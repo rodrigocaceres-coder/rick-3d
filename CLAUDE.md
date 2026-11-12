@@ -5,8 +5,18 @@ Story, characters and tone: ~/rick-platformer/STORY.md and its dialogue JSON. Pr
 
 ## Game
 A playable episode: cold open, title card, portal puzzle, boss, post-credits gag.
-Slice order: 1. Smith garage hub (built). 2. Shrimp Rick's lab (built Nov 12: 3 rooms, portal gun, guards, parts, Shrimp Rick entrance). 3. Turn-based boss vs Shrimp Rick in the garage (built Nov 12: rules from STORY.md, camera cuts, timed Space press, tank phase, Portal Banish, ending, post-credits gag). Add areas only after these three feel great.
+Slice order: 1. Smith garage hub (built). 2. Shrimp Rick's lab (built Nov 12: 3 rooms, portal gun, guards, parts, Shrimp Rick entrance). 3. Turn-based boss vs Shrimp Rick in the garage (built Nov 12: rules from STORY.md, camera cuts, timed Space press, tank phase, Portal Banish, ending, post-credits gag).
 Story change from 2D: all 3 gun parts land in the shrimp lab.
+
+## Roadmap (set Nov 12, after slice 3)
+One build per session, in this order. Each line is a goal, not a design: the building model owns how it looks, plays and fits the story, and may change the story threading if it makes a better episode. Read STORY.md and the 2D dialogue JSON for characters and tone first.
+4. Smith house and the family. Beth, Summer and Jerry as low-poly models with scenes of their own. Beth hands over the sandwich, Summer's phone becomes the quest log (Q), Jerry has a bad business idea. Done: the episode starts in the house and the sandwich in the boss fight is earned.
+5. Save progress. Flags, parts, items and area in localStorage (try/catch), a Continue option on the start card. Done: refresh mid-episode and carry on.
+6. Blips and Chitz. An arcade set, Gorbi and Glorp, one arcade challenge that is fun in 3D, the arcade soda as its reward. Done: reachable by portal, beatable, sets a flag the boss fight reads.
+7. Citadel of Ricks. A queue of bureaucrat Ricks and the Take a Number dialogue puzzle. Done: reachable, beatable, worth the trip (a reward or a story beat).
+8. Lab extras: crates and beams through portals, cut from Session 2. Done: one new puzzle beat per room, old solutions still work.
+Rules for every build: the episode must stay playable start to end after each session, the `?boss` and `?lab` test links keep working, test with a script before the commit, log the session.
+Cut line: stop new builds at the end of Nov 15. Nov 16 is for fixes, a friend playtest and slides. If time runs short, drop from the bottom of the list.
 
 ## Stack
 - Three.js 0.187 (pinned), Vite, vanilla JavaScript. Packages: three, vite. Ask before adding or removing any package.
