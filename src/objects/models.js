@@ -51,10 +51,10 @@ export function buildMorty() {
   const head = limb(root, 0, 1.24);
   parts.head = head;
   ball(0.355, SKIN, { parent: head, detail: 2, sz: 0.97 });
-  shape(new THREE.SphereGeometry(0.385, 12, 5, 0, Math.PI * 2, 0, Math.PI * 0.38), HAIR, { parent: head, y: 0.01, z: -0.02, rx: -0.72 });
+  shape(new THREE.SphereGeometry(0.385, 12, 5, 0, Math.PI * 2, 0, Math.PI * 0.43), HAIR, { parent: head, y: 0.01, z: -0.02, rx: -0.6 });
   for (const s of [-1, 1]) ball(0.07, SKIN, { parent: head, x: s * 0.35, y: -0.05, sz: 0.6, line: 0.022 });
   eyes(head, 0.14, 0.04, 0.255, 0.125);
-  for (const s of [-1, 1]) box(0.11, 0.022, 0.03, C(0x5e3a1c), { parent: head, x: s * 0.14, y: 0.215, z: 0.3, rz: s * 0.28, line: 0 });
+  for (const s of [-1, 1]) box(0.11, 0.022, 0.03, C(0x5e3a1c), { parent: head, x: s * 0.14, y: 0.215, z: 0.3, rz: s * -0.28, line: 0 });
   ball(0.042, SKIN, { parent: head, y: -0.075, z: 0.35, line: 0.018, detail: 0 });
   box(0.1, 0.02, 0.03, C(0x7a3a34), { parent: head, y: -0.2, z: 0.3, line: 0 });
 

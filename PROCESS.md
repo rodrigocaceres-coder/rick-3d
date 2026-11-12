@@ -50,3 +50,41 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Evidence files: process/screenshots/2026-11-12_s1_first-render-too-bright.jpg, _dialogue-v1-too-close-white-halo.jpg, _dialogue-v2.jpg, _portal-v1-blown-out.jpg, _cold-open-rick-falls.jpg, _cold-open-gun-parts.jpg, _title-card-v1-over-morty.jpg, _lowpoly-v1-dark-faces-rick-flat.jpg, _lowpoly-v2-dialogue.jpg, _lowpoly-v2-play.jpg (the paper cutout screenshots above are the before)
 - Chat link: Claude Code session "Rick and Morty 3D RPG" (desktop app link claude://claude.ai/epitaxy/local_a29351ea-a4fc-46bb-bbdc-587e649e7de1)
 - Why:
+
+### Session 2, 2026-11-12
+- Goal: Polish the character designs, fix the shadows, then build the portal puzzle area (Shrimp Rick's lab).
+- AI types and tools: code AI (Claude Code, Claude Fable 5.2) for design, code and testing. No new image or audio AI: portraits and music are the Gemini outputs from the 2D game. All 3D models are built in code.
+- Key prompts (word for word):
+  - "of possible make character designs more polished, the shadows look weird, then keep building"
+  - "Yes, continue"
+- What was built:
+  - Morty and Rick rebuilt: rounder heads, necks, eyebrows, Rick's heavy eyelids, lapels, drool, an 11-spike hair fan. Soft contact shadow under every character.
+  - Shrimp Rick's lab (src/areas/lab.js, src/scenes/labScene.js): 3 rooms in a row, goo channels, a glass wall, a barrier with one slot, propaganda banners, glowing tanks, doors that slide open.
+  - Portal gun: SPACE fires where Morty faces (8 directions). The shot places a portal where it lands, two portals link, walking into one comes out the other.
+  - Each part upgrades the gun: base reach 6, Focus Crystal reach 7 and through glass, Fluid Canister reach 14.
+  - Three original low-poly shrimp: Officer Krillson guards with a red sight wedge, Prawnsworth (a dialogue choice sets helpedResistance for the boss fight), and Shrimp Rick (lab coat, blue spikes, one eyebrow).
+  - Caught by a guard or shooting one: a Krillson line, then back to the room start.
+  - Ending: alarm, Shrimp Rick steps out of a portal, 5 lines, "Next: the boss fight" card, back to the garage with all 3 parts.
+  - Parts tray (top right), control hint, ?lab=1, 2 or 3 to start in a lab room for testing.
+- Key decisions:
+  - Shots stop at doorways, so a portal cannot be fired into another room.
+  - Portals always face the camera. Side-on they were a thin sliver.
+  - Both portals close when a part is picked up, so nobody walks back into an old one by accident.
+  - Guards freeze during dialogue and cutscenes.
+- What went wrong or looked weak, and the revision:
+  - "the shadows look weird": the walls cast a huge dark wedge across the floor, and two-tone shading made hard-edged light pools on floors and dark blotches on faces. Walls no longer cast shadows, the key light moved almost overhead, floors and walls use smooth light, characters use smooth light on flat faces plus a little glow of their own.
+  - Dialogue camera looked at the back of the speaker's head. It now stands in front of the speaker, out toward the listener.
+  - Rick was hidden behind the workbench leg in dialogue. Moved him to the front corner of the bench.
+  - Room 2 guard caught Morty standing still at the room's start while it turned a corner. Patrol moved 1.1 units away, start moved back 0.4. Checked: 20 seconds standing at the start, not caught.
+  - Stepping out of a portal next to the glass put Morty inside the glass. He now steps out the other side when the first side is blocked.
+  - "Too close" rule blocked a fair shot in room 3. Minimum distance 1.6 to 1.1.
+  - Shrimp Rick entrance v1: the camera was behind the barrier wall. v2: it sat inside a character's head. v3 uses fixed cameras for that corner.
+  - A misplaced comma (my edit) broke the whole page once. Caught by the browser console before commit.
+- Rejected, and why:
+  - Aiming with the mouse: the demo is keyboard only, and 8 directions are predictable on a projector.
+  - Crates and beams going through portals (from the pitch): cut to keep three rooms finished and tested by Nov 17.
+  - A timer in room 3: the guard crossing the firing lane already gives the pressure.
+- Result: Playable from the start card through all 3 lab rooms to the "Next: the boss fight" card, tested room by room and garage-to-lab with stepped frames, no console errors, production build passes. Deployed. Not confirmed on Rodrigo's machine: real-time feel and puzzle difficulty. Boss fight not started.
+- Evidence files: process/screenshots/2026-11-12_s2_garage-shadows-fixed.jpg, _lab-room1-two-portals.jpg, _lab-portal-v1-side-on.jpg, _lab-room2-glass-guards.jpg, _shrimp-rick-v1-camera-behind-wall.jpg, _shrimp-rick-v3.jpg
+- Chat link: Claude Code session "Rick and Morty 3D RPG" (desktop app link claude://claude.ai/epitaxy/local_a29351ea-a4fc-46bb-bbdc-587e649e7de1)
+- Why:

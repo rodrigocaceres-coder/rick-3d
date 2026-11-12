@@ -28,7 +28,7 @@ export function createLab({ scene, morty, api }) {
 
   // ---- People ----
   const guards = [
-    new Guard([V(20.5, 0, -3), V(25.6, 0, -3), V(25.6, 0, 3), V(20.5, 0, 3)], { x0: 16.3, x1: 26.9 }),
+    new Guard([V(21.6, 0, -3), V(25.6, 0, -3), V(25.6, 0, 3), V(21.6, 0, 3)], { x0: 16.3, x1: 26.9 }),
     new Guard([V(39.5, 0, -3.7), V(39.5, 0, 3.7)], { x0: 38, x1: 41 }, 2.6),
   ];
   const prawn = new Character(buildShrimp('rebel'));
@@ -104,8 +104,8 @@ export function createLab({ scene, morty, api }) {
     if (hitGuard) { firing = false; return caught(hitGuard, text.shotGuard[0]); }
     const inGoo = lab.hazards.some((r) => inRect(end.x, end.z, r, 0.3));
     const onGlass = lab.glass.some((r) => inRect(end.x, end.z, r, 0.4));
-    if (d < 1.6 || inGoo || onGlass) {
-      hud.toast(d < 1.6 ? 'Too close. Back up and fire again.' : inGoo ? 'The shot fizzles in the goo.' : 'The shot fizzles on the glass.');
+    if (d < 1.1 || inGoo || onGlass) {
+      hud.toast(d < 1.1 ? 'Too close. Back up and fire again.' : inGoo ? 'The shot fizzles in the goo.' : 'The shot fizzles on the glass.');
       audio.sfx('menu_move.mp3');
     } else {
       const p = portals[next];
@@ -204,15 +204,16 @@ export function createLab({ scene, morty, api }) {
     alarmOn = true;
     rig.shake(0.6);
     audio.sfx('caught.mp3');
-    morty.position.set(46.2, 0, 1.6);
-    morty.group.rotation.y = Math.PI;
-    bossPortal.position.set(46.2, 0, -3.2);
-    rig.cut({ pos: V(41.5, 2.2, 5.5), look: V(46.2, 1.4, -2), fov: 36 });
+    // Fixed cameras here: this corner is boxed in by the barrier, so the usual dialogue shots would look through a wall
+    morty.position.set(46, 0, 1.8);
+    morty.faceToward(V(45.4, 0, -1.2));
+    bossPortal.position.set(45.4, 0, -3.3);
+    rig.cut({ pos: V(47.3, 2.7, 4.5), look: V(45.9, 1.3, -2.4), fov: 40 });
     await wait(0.8);
     hud.caption('');
     hud.flash(0.8);
     await bossPortal.open();
-    shrimpRick.position.set(46.2, 0, -3.1);
+    shrimpRick.position.set(45.4, 0, -3.1);
     shrimpRick.group.rotation.y = 0;
     shrimpRick.group.visible = true;
     let last = 0;
@@ -224,7 +225,7 @@ export function createLab({ scene, morty, api }) {
     rig.shake(0.3);
     for (const line of text.shrimpRick) {
       const boss = line.speaker === 'Shrimp Rick';
-      rig.cut(boss ? shotOn(shrimpRick.position, morty.position, 1.3) : shotOn(morty.position, shrimpRick.position));
+      rig.cut(boss ? { pos: V(47.7, 1.8, 2.9), look: V(45.4, 1.35, -1.2), fov: 34 } : { pos: V(47.0, 1.7, -1.7), look: V(46, 1.0, 1.8), fov: 32 });
       rig.pushIn(0.1, 6);
       await say(line);
     }

@@ -18,7 +18,7 @@ import dialogue from './data/dialogue/garage.json';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const params = new URLSearchParams(location.search);
-const GARAGE_LIMITS = { x0: -3.2, x1: 3.2, z0: -3, z1: 2.5 };
+const GARAGE_LIMITS = { x0: -4, x1: 4, z0: -3, z1: 2.5 };
 
 // ---- Garage world ----
 const garage = buildGarage();

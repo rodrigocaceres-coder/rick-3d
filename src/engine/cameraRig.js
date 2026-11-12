@@ -14,7 +14,7 @@ let shotId = 0;
 
 const FOLLOW = { offset: new THREE.Vector3(0, 10, 12), lookUp: 0.9, fov: 35, snap: 3.2 };
 const tmp = new THREE.Vector3();
-let limits = { x0: -3.2, x1: 3.2, z0: -3, z1: 2.5 }; // how far the follow camera may slide in this area
+let limits = { x0: -4, x1: 4, z0: -3, z1: 2.5 }; // how far the follow camera may slide in this area
 
 const rig = {
   follow(obj) { target = obj; mode = 'follow'; shotId++; },

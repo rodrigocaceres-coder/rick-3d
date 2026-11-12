@@ -125,7 +125,7 @@ export function buildLab() {
     group: g,
     bounds: { x0: 0.45, x1: 47.55, z0: -4.55, z1: 4.6 },
     solids, hazards, glass, doors, partSpots, alarm,
-    starts: [new THREE.Vector3(2, 0, 0), new THREE.Vector3(18, 0, 0), new THREE.Vector3(34, 0, 0)],
+    starts: [new THREE.Vector3(2, 0, 0), new THREE.Vector3(17.6, 0, 0), new THREE.Vector3(34, 0, 0)], // each start is out of every guard's sight
     update(time, focusX) {
       key.position.set(focusX - 2.5, 14, 4.5);
       key.target.position.set(focusX, 0, 0);
