@@ -8,7 +8,7 @@ import { box, cyl, ball, cone, shape, glow, charMat as C } from '../engine/toon.
 const EYE_WHITE = new THREE.MeshBasicMaterial({ color: 0xf6f4ee }); // unlit, so eyes always read
 const INK = new THREE.MeshBasicMaterial({ color: 0x15101c });
 
-function limb(parent, x, y, z = 0) {
+export function limb(parent, x, y, z = 0) {
   const pivot = new THREE.Group();
   pivot.position.set(x, y, z);
   parent.add(pivot);
@@ -16,7 +16,7 @@ function limb(parent, x, y, z = 0) {
 }
 
 // Two eyes with pupils. lid (a material) adds a heavy upper eyelid for a tired look.
-function eyes(parent, x, y, z, r, lid = null) {
+export function eyes(parent, x, y, z, r, lid = null) {
   for (const s of [-1, 1]) {
     ball(r, EYE_WHITE, { parent, x: s * x, y, z, line: 0.016, detail: 2 });
     ball(r * 0.2, INK, { parent, x: s * x * 0.9, y: y - (lid ? r * 0.15 : 0), z: z + r * 0.95, line: 0, detail: 0 });

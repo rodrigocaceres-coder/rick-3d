@@ -1,0 +1,231 @@
+{
+  "coldOpen": {
+    "caption": "INT. SMITH HOUSE. SAME TIME.",
+    "lines": [
+      { "speaker": "Jerry", "mood": "neutral", "text": "Was that the garage? That sounded like the garage." },
+      { "speaker": "Summer", "mood": "angry", "text": "Not it." },
+      { "speaker": "Jerry", "mood": "happy", "text": "Not it!" },
+      { "speaker": "Beth", "mood": "angry", "text": "MORTY!" }
+    ],
+    "morty": [
+      { "speaker": "Morty", "mood": "neutral", "text": "W-what? What did I do? I was asleep!" }
+    ]
+  },
+  "goals": {
+    "start": "Mom is yelling. Talk to Beth.",
+    "garage": "Go to the garage. The door is on the right.",
+    "done": "Episode over. Nobody touch the gun."
+  },
+  "got": {
+    "sandwich": "GOT: MOM'S SANDWICH",
+    "phone": "GOT: SUMMER'S PHONE. PRESS Q TO READ HER NOTES."
+  },
+  "hints": {
+    "phone": "Q: Summer's phone",
+    "noPhone": "No phone. Summer has one."
+  },
+  "doorNotYet": [
+    { "speaker": "Morty", "mood": "neutral", "text": "Mom's using her yelling voice. I should talk to her first." }
+  ],
+  "beth": {
+    "entry": [
+      { "if": "bossBeaten", "goto": "after" },
+      { "if": "hasSandwich", "goto": "reminder" },
+      { "if": "rudeToMom", "goto": "stillMad" },
+      { "if": "askedToCheckGarage", "goto": "secondChance" },
+      { "goto": "intro" }
+    ],
+    "nodes": {
+      "intro": {
+        "lines": [
+          { "speaker": "Beth", "mood": "neutral", "text": "Oh good, you're up. Your grandfather has been in the garage since three in the morning." },
+          { "speaker": "Beth", "mood": "angry", "text": "Something exploded. Twice. The second one was purple." }
+        ],
+        "choices": [
+          { "text": "I'll go check on him.", "set": { "askedToCheckGarage": true }, "goto": "thanks" },
+          { "text": "Purple? Cool.", "set": { "askedToCheckGarage": true }, "goto": "notCool" },
+          { "text": "Not my problem.", "set": { "askedToCheckGarage": true, "rudeToMom": true }, "goto": "rude" }
+        ]
+      },
+      "thanks": {
+        "set": { "hasSandwich": true },
+        "lines": [
+          { "speaker": "Beth", "mood": "happy", "text": "Thank you, sweetie. Take a sandwich. Don't touch anything that hums." }
+        ],
+        "do": { "give": "sandwich" }
+      },
+      "notCool": {
+        "lines": [
+          { "speaker": "Beth", "mood": "angry", "text": "It is not cool. The cat won't come out from under the couch. Go." }
+        ]
+      },
+      "rude": {
+        "lines": [
+          { "speaker": "Beth", "mood": "angry", "text": "Fine. Don't come crying to me when the garage is on fire." }
+        ]
+      },
+      "secondChance": {
+        "set": { "hasSandwich": true },
+        "lines": [
+          { "speaker": "Beth", "mood": "neutral", "text": "Still here? Garage. Before the third explosion." },
+          { "speaker": "Beth", "mood": "neutral", "text": "...And take this. You get weird when you don't eat." }
+        ],
+        "do": { "give": "sandwich" }
+      },
+      "stillMad": {
+        "lines": [
+          { "speaker": "Beth", "mood": "angry", "text": "Oh, now you want to talk?" }
+        ],
+        "choices": [
+          { "text": "Sorry, Mom.", "set": { "rudeToMom": false, "hasSandwich": true }, "goto": "sorry" },
+          { "text": "Never mind.", "goto": "neverMind" }
+        ]
+      },
+      "sorry": {
+        "lines": [
+          { "speaker": "Beth", "mood": "neutral", "text": "Apology accepted. Barely." },
+          { "speaker": "Beth", "mood": "happy", "text": "Here. I made it before you were rude, so it's a good one. Don't touch anything that hums." }
+        ],
+        "do": { "give": "sandwich" }
+      },
+      "neverMind": {
+        "lines": [
+          { "speaker": "Beth", "mood": "angry", "text": "Garage." }
+        ]
+      },
+      "reminder": {
+        "lines": [
+          { "speaker": "Beth", "mood": "neutral", "text": "Garage. Now. And if you leave the dimension, text me." }
+        ]
+      },
+      "after": {
+        "lines": [
+          { "speaker": "Beth", "mood": "happy", "text": "You're alive. Good. Is your grandfather alive?" },
+          { "speaker": "Morty", "mood": "neutral", "text": "He says he handled it." },
+          { "speaker": "Beth", "mood": "neutral", "text": "Of course he does. There's another sandwich in the fridge." }
+        ]
+      }
+    }
+  },
+  "summer": {
+    "entry": [
+      { "if": "bossBeaten", "goto": "after" },
+      { "if": "hasPhone", "goto": "afterPhone" },
+      { "goto": "intro" }
+    ],
+    "nodes": {
+      "intro": {
+        "lines": [
+          { "speaker": "Summer", "mood": "angry", "text": "Ugh. What." }
+        ],
+        "choices": [
+          { "text": "Can I borrow your phone?", "goto": "phone" },
+          { "text": "Did you hear the explosion?", "goto": "explosion" },
+          { "text": "Nothing.", "goto": "nothing" }
+        ]
+      },
+      "explosion": {
+        "lines": [
+          { "speaker": "Summer", "mood": "neutral", "text": "Which one? There have been, like, four this week." },
+          { "speaker": "Summer", "mood": "neutral", "text": "Mom said it was purple this time.", "if": "askedToCheckGarage" }
+        ]
+      },
+      "phone": {
+        "set": { "hasPhone": true },
+        "lines": [
+          { "speaker": "Summer", "mood": "angry", "text": "My phone? Why." },
+          { "speaker": "Morty", "mood": "neutral", "text": "Rick broke something. I think I need to write stuff down." },
+          { "speaker": "Summer", "mood": "happy", "text": "Fine. Five minutes. If you open my messages I will know." }
+        ],
+        "do": { "give": "phone" },
+        "goto": "phoneNotes"
+      },
+      "phoneNotes": {
+        "lines": [
+          { "speaker": "Summer", "mood": "neutral", "text": "I put the stuff you have to do in my notes app. You're welcome. Don't read the other notes." }
+        ]
+      },
+      "nothing": {
+        "lines": [
+          { "speaker": "Summer", "mood": "angry", "text": "Then why are you standing there breathing at me?" }
+        ]
+      },
+      "afterPhone": {
+        "lines": [
+          { "speaker": "Summer", "mood": "angry", "text": "That was way more than five minutes." }
+        ]
+      },
+      "after": {
+        "lines": [
+          { "speaker": "Summer", "mood": "neutral", "text": "A shrimp. In a lab coat. In our garage." },
+          { "speaker": "Summer", "mood": "happy", "text": "I got a picture. Four hundred likes already. You're not in it." }
+        ]
+      }
+    }
+  },
+  "jerry": {
+    "entry": [
+      { "if": "bossBeaten", "goto": "after" },
+      { "if": "jerrySat", "goto": "stuck" },
+      { "goto": "intro" }
+    ],
+    "nodes": {
+      "intro": {
+        "lines": [
+          { "speaker": "Jerry", "mood": "happy", "text": "Hey, buddy! Want to hear my new business idea?" }
+        ],
+        "choices": [
+          { "text": "Sure, Dad.", "goto": "pitch" },
+          { "text": "Is it a chair?", "goto": "guessed" },
+          { "text": "I'm kind of busy.", "goto": "busy" }
+        ]
+      },
+      "pitch": {
+        "lines": [
+          { "speaker": "Jerry", "mood": "happy", "text": "A lawn chair. With a second, smaller lawn chair for your drink." }
+        ],
+        "goto": "demo"
+      },
+      "guessed": {
+        "lines": [
+          { "speaker": "Jerry", "mood": "angry", "text": "It is NOT just a chair." },
+          { "speaker": "Jerry", "mood": "happy", "text": "It's a lawn chair. With a second, smaller lawn chair. For your drink." }
+        ],
+        "goto": "demo"
+      },
+      "demo": {
+        "set": { "jerrySat": true },
+        "lines": [
+          { "speaker": "Jerry", "mood": "happy", "text": "Watch. Fully load-tested." }
+        ],
+        "do": { "sit": true },
+        "goto": "crushed"
+      },
+      "crushed": {
+        "lines": [
+          { "speaker": "Jerry", "mood": "neutral", "text": "...The small one held." },
+          { "speaker": "Morty", "mood": "neutral", "text": "Dad, are you stuck?" },
+          { "speaker": "Jerry", "mood": "happy", "text": "I'm not stuck. This is the lounge setting." }
+        ]
+      },
+      "busy": {
+        "lines": [
+          { "speaker": "Jerry", "mood": "neutral", "text": "Right. Sure. Busy." },
+          { "speaker": "Jerry", "mood": "happy", "text": "The chair will be here when you're ready. So will I. I live here." }
+        ]
+      },
+      "stuck": {
+        "lines": [
+          { "speaker": "Jerry", "mood": "neutral", "text": "Your mom sent you to the garage, huh? I'd stay out of there. Last time I lost an eyebrow.", "if": "askedToCheckGarage" },
+          { "speaker": "Jerry", "mood": "happy", "text": "If you see a market for tiny lawn chairs out there, let me know." }
+        ]
+      },
+      "after": {
+        "lines": [
+          { "speaker": "Jerry", "mood": "happy", "text": "Morty! New idea. Shrimp-themed lawn chairs." },
+          { "speaker": "Jerry", "mood": "happy", "text": "The little chair holds the cocktail sauce." }
+        ]
+      }
+    }
+  }
+}

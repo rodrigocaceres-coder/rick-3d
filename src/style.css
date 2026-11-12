@@ -230,3 +230,43 @@ body.play #hint.on { opacity: 1; }
   position: absolute; border-radius: 47% 53% 60% 40% / 55% 45% 58% 42%; background: #d8342a;
   box-shadow: inset -1.2vh -1.6vh 0 rgba(90, 10, 10, 0.35), inset 1vh 1vh 0 rgba(255, 150, 120, 0.35); border: 0.5vh solid var(--ink);
 }
+
+/* ---- Summer's phone: the quest log ---- */
+#phone {
+  position: fixed; right: 5vw; bottom: 4vh; width: 46vh; height: 86vh; padding: 5vh 1.6vh 1.6vh;
+  background: #f08ab8; border: 0.7vh solid var(--ink); border-radius: 5vh; box-shadow: 1.2vh 1.2vh 0 rgba(0, 0, 0, 0.5);
+  transform: translateY(110%) rotate(8deg); opacity: 0; pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.2, 1.2, 0.3, 1), opacity 0.2s;
+}
+#phone.on { transform: translateY(0) rotate(-3deg); opacity: 1; }
+#phone::before { content: ''; position: absolute; top: 1.8vh; left: 50%; width: 9vh; height: 1.2vh; margin-left: -4.5vh; background: var(--ink); border-radius: 1vh; }
+#phone-screen {
+  height: calc(100% - 4.4vh); padding: 2vh 2.2vh; overflow: hidden; background: #fff8dc; color: var(--ink);
+  border: 0.5vh solid var(--ink); border-radius: 2.4vh; display: flex; flex-direction: column;
+}
+#phone-app { font-size: 1.8vh; font-weight: bold; letter-spacing: 0.3vh; text-transform: uppercase; color: #b8860b; }
+#phone-title { font-size: 4vh; font-weight: 900; line-height: 1.1; }
+#phone-sub { font-size: 1.9vh; font-style: italic; color: #8a6a45; margin-bottom: 1.4vh; }
+#phone-tasks { list-style: none; margin: 0; padding: 0; }
+#phone-tasks li { position: relative; padding: 0.7vh 0.8vh 0.7vh 4vh; font-size: 2.25vh; line-height: 1.25; border-radius: 1vh; }
+#phone-tasks li::before {
+  content: ''; position: absolute; left: 0.8vh; top: 0.9vh; width: 2vh; height: 2vh; border: 0.35vh solid var(--ink); border-radius: 0.5vh; background: #fff;
+}
+#phone-tasks li.done { color: #9a917c; text-decoration: line-through; }
+#phone-tasks li.done::before { background: var(--green); }
+#phone-tasks li.done::after { content: '\2713'; position: absolute; left: 1.15vh; top: 0.45vh; font-size: 2.2vh; font-weight: 900; color: var(--ink); text-decoration: none; }
+#phone-tasks li.now { background: #ffe58a; font-weight: bold; }
+.phone-label { margin-top: 1.6vh; font-size: 1.7vh; font-weight: bold; letter-spacing: 0.25vh; text-transform: uppercase; color: #b8860b; }
+#phone-parts { display: flex; gap: 0.8vh; margin-top: 0.6vh; }
+#phone-parts span { flex: 1; padding: 0.6vh 0; text-align: center; font-size: 1.8vh; font-weight: bold; border: 0.35vh dashed #9a917c; border-radius: 1vh; color: #9a917c; }
+#phone-parts span.got { border-style: solid; border-color: var(--ink); color: var(--ink); }
+#phone-parts span.got:nth-child(1) { background: #4affe0; }
+#phone-parts span.got:nth-child(2) { background: #d59aff; }
+#phone-parts span.got:nth-child(3) { background: #ffc46a; }
+#phone-pockets { margin-top: 0.4vh; font-size: 2.1vh; }
+#phone-note {
+  margin-top: auto; padding: 1.2vh 1.4vh; font-size: 2vh; font-style: italic; line-height: 1.3;
+  background: #ffd9ea; border: 0.35vh solid var(--ink); border-radius: 1.6vh 1.6vh 1.6vh 0.3vh;
+}
+#phone-note::after { content: ' - S'; font-weight: bold; font-style: normal; }
+#phone-close { margin-top: 1vh; text-align: center; font-size: 1.8vh; font-weight: bold; color: var(--ink); }

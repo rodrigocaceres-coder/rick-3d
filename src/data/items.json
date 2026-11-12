@@ -1,7 +1,7 @@
 {
   "_note": "Boss fight items, from STORY.md. One use each per fight. heal: HP back. extraTurn: Morty acts again before Shrimp Rick.",
   "items": [
-    { "id": "sandwich", "name": "Mom's sandwich", "desc": "Heals 25 HP.", "heal": 25, "line": "Still warm. Thanks, Mom." },
+    { "id": "sandwich", "flag": "hasSandwich", "name": "Mom's sandwich", "desc": "Heals 25 HP.", "heal": 25, "line": "Still warm. Thanks, Mom." },
     { "id": "soda", "name": "Arcade soda", "desc": "Heals 15 HP. Morty moves again right away.", "heal": 15, "extraTurn": true, "line": "SO MUCH SUGAR. Go go go go!" }
   ]
 }

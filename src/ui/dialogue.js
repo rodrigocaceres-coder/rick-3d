@@ -79,16 +79,21 @@ export function choose(texts) {
 export function closeDialogue() { root.classList.remove('on'); lastSpeaker = ''; onKey = null; }
 
 // Run a whole conversation. onLine(line) is called before each line so the camera can cut to the speaker.
+// A line with an "if" is only said when that flag condition holds.
 // Returns the list of "do" actions the conversation asked for (for example { portal: true }).
-export async function converse(convo, { onLine } = {}) {
+export async function converse(convo, { onLine, onDo } = {}) {
   const todo = [];
   let id = convo.entry.find((e) => flags.check(e.if))?.goto;
   while (id) {
     const node = convo.nodes[id];
     id = null;
     flags.setMany(node.set);
-    for (const line of node.lines ?? []) { onLine?.(line); await say(line); }
-    if (node.do) todo.push(node.do);
+    for (const line of node.lines ?? []) { if (!flags.check(line.if)) continue; onLine?.(line); await say(line); }
+    if (node.do) {
+      todo.push(node.do);
+      // onDo stages an action mid-conversation (Beth hands over the sandwich). The box gets out of the way for it.
+      if (onDo) { closeDialogue(); await onDo(node.do); }
+    }
     if (node.choices) {
       const options = node.choices.filter((c) => flags.check(c.if));
       const c = options[await choose(options.map((o) => o.text))];

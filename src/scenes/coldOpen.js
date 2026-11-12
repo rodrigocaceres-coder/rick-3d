@@ -11,8 +11,8 @@ import { shotOn, slump, SLUMP_Y } from './shots.js';
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
 // The cold open, like the first minute of an episode: a portal rips open, Rick falls out, the gun cracks,
-// three parts fly back into the portal, Morty walks in, title card. Escape fast-forwards it.
-export async function coldOpen(G) {
+// three parts fly back into the portal, the family hears it from the house, title card. Escape fast-forwards it.
+export async function coldOpen(G, houseBeat) {
   const { morty, rick, gun, garage, introPortal, scene } = G;
   let done = false;
   input.nextPress('Escape').then(() => { if (!done) clock.timeScale = 40; });
@@ -118,27 +118,12 @@ export async function coldOpen(G) {
   await say({ speaker: 'Rick', mood: 'happy', text: 'Nailed it. Zzzz.' });
   closeDialogue();
 
-  // 7. Morty comes in from the house
-  const door = garage.spots.door, stop = V(-5.4, 0, 0.7);
-  rig.cut({ pos: V(-0.8, 1.7, 6.2), look: V(-6.6, 1.0, 0.2), fov: 32 });
-  rig.pushIn(0.08, 6);
-  audio.sfx('door.mp3');
-  morty.position.copy(door);
-  morty.group.rotation.y = Math.PI / 2;
-  morty.group.visible = true;
-  let last = 0;
-  await tween(1.5, (t) => {
-    morty.position.lerpVectors(door, stop, t);
-    morty.animate((t - last) * 1.5, t < 0.97 ? 3 : 0, stop.x - door.x, stop.z - door.z);
-    last = t;
-  }, ease.linear);
-  morty.animate(0.016, 0);
-  await say({ speaker: 'Morty', mood: 'neutral', text: 'Rick? What was that noise?' });
-  await say({ speaker: 'Morty', mood: 'angry', text: "Rick, if you're faking being asleep, I swear..." });
-  closeDialogue();
+  // 7. Meanwhile, in the house (houseBeat comes from main.js and ends on a shot of the family)
+  await hud.fade(1, 0.5);
+  await houseBeat();
 
   // 8. Title card
-  rig.cut({ pos: V(0, 6.5, 13.5), look: V(0, 1.2, -1.5), fov: 38 });
+  rig.cut({ pos: V(0, 6.5, 13.5), look: V(0, 1.2, -1.5), fov: 38 }); // high and wide over the living room
   rig.pushIn(0.06, 4);
   audio.sfx('menu_select.mp3');
   rig.shake(0.3);
@@ -160,4 +145,28 @@ export function afterColdOpen(G) {
   morty.group.rotation.y = Math.PI / 2;
   G.gunLight.intensity = 3;
   G.rickAsleep = true;
+}
+
+// The first time Morty walks into the garage from the house: he finds Rick and the humming gun
+export async function garageArrival(G, lines) {
+  const { morty, garage } = G;
+  hud.cinema(true);
+  const door = garage.spots.door, stop = V(-5.4, 0, 0.7), land = garage.spots.rick;
+  rig.cut({ pos: V(-0.8, 1.7, 6.2), look: V(-6.6, 1.0, 0.2), fov: 32 });
+  rig.pushIn(0.08, 6);
+  morty.position.copy(door);
+  morty.group.rotation.y = Math.PI / 2;
+  hud.fade(0, 0.5);
+  let last = 0;
+  await tween(1.5, (t) => {
+    morty.position.lerpVectors(door, stop, t);
+    morty.animate((t - last) * 1.5, t < 0.97 ? 3 : 0, stop.x - door.x, stop.z - door.z);
+    last = t;
+  }, ease.linear);
+  morty.animate(0.016, 0);
+  await say(lines[0]);
+  rig.cut(shotOn(land, V(land.x - 3, 0, land.z + 1), 0.8)); // what he is looking at
+  rig.pushIn(0.1, 6);
+  for (const line of lines.slice(1)) await say(line);
+  closeDialogue();
 }

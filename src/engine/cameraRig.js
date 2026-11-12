@@ -17,7 +17,17 @@ const tmp = new THREE.Vector3();
 let limits = { x0: -4, x1: 4, z0: -3, z1: 2.5 }; // how far the follow camera may slide in this area
 
 const rig = {
-  follow(obj) { target = obj; mode = 'follow'; shotId++; },
+  // snap: jump straight to the follow view (after a fade) instead of gliding there
+  follow(obj, snap = false) {
+    target = obj; mode = 'follow'; shotId++;
+    if (!snap) return;
+    tmp.copy(obj.position);
+    tmp.x = THREE.MathUtils.clamp(tmp.x, limits.x0, limits.x1);
+    tmp.z = THREE.MathUtils.clamp(tmp.z, limits.z0, limits.z1);
+    pos.copy(tmp).add(FOLLOW.offset);
+    look.copy(tmp); look.y += FOLLOW.lookUp;
+    fov = FOLLOW.fov;
+  },
   setLimits(l) { limits = l; },
 
   // Jump straight to a shot, like a cut in a TV show

@@ -109,7 +109,7 @@ export function createBoss({ G, held, api }) {
 
   // Put everything in place for a fresh fight. phase 2 is used when retrying after losing to the tank.
   function setup(phase) {
-    const items = itemData.items;
+    const items = itemData.items.filter((it) => flags.check(it.flag)); // the sandwich has to be earned from Beth
     s = newFight({ parts: ['hasCrystal', 'hasCanister', 'hasChip'].filter((f) => flags.get(f)).length, helpedResistance: Boolean(flags.get('helpedResistance')), rudeToMom: Boolean(flags.get('rudeToMom')), items, phase });
     Object.assign(pose, { aim: 0, guard: 0, down: 0, mSq: 1, bSq: 1, tSq: 1, tilt: 0, droop: 0 });
     morty.group.visible = true; held.visible = true;

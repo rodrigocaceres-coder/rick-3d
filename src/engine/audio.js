@@ -7,10 +7,13 @@ const MUSIC_VOL = 0.15;
 const SFX_VOL = 0.5;
 let muted = false;
 let music = null;
+let playing = null; // file name of the current track
 const cache = {};
 
 const audio = {
   music(file) {
+    if (file && file === playing) return; // same track: keep it going (house and garage share one)
+    playing = file;
     if (music) { music.pause(); music = null; }
     if (!file) return;
     music = new Audio(base + file);

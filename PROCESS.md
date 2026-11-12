@@ -127,3 +127,40 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Evidence files: process/screenshots/2026-11-12_s3_wide-v1-boxes-block-view.jpg, _slam-v1-camera-inside-tank.jpg, _slam-v2-shield-portal-side-on.jpg, _krill-v1-camera-behind-claw.jpg (the befores), _battle-menu-wide.jpg, _timing-ring-shoot.jpg, _tank-drops-from-ceiling-portal.jpg, _tank-phase-wide.jpg, _tidal-slam-v3-portal-shield.jpg, _portal-banish.jpg
 - Chat link: Claude Code session "Shrimp Rick boss fight" (desktop app link claude://claude.ai/epitaxy/local_1fb5a4e7-133c-4f2c-a970-8cca7451d740)
 - Why:
+
+### Session 4, 2026-11-12
+- Goal: Build roadmap item 4: the Smith house and the family. The episode starts in the house, and the sandwich in the boss fight is earned.
+- AI types and tools: code AI (Claude Code, Claude Fable 5.2) for design, code and testing. No new image or audio AI: portraits (Beth, Summer, Jerry), music and sound effects are the Gemini and ElevenLabs outputs from the 2D game. All new 3D models are built in code.
+- Key prompts (word for word):
+  - "Read ~/rick-3d/CLAUDE.md and ~/rick-3d/PROCESS.md, then build roadmap item 4: the Smith house and the family. You own the design. Log it as Session 4."
+  - "go"
+- What was built:
+  - Smith house set (src/areas/house.js): kitchen with tile floor, counter, fridge and a night window; living room with couch, rug, coffee table, lamp; the TV at the front with its back to the camera like a sitcom set; Jerry's "office" at the dining table with a pitch board drawn in code ("CHAIR 2, a chair for your drink"); a door to the garage with green light under it.
+  - Beth, Summer and Jerry as low-poly models (src/objects/family.js), same style as Morty and Rick. Beth makes sandwiches at the counter and turns around when Morty comes close. Summer lies on the couch with her phone over her face. Jerry practices his pitch on nobody.
+  - Cold open, new second half: after Rick lands in the garage it cuts to the house. Purple flash under the garage door, the family looks at it, "Not it." "Not it!" "MORTY!", Morty stumbles in, title card. Play now starts in the house.
+  - Beth hands over the sandwich: she picks it up off the plate and tosses it, Morty catches it. Three ways to earn it: be nice, come back a second time, or be rude and then say sorry (which also clears rudeToMom, so Morty's plea works again in the boss fight).
+  - Summer throws her phone. Q opens it: a pink phone with her notes app as the quest log (tasks tick off from story flags, gun parts, pockets, and a note from Summer that changes with progress). Works in the house, the garage and the lab.
+  - Jerry's bad business idea: he sits in his lawn chair, it creaks twice and folds flat with him in it. The small chair does not spill the drink. He stays folded for the rest of the episode.
+  - A door between house and garage, both ways. The first time into the garage plays Morty finding Rick. After the boss fight all three have new lines (STORY.md ending: Summer's shrimp picture, Jerry's shrimp lawn chairs).
+  - Boss fight: Mom's sandwich is only in the Item menu if Beth gave it. Test links: ?garage (start in the garage), ?boss now includes the sandwich, add &nosandwich to play without it.
+- Key decisions:
+  - The house beat goes inside the cold open, before the title card, so the episode still opens on the portal and the title lands on the whole family.
+  - Beth only lets Morty through the garage door after she has talked to him, so nobody skips the sandwich scene by accident.
+  - Summer's phone is optional. The goal line at the top left stays, so the game can be finished without it.
+  - Staged actions (the toss, the chair) now hide the dialogue box while they play. Dialogue JSON got two small additions: a line can have an "if", and a "do" can run a staged action in the middle of a conversation.
+  - The arcade soda stays in the fight for free until Blips and Chitz exists (roadmap item 6).
+- What went wrong or looked weak, and the revision:
+  - Summer's close-up was shot from behind Morty, so his head covered her. The camera now comes from the side he is not standing on.
+  - Summer v1 held the phone at arm's length like a pointing statue. v2 leans back on the armrest (0.3 to 0.6) with the phone over her face.
+  - Phone toss and sandwich handover v1 were filmed from the front with Morty in the way. Both now use a side view of the two people.
+  - Jerry's chair v1: the dialogue box covered the chair, Morty's head stuck out behind Jerry like a second head, and Jerry sat in a T-pose. v2: the box hides, Morty steps to a mark at the side, hands go on the armrests.
+  - House wide shot v1 left Beth out of frame behind the pitch board. v2 is wider (40 to 44) and from further right.
+  - Sandwich arc was too high, over both heads. Arc height 1.0 to 0.6.
+- Rejected, and why:
+  - Jerry's lawn chair as a boss fight item (it is one in the 2D game): it needs a new battle rule and staging. The roadmap line only asks for the bad idea.
+  - Separate rooms for kitchen and living room: one open set keeps all three family members in the title shot and needs no extra doors.
+  - Making the phone required to leave the house: a forced errand before the story starts.
+- Result: Tested with a script that plays the game: start card, cold open, house, rude answer, apology, sandwich, door, garage arrival, Rick, gun, portal, lab arrival, and back through the door both ways. Phone checked in house and lab. ?boss, ?boss&nosandwich, ?lab=2 and ?garage checked. Post-boss family lines checked. No console errors, production build passes. Not confirmed on Rodrigo's machine: real-time feel of the toss and the chair collapse (the preview pane throttles animation). Not deployed.
+- Evidence files: process/screenshots/2026-11-12_s4_house-first-render.jpg, _summer-v1-stiff-arm.jpg, _phone-toss-v1-morty-blocks-camera.jpg, _jerry-v1-morty-behind-box-covers-chair.jpg, _cold-open-house-v1-beth-out-of-frame.jpg (the befores), _summer-v2-lounging.jpg, _phone-quest-log.jpg, _jerry-v2-sits.jpg, _jerry-v2-chair-collapsed.jpg, _cold-open-house-v2-wide.jpg, _beth-sandwich-handover.jpg
+- Chat link: Claude Code session "Smith house and family design" (desktop app link claude://claude.ai/epitaxy/local_7f8f4758-52d6-46a1-b871-39e2f599d963)
+- Why:

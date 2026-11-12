@@ -1,0 +1,36 @@
+{
+  "_note": "Summer's phone: the quest log (Q). tasks: show = flag that makes the line appear, done = flag that ticks it. notes: the first one whose flag is set is shown.",
+  "app": "Notes",
+  "title": "morty's stuff",
+  "subtitle": "(DO NOT read my other notes)",
+  "tasks": [
+    { "text": "See why Mom is yelling", "done": "askedToCheckGarage" },
+    { "text": "Find out what Grandpa broke", "show": "askedToCheckGarage", "done": "rickExplained" },
+    { "text": "Touch the humming gun. Mom said don't.", "show": "rickExplained", "done": "portalOpen" },
+    { "text": "Get the Focus Crystal back", "show": "portalOpen", "done": "hasCrystal" },
+    { "text": "Get the Fluid Canister back", "show": "hasCrystal", "done": "hasCanister" },
+    { "text": "Get the Coordinate Chip back", "show": "hasCanister", "done": "hasChip" },
+    { "text": "Survive Shrimp Rick", "show": "hasChip", "done": "bossBeaten" }
+  ],
+  "partsLabel": "gun parts",
+  "parts": [
+    { "name": "Crystal", "flag": "hasCrystal" },
+    { "name": "Canister", "flag": "hasCanister" },
+    { "name": "Chip", "flag": "hasChip" }
+  ],
+  "pocketsLabel": "pockets",
+  "pocketsEmpty": "nothing. sad.",
+  "pockets": [
+    { "name": "Mom's sandwich", "flag": "hasSandwich", "gone": "bossBeaten" },
+    { "name": "Rick's portal gun", "flag": "portalOpen" }
+  ],
+  "notes": [
+    { "if": "bossBeaten", "text": "you used 96% of my battery. the shrimp pic has 400 likes so you may live." },
+    { "if": "hasChip", "text": "why is my phone in ANOTHER DIMENSION. roaming charges are yours." },
+    { "if": "portalOpen", "text": "shrimp? like the food? gross. bring me a picture." },
+    { "if": "rickExplained", "text": "grandpa said \"delegating\". that means you. lol" },
+    { "if": "askedToCheckGarage", "text": "mom said don't touch anything that hums. so obviously you will." },
+    { "text": "five minutes. if you open my messages i will know." }
+  ],
+  "close": "Q to put it away"
+}

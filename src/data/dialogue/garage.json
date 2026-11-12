@@ -1,4 +1,8 @@
 {
+  "arrival": [
+    { "speaker": "Morty", "mood": "neutral", "text": "Rick? Mom says something exploded. Twice." },
+    { "speaker": "Morty", "mood": "angry", "text": "Rick, if you're faking being asleep, I swear..." }
+  ],
   "rick": {
     "entry": [
       { "if": "portalOpen", "goto": "asleepPortal" },

@@ -11,7 +11,10 @@ import { buildGarage } from './areas/garage.js';
 import { Model, Character, buildRick, buildGun } from './objects/models.js';
 import { Player } from './objects/player.js';
 import { Portal } from './objects/portal.js';
-import { coldOpen, afterColdOpen } from './scenes/coldOpen.js';
+import { coldOpen, afterColdOpen, garageArrival } from './scenes/coldOpen.js';
+import { createHouse } from './scenes/houseScene.js';
+import phone from './ui/phone.js';
+import houseText from './data/dialogue/house.json';
 import { createLab } from './scenes/labScene.js';
 import { createBoss } from './scenes/bossScene.js';
 import { shotOn } from './scenes/shots.js';
@@ -50,14 +53,20 @@ const zzz = [0, 1, 2].map(() => {
 
 // G is the shared game state that cutscenes read and change
 const G = { scene: garage.group, garage, morty, rick, gun, portal, introPortal, gunLight, rickAsleep: false, rickAwake: false };
-let state = 'boot';     // boot, cutscene, play, dialogue, battle
-let area = 'garage';    // garage or lab
+let state = 'boot';     // boot, cutscene, play, dialogue, battle, phone
+let area = 'garage';    // house, garage or lab
 let cooldown = 0;       // short pause after dialogue so the same key press does not start it again
 
 // ---- Shrimp Rick's lab ----
 const lab = createLab({
   scene, morty,
   api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toBoss },
+});
+
+// ---- The Smith house: where the episode starts ----
+const house = createHouse({
+  scene, morty,
+  api: { camera, setState(s) { state = s; }, startPlay, toGarage: houseToGarage },
 });
 
 // ---- Boss fight vs Shrimp Rick, staged in the garage ----
@@ -89,6 +98,7 @@ const usable = [
       if (todo.some((d) => d.portal)) await firePortal();
     },
   },
+  { label: 'House', at: () => garage.spots.door, radius: 1.5, hintY: 1.7, when: () => true, run: garageToHouse },
 ];
 
 function garageGoal() {
@@ -132,6 +142,53 @@ async function enterPortal() {
   await toLab(0);
 }
 
+// ---- The door between the house and the garage ----
+async function garageToHouse() {
+  state = 'cutscene';
+  audio.sfx('door.mp3');
+  await hud.fade(1, 0.35);
+  garage.group.visible = false;
+  area = 'house';
+  resetMortyPose();
+  house.enter('door');
+  startPlay();
+  await hud.fade(0, 0.35);
+  return true; // tells use() that this scene already handed control back
+}
+
+async function houseToGarage() {
+  state = 'cutscene';
+  audio.sfx('door.mp3');
+  await hud.fade(1, 0.35);
+  house.leave();
+  area = 'garage';
+  garage.group.visible = true;
+  resetMortyPose();
+  rig.setLimits(GARAGE_LIMITS);
+  if (!flags.get('sawGarage')) {
+    // First time in: Morty finds Rick and the gun
+    flags.set('sawGarage');
+    await garageArrival(G, dialogue.arrival);
+    startPlay();
+    return;
+  }
+  morty.position.set(-7.4, 0, 0);
+  morty.group.rotation.y = Math.PI / 2;
+  rig.follow(morty, true);
+  startPlay();
+  await hud.fade(0, 0.35);
+}
+
+// Q: Summer's phone, the quest log
+function togglePhone() {
+  if (state === 'phone') { phone.close(); cooldown = 0.2; state = 'play'; return; }
+  if (state !== 'play') return;
+  if (!flags.get('hasPhone')) { hud.toast(houseText.hints.noPhone); return; }
+  hud.prompt('');
+  phone.open();
+  state = 'phone';
+}
+
 function resetMortyPose() {
   Object.assign(morty, { scale: 1, squash: 1, vx: 0, vz: 0 });
   morty.mesh.rotation.z = 0; morty.mesh.position.y = 0;
@@ -169,9 +226,11 @@ async function toGarage() {
 function startPlay() {
   hud.cinema(false);
   rig.follow(morty);
-  hud.goal(area === 'garage' ? garageGoal() : lab.goal());
+  hud.goal(area === 'garage' ? garageGoal() : area === 'house' ? house.goal() : lab.goal());
+  if (area !== 'lab') hud.hint(flags.get('hasPhone') ? houseText.hints.phone : '');
   cooldown = 0.3;
   lab.setCooldown(0.3);
+  house.setCooldown(0.3);
   state = 'play';
 }
 
@@ -181,8 +240,7 @@ async function use(thing) {
   hud.cinema(true);
   morty.faceToward(thing.at());
   morty.animate(0.016, 0);
-  await thing.run();
-  startPlay();
+  if (await thing.run() !== true) startPlay();
 }
 
 function garageTick() {
@@ -203,6 +261,7 @@ function garageTick() {
 
 // ---- Main loop ----
 const tmp = new THREE.Vector3();
+const worlds = { garage, house: house.world, lab: lab.world };
 let last = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
@@ -216,10 +275,14 @@ function tick(dt) {
   const time = clock.time;
 
   if (state === 'play') {
-    morty.move(dt, area === 'garage' ? garage : lab.world, true);
+    morty.move(dt, worlds[area], true);
     cooldown -= dt;
-    if (area === 'garage') garageTick(); else lab.tick(dt);
+    if (area === 'garage') garageTick(); else if (area === 'house') house.tick(dt); else lab.tick(dt);
+  } else if (state === 'phone') {
+    morty.move(dt, worlds[area], false); // he slows to a stop while he reads
+    if (input.pressed('Escape')) togglePhone();
   }
+  if (input.pressed('KeyQ')) togglePhone();
 
   if (input.pressed('KeyM')) hud.toast(audio.toggleMute() ? 'Sound off' : 'Sound on');
 
@@ -247,6 +310,7 @@ function tick(dt) {
     introPortal.update(time);
   }
   boss.update(dt, time);
+  house.update(dt, time);
   morty.update();
   lab.update(dt, time);
   rig.update(dt, time);
@@ -256,10 +320,12 @@ function tick(dt) {
 requestAnimationFrame(frame);
 
 // Dev builds only: lets a test script run the game forward by hand, for example __game.step(120) = 2 seconds
-if (import.meta.env.DEV) window.__game = { G, flags, lab, boss, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
+if (import.meta.env.DEV) window.__game = { G, flags, lab, boss, house, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
 
-// ---- Boot: start card, cold open, then play. ?skip jumps past the cold open, ?lab=1, 2 or 3 starts in that lab room,
-// ?boss starts at the boss fight (?boss=2 at the tank phase, ?boss=fight skips the fight's opening scene). ----
+// ---- Boot: start card, cold open (garage, then the house), then play in the house. ?skip jumps past the cold open,
+// ?garage starts in the garage with Beth's errand done, ?lab=1, 2 or 3 starts in that lab room,
+// ?boss starts at the boss fight (?boss=2 at the tank phase, ?boss=fight skips the fight's opening scene, &nosandwich
+// plays it without Beth's sandwich). ----
 async function boot() {
   rig.cut({ pos: V(-7.2, 1.5, 5.6), look: V(1.5, 1.7, -3), fov: 38 });
   if (params.has('lab')) {
@@ -269,19 +335,29 @@ async function boot() {
   }
   if (params.has('boss')) {
     afterColdOpen(G);
-    flags.setMany({ hasCrystal: true, hasCanister: true, hasChip: true, helpedResistance: !params.has('norebels') });
+    flags.setMany({ hasCrystal: true, hasCanister: true, hasChip: true, helpedResistance: !params.has('norebels'), hasSandwich: !params.has('nosandwich'), askedToCheckGarage: true, sawGarage: true });
     const v = params.get('boss');
     return toBoss({ phase: v === '2' ? 2 : 1, skipIntro: v === '2' || v === 'fight' });
   }
+  if (params.has('garage')) {
+    afterColdOpen(G);
+    flags.setMany({ askedToCheckGarage: true, sawGarage: true });
+    audio.music('smith_house.m4a');
+    startPlay();
+    return hud.fade(0, 0.5);
+  }
+  const toHouse = () => { garage.group.visible = false; area = 'house'; };
   if (params.has('skip')) {
     afterColdOpen(G);
+    toHouse();
+    house.enter('hall');
   } else {
     hud.card({ small: 'A playable episode', big: 'TOTAL RICKALL<br>OF PARTS', hint: 'Press SPACE to start', solid: true });
     await input.nextPress('Space', 'Enter');
     hud.hideCard();
     await wait(0.6);
     state = 'cutscene';
-    await coldOpen(G);
+    await coldOpen(G, () => { toHouse(); return house.intro(); });
   }
   audio.music('smith_house.m4a');
   startPlay();
