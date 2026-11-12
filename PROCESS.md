@@ -164,3 +164,32 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Evidence files: process/screenshots/2026-11-12_s4_house-first-render.jpg, _summer-v1-stiff-arm.jpg, _phone-toss-v1-morty-blocks-camera.jpg, _jerry-v1-morty-behind-box-covers-chair.jpg, _cold-open-house-v1-beth-out-of-frame.jpg (the befores), _summer-v2-lounging.jpg, _phone-quest-log.jpg, _jerry-v2-sits.jpg, _jerry-v2-chair-collapsed.jpg, _cold-open-house-v2-wide.jpg, _beth-sandwich-handover.jpg
 - Chat link: Claude Code session "Smith house and family design" (desktop app link claude://claude.ai/epitaxy/local_7f8f4758-52d6-46a1-b871-39e2f599d963)
 - Why:
+
+### Session 5, 2026-11-12
+- Goal: Build roadmap item 5: save progress. Refresh mid-episode and carry on.
+- AI types and tools: code AI (Claude Code, Claude Opus 5.5) for design, code and testing. No image or audio AI.
+- Key prompts (word for word):
+  - "Read CLAUDE.md and PROCESS.md, then do the next step"
+  - "should we split the 3d and 2d versions into two separate things?"
+  - "ok now keep going u are on 3d"
+  - "stop, if you dont do the portal banish correctly it jsut keeps going, fix then keep going"
+- What was built:
+  - src/systems/save.js: one save slot in localStorage, every read and write in try/catch, so a private window still plays.
+  - Autosave every time Morty gets control back (after each door, dialogue, pickup, getting caught), plus a checkpoint at the start of the boss fight and at the start of the tank phase.
+  - The start card shows "SPACE: Continue in <area>" and "N: New episode" when a save exists. N wipes the save and plays the cold open.
+  - Continue rebuilds each area from the story flags: the house (sandwich gone, Jerry still folded, phone hint), the garage (portal still open if the gun already fired, gun gone after the boss), the lab (right room, parts tray, open doors), the boss fight (right phase, items back).
+  - Test links (?skip, ?garage, ?lab, ?boss) never load or overwrite the real save.
+- Key decisions:
+  - Save checkpoints, not Morty's exact spot. Continue puts him at the entrance of his area. Room entrances in the lab are out of every guard's sight, and a spot saved mid-cutscene could leave him inside a wall.
+  - Continuing a boss save skips the boss's opening scene and goes straight to the fight.
+- What went wrong or looked weak, and the revision:
+  - This session opened in the 2D folder, so "the next step" could mean either game. Claude asked; Rodrigo moved the session to ~/rick-3d.
+  - Start card v1: "Continue in the garage N New episode" ran together on one line (HTML collapses spaces). v2 puts each option on its own line.
+  - Claude's own test bot pressed Space at random during the Portal Banish timing ring, missed every time, and the fight never ended. Rodrigo stopped it. The fixed test presses Space 1.1 s after the ring appears: "NICE!" on the first try, fight won.
+- Rejected, and why:
+  - A "Progress saved" pop-up: it would fire after almost every dialogue and fight the other toasts.
+  - Several save slots: one episode, one player, about 20 minutes long.
+- Result: Tested with a script in the browser: fresh start saves in the house; Continue from the house, the garage with the portal open, lab room 2 after a real pickup, boss phase 1 and 2, and the garage after the ending; a real Banish win saves the garage with bossBeaten; N clears the save; ?garage, ?lab=2 and ?boss=fight leave the save alone. No console errors, production build passes. Not checked on Rodrigo's machine yet.
+- Evidence files: process/screenshots/2026-11-12_s5_continue-card-v1-options-run-together.jpg (before), _continue-card-v2-two-lines.png (after)
+- Chat link: Claude Code session "Read CLAUDE.md and PROCESS.md" (desktop app link claude://claude.ai/epitaxy/local_2e48fca3-329a-4553-91a4-edb650ea1502)
+- Why:

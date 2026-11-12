@@ -7,6 +7,7 @@ import { updateTweens, tween, wait, ease, clock } from './engine/tween.js';
 import hud from './ui/hud.js';
 import { converse } from './ui/dialogue.js';
 import flags from './systems/flags.js';
+import save from './systems/save.js';
 import { buildGarage } from './areas/garage.js';
 import { Model, Character, buildRick, buildGun } from './objects/models.js';
 import { Player } from './objects/player.js';
@@ -23,6 +24,10 @@ import dialogue from './data/dialogue/garage.json';
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const params = new URLSearchParams(location.search);
 const GARAGE_LIMITS = { x0: -4, x1: 4, z0: -3, z1: 2.5 };
+// Test links start mid-episode with made-up flags, so they neither load nor overwrite the real save
+const TEST_LINK = ['skip', 'garage', 'lab', 'boss'].some((k) => params.has(k));
+const PART_FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
+const SAVED_WHERE = { house: 'the Smith house', garage: 'the garage', lab: "Shrimp Rick's lab", boss: 'the boss fight' };
 
 // ---- Garage world ----
 const garage = buildGarage();
@@ -70,7 +75,7 @@ const house = createHouse({
 });
 
 // ---- Boss fight vs Shrimp Rick, staged in the garage ----
-const boss = createBoss({ G, held: lab.held, api: { setState(s) { state = s; }, toGarage } });
+const boss = createBoss({ G, held: lab.held, api: { setState(s) { state = s; }, toGarage, checkpoint: (phase) => checkpoint({ area: 'boss', phase }) } });
 
 // ---- Things Morty can use in the garage ----
 const usable = [
@@ -207,6 +212,7 @@ function toBoss(opts) {
   area = 'garage';
   garage.group.visible = true;
   gun.group.visible = false; // Morty is holding it
+  checkpoint({ area: 'boss', phase: opts?.phase ?? 1 });
   return boss.start(opts);
 }
 
@@ -232,6 +238,41 @@ function startPlay() {
   lab.setCooldown(0.3);
   house.setCooldown(0.3);
   state = 'play';
+  checkpoint();
+}
+
+// Autosave: every time Morty gets control back, and at the start of each boss phase.
+// Morty's exact spot is not saved: Continue puts him at the entrance of the area he was in.
+function checkpoint(extra = {}) {
+  if (!TEST_LINK) save.write({ area, ...extra, flags: flags.all() });
+}
+
+// Continue from the start card: put the garage back the way the flags say, then go to the saved area
+async function continueFrom(saved) {
+  flags.replace(saved.flags);
+  afterColdOpen(G);
+  gun.group.visible = !flags.get('bossBeaten');
+  if (flags.get('portalOpen') && !flags.get('bossBeaten')) { gunLight.intensity = 0; portal.open(); }
+  await wait(0.3);
+  if (saved.area === 'boss') {
+    gun.group.visible = false;
+    return toBoss({ phase: saved.phase === 2 ? 2 : 1, skipIntro: true });
+  }
+  if (saved.area === 'lab') {
+    gun.group.visible = false;
+    return toLab(Math.min(2, PART_FLAGS.filter((f) => flags.get(f)).length));
+  }
+  if (saved.area === 'house') {
+    garage.group.visible = false;
+    area = 'house';
+    house.enter('hall');
+  } else {
+    area = 'garage';
+    rig.setLimits(GARAGE_LIMITS);
+  }
+  audio.music('smith_house.m4a');
+  startPlay();
+  await hud.fade(0, 0.5);
 }
 
 async function use(thing) {
@@ -320,7 +361,7 @@ function tick(dt) {
 requestAnimationFrame(frame);
 
 // Dev builds only: lets a test script run the game forward by hand, for example __game.step(120) = 2 seconds
-if (import.meta.env.DEV) window.__game = { G, flags, lab, boss, house, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
+if (import.meta.env.DEV) window.__game = { G, flags, save, lab, boss, house, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
 
 // ---- Boot: start card, cold open (garage, then the house), then play in the house. ?skip jumps past the cold open,
 // ?garage starts in the garage with Beth's errand done, ?lab=1, 2 or 3 starts in that lab room,
@@ -352,9 +393,13 @@ async function boot() {
     toHouse();
     house.enter('hall');
   } else {
-    hud.card({ small: 'A playable episode', big: 'TOTAL RICKALL<br>OF PARTS', hint: 'Press SPACE to start', solid: true });
-    await input.nextPress('Space', 'Enter');
+    const saved = TEST_LINK ? null : save.read();
+    const hint = saved ? `SPACE: Continue in ${SAVED_WHERE[saved.area] ?? 'the episode'}\nN: New episode` : 'Press SPACE to start';
+    hud.card({ small: 'A playable episode', big: 'TOTAL RICKALL<br>OF PARTS', hint, solid: true });
+    const key = await input.nextPress('Space', 'Enter', ...(saved ? ['KeyN'] : []));
     hud.hideCard();
+    if (saved && key !== 'KeyN') return continueFrom(saved);
+    save.clear();
     await wait(0.6);
     state = 'cutscene';
     await coldOpen(G, () => { toHouse(); return house.intro(); });

@@ -24,7 +24,7 @@ const MORTY_TURN = 1.2, BOSS_TURN = -1.05; // facing each other, turned a little
 
 // The boss fight in the Smith garage: a turn-based battle staged like a TV fight scene.
 // Rules are in systems/battleRules.js, every line of text is in data/dialogue/boss.json.
-// G is the shared garage state from main.js. api: { setState(name), toGarage() }
+// G is the shared garage state from main.js. api: { setState(name), toGarage(), checkpoint(phase) }
 export function createBoss({ G, held, api }) {
   const { garage, morty, portal } = G;
   const room = garage.group;
@@ -635,7 +635,7 @@ export function createBoss({ G, held, api }) {
     let banishTold = false;
     for (;;) {
       if (await mortyTurn() === true) return true;
-      if (checkPhase2(s)) await tankEntrance();
+      if (checkPhase2(s)) { await tankEntrance(); api.checkpoint?.(2); }
       if (s.extraTurn) { s.extraTurn = false; continue; }
       await bossTurn();
       if (s.morty.hp <= 0) return false;

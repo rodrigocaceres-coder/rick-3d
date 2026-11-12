@@ -7,12 +7,13 @@ Story, characters and tone: ~/rick-platformer/STORY.md and its dialogue JSON. Pr
 A playable episode: cold open, title card, the Smith house, portal puzzle, boss, post-credits gag.
 Slice order: 1. Smith garage hub (built). 2. Shrimp Rick's lab (built Nov 12: 3 rooms, portal gun, guards, parts, Shrimp Rick entrance). 3. Turn-based boss vs Shrimp Rick in the garage (built Nov 12: rules from STORY.md, camera cuts, timed Space press, tank phase, Portal Banish, ending, post-credits gag).
 4. Smith house and the family (built Nov 12: house set, Beth, Summer and Jerry, cold open ends in the house, sandwich handover, Summer's phone as the quest log on Q, Jerry's lawn chair, door to the garage).
+5. Save progress (built Nov 12: autosave whenever Morty gets control back plus boss phase checkpoints, Continue / New episode on the start card, test links never touch the save).
 Story change from 2D: all 3 gun parts land in the shrimp lab.
 
 ## Roadmap (set Nov 12, after slice 3)
 One build per session, in this order. Each line is a goal, not a design: the building model owns how it looks, plays and fits the story, and may change the story threading if it makes a better episode. Read STORY.md and the 2D dialogue JSON for characters and tone first.
 4. Smith house and the family: done, see Game above.
-5. Save progress. Flags, parts, items and area in localStorage (try/catch), a Continue option on the start card. Done: refresh mid-episode and carry on.
+5. Save progress: done, see Game above.
 6. Blips and Chitz. An arcade set, Gorbi and Glorp, one arcade challenge that is fun in 3D, the arcade soda as its reward. Done: reachable by portal, beatable, sets a flag the boss fight reads. (The soda is free in the fight until then: give it a "flag" in src/data/items.json like the sandwich has.)
 7. Citadel of Ricks. A queue of bureaucrat Ricks and the Take a Number dialogue puzzle. Done: reachable, beatable, worth the trip (a reward or a story beat).
 8. Lab extras: crates and beams through portals, cut from Session 2. Done: one new puzzle beat per room, old solutions still work.
@@ -37,7 +38,7 @@ Cut line: stop new builds at the end of Nov 15. Nov 16 is for fixes, a friend pl
 - src/objects/: models (Morty, Rick, gun, walk cycle), family (Beth, Summer, Jerry, lawn chair, sandwich), player, portal (cutout.js is the unused first version)
 - src/scenes/: cutscenes written with await (coldOpen), houseScene (the family, handovers, Jerry's chair, the house half of the cold open), labScene (portal gun, guards, pickups, ending), bossScene (the staged fight), camera shot helpers
 - src/ui/: hud (bars, fades, cards), dialogue (box and conversation runner), phone (Summer's phone, the quest log; content in src/data/phone.json), battleUi (HP bars, menu, timing ring, damage numbers)
-- src/systems/: flags, battleRules (boss fight numbers only, all tuning in RULES; change one value at a time)
+- src/systems/: flags, save (localStorage slot), battleRules (boss fight numbers only, all tuning in RULES; change one value at a time)
 - src/data/dialogue/: dialogue JSON, same format as the 2D game, plus two additions: a line can have an "if", and a node's "do" can run a staged action mid-conversation (onDo in converse). Never hardcode story dialogue in scenes.
 - tools/cut_sheet.py: cuts Gemini sheets at full size with halo trim
 

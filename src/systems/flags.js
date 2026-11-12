@@ -6,6 +6,8 @@ const flags = {
   get: (name) => store[name],
   set(name, value = true) { store[name] = value; },
   setMany(obj = {}) { Object.assign(store, obj); },
+  all: () => ({ ...store }),                 // a copy, for the save file
+  replace(obj = {}) { for (const k in store) delete store[k]; Object.assign(store, obj); },
   check(cond) {
     if (!cond) return true;
     return cond.startsWith('!') ? !store[cond.slice(1)] : Boolean(store[cond]);
