@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rick and Morty 3D: Total Rickall of Parts</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <!-- Everything below is 2D overlay drawn by the browser on top of the 3D canvas -->
+    <div id="vignette"></div>
+    <div id="bar-top" class="bar"></div>
+    <div id="bar-bottom" class="bar"></div>
+    <div id="fade"></div>
+    <div id="flash"></div>
+
+    <div id="goal"></div>
+    <div id="prompt"><span class="key">SPACE</span> <span id="prompt-text"></span></div>
+    <div id="caption"></div>
+    <div id="toast"></div>
+
+    <div id="dialogue">
+      <img id="dlg-portrait" alt="" />
+      <div id="dlg-box">
+        <div id="dlg-name"></div>
+        <div id="dlg-text"></div>
+        <div id="dlg-choices"></div>
+        <div id="dlg-arrow">▼</div>
+      </div>
+    </div>
+
+    <div id="card">
+      <div id="card-small"></div>
+      <div id="card-big"></div>
+      <div id="card-hint"></div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

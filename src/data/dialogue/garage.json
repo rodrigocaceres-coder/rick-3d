@@ -1,0 +1,84 @@
+{
+  "rick": {
+    "entry": [
+      { "if": "portalOpen", "goto": "asleepPortal" },
+      { "if": "rickExplained", "goto": "asleep" },
+      { "goto": "intro" }
+    ],
+    "nodes": {
+      "intro": {
+        "set": { "rickExplained": true },
+        "lines": [
+          { "speaker": "Morty", "mood": "neutral", "text": "Rick? Rick, wake up. What happened to the gun?" },
+          { "speaker": "Rick", "mood": "angry", "text": "Mmrgh. Morty? Why is the floor so loud?" },
+          { "speaker": "Rick", "mood": "neutral", "text": "Gun's busted. Three parts flew out. Crystal, canister, chip. Don't make me say it twice." },
+          { "speaker": "Rick", "mood": "neutral", "text": "I won't. I'll be asleep. Gun's got one charge left. Point it at your problems." }
+        ],
+        "choices": [
+          { "text": "Where did the parts go?", "goto": "where" },
+          { "text": "Can't you do it?", "goto": "cant" }
+        ]
+      },
+      "where": {
+        "lines": [
+          { "speaker": "Rick", "mood": "neutral", "text": "Through the last portal I opened. Shrimp place. All three. Zzzz." },
+          { "speaker": "Morty", "mood": "angry", "text": "Why is it always shrimp? Why is it never something normal?" }
+        ]
+      },
+      "cant": {
+        "lines": [
+          { "speaker": "Rick", "mood": "angry", "text": "I'm doing it right now, Morty. I'm delegating. Zzzz." }
+        ]
+      },
+      "asleep": {
+        "lines": [
+          { "speaker": "Rick", "mood": "neutral", "text": "Zzzz... crystal... canister... don't touch the thing that hums... zzzz." }
+        ]
+      },
+      "asleepPortal": {
+        "lines": [
+          { "speaker": "Rick", "mood": "happy", "text": "Wake me when you're a hero. Or dead. Whichever's quieter." }
+        ]
+      }
+    }
+  },
+  "gun": {
+    "entry": [
+      { "if": "portalOpen", "goto": "empty" },
+      { "if": "rickExplained", "goto": "lastCharge" },
+      { "goto": "humming" }
+    ],
+    "nodes": {
+      "humming": {
+        "lines": [
+          { "speaker": "Morty", "mood": "neutral", "text": "Rick's portal gun. It's cracked. And it's humming." },
+          { "speaker": "Morty", "mood": "neutral", "text": "Mom said not to touch anything that hums. Maybe I should wake Rick first." }
+        ]
+      },
+      "lastCharge": {
+        "lines": [
+          { "speaker": "Morty", "mood": "neutral", "text": "One charge left. The screen says... \"SHRIMP RICK'S LAB\"?" }
+        ],
+        "choices": [
+          { "text": "Pull the trigger.", "set": { "portalOpen": true }, "do": { "portal": true }, "goto": "fire" },
+          { "text": "Not yet.", "goto": "notYet" }
+        ]
+      },
+      "fire": {
+        "lines": [
+          { "speaker": "Morty", "mood": "angry", "text": "Okay. Okay. I can do this. I can probably do this." }
+        ]
+      },
+      "notYet": {
+        "lines": [
+          { "speaker": "Morty", "mood": "neutral", "text": "It's still humming. At me." }
+        ]
+      },
+      "empty": {
+        "lines": [
+          { "speaker": "Morty", "mood": "neutral", "text": "Empty. The only way now is through the portal." }
+        ]
+      }
+    }
+  }
+}

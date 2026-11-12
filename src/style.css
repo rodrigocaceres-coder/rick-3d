@@ -1,0 +1,110 @@
+:root {
+  --green: #7dff4a;
+  --green-dark: #1c6b12;
+  --ink: #15101c;
+  --paper: #f4efe2;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden; background: #000;
+  font-family: 'Trebuchet MS', 'Avenir Next', Verdana, sans-serif; color: var(--paper);
+  user-select: none;
+}
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* Film look: dark corners, letterbox bars, fades */
+#vignette {
+  position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(5, 2, 15, 0.55) 100%);
+}
+.bar {
+  position: fixed; left: 0; right: 0; height: 12vh; background: #000; pointer-events: none;
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+#bar-top { top: 0; transform: translateY(-100%); }
+#bar-bottom { bottom: 0; transform: translateY(100%); }
+body.cinema .bar { transform: translateY(0); }
+#fade { position: fixed; inset: 0; background: #000; opacity: 1; pointer-events: none; }
+#flash { position: fixed; inset: 0; background: #c8ff9a; opacity: 0; pointer-events: none; mix-blend-mode: screen; }
+
+/* Goal line, top left */
+#goal {
+  position: fixed; top: 18px; left: 22px; padding: 8px 14px; font-size: 17px; letter-spacing: 0.3px;
+  background: rgba(21, 16, 28, 0.78); border: 3px solid var(--ink); border-left: 6px solid var(--green);
+  border-radius: 6px; opacity: 0; transition: opacity 0.4s;
+}
+body.play #goal.on { opacity: 1; }
+
+/* "SPACE Talk" hint that floats over the thing you can use */
+#prompt {
+  position: fixed; left: 0; top: 0; padding: 5px 10px; font-size: 15px; font-weight: bold; white-space: nowrap;
+  background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: 8px;
+  transform: translate(-50%, -100%); opacity: 0; transition: opacity 0.15s; pointer-events: none;
+}
+#prompt.on { opacity: 1; }
+#prompt .key { background: var(--ink); color: var(--green); padding: 1px 6px; border-radius: 4px; margin-right: 4px; }
+
+/* Screenplay caption during cutscenes */
+#caption {
+  position: fixed; left: 0; right: 0; bottom: 3.6vh; text-align: center; font-size: 2.4vh;
+  font-family: 'Courier New', monospace; letter-spacing: 2px; color: #d9d4c5; opacity: 0; transition: opacity 0.4s;
+}
+#caption.on { opacity: 1; }
+#toast {
+  position: fixed; top: 18px; right: 22px; padding: 6px 12px; font-size: 14px; background: rgba(21, 16, 28, 0.8);
+  border-radius: 6px; opacity: 0; transition: opacity 0.3s;
+}
+#toast.on { opacity: 1; }
+
+/* Dialogue: big portrait like a TV close-up, speech box next to it */
+#dialogue {
+  position: fixed; left: 50%; bottom: 13.5vh; width: min(980px, 92vw); transform: translate(-50%, 30px);
+  display: flex; align-items: flex-end; gap: 0; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+#dialogue.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+#dlg-portrait {
+  height: min(300px, 38vh); margin-right: -18px; z-index: 2; transform-origin: bottom center;
+  filter: drop-shadow(0 0 0 var(--ink)) drop-shadow(6px 6px 0 rgba(0, 0, 0, 0.45));
+}
+#dlg-portrait.pop { animation: pop 0.28s cubic-bezier(0.2, 1.6, 0.4, 1); }
+#dlg-portrait.talk { animation: talk 0.22s ease-in-out infinite alternate; }
+@keyframes pop { from { transform: scale(0.8) translateY(20px); } to { transform: scale(1); } }
+@keyframes talk { from { transform: scaleY(1); } to { transform: scaleY(1.025) rotate(-0.6deg); } }
+#dlg-box {
+  position: relative; flex: 1; min-height: 150px; padding: 20px 28px 26px 38px;
+  background: var(--paper); color: var(--ink); border: 5px solid var(--ink); border-radius: 18px 22px 16px 24px;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
+}
+#dlg-name {
+  position: absolute; top: -22px; left: 30px; padding: 4px 16px; font-weight: bold; font-size: 19px;
+  background: var(--green); color: var(--ink); border: 4px solid var(--ink); border-radius: 10px; transform: rotate(-2deg);
+}
+#dlg-text { font-size: 24px; line-height: 1.35; min-height: 66px; }
+#dlg-choices { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.choice {
+  padding: 7px 14px; font-size: 20px; border: 3px solid transparent; border-radius: 10px; cursor: pointer;
+}
+.choice.sel { border-color: var(--ink); background: var(--green); font-weight: bold; }
+.choice.sel::before { content: '▶ '; }
+#dlg-arrow { position: absolute; right: 18px; bottom: 8px; font-size: 20px; opacity: 0; animation: bounce 0.5s ease-in-out infinite alternate; }
+#dlg-arrow.on { opacity: 1; }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(6px); } }
+
+/* Title card and other full-screen cards */
+#card {
+  position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.5s;
+}
+#card.on { opacity: 1; }
+#card.solid { background: #000; }
+#card-small { font-size: 3vh; letter-spacing: 0.6vh; text-transform: uppercase; color: #cfe; margin-bottom: 1.5vh; }
+#card-big {
+  font-size: 11vh; font-weight: 900; line-height: 0.95; letter-spacing: -0.2vh; color: var(--green);
+  -webkit-text-stroke: 0.5vh var(--ink); paint-order: stroke fill;
+  text-shadow: 0 0 4vh rgba(125, 255, 74, 0.75), 0.6vh 0.6vh 0 #0a3b05; transform: rotate(-3deg);
+}
+#card.on #card-big { animation: slam 0.5s cubic-bezier(0.2, 1.5, 0.4, 1); }
+@keyframes slam { from { transform: rotate(-3deg) scale(2.2); opacity: 0; } to { transform: rotate(-3deg) scale(1); opacity: 1; } }
+#card-hint { margin-top: 4vh; font-size: 2.4vh; color: #d9d4c5; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0.25; } }
