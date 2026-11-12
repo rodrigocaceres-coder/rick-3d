@@ -38,7 +38,7 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
   - Outline as a screen effect (edge detection): draws boxes around the flat cutouts and costs a second render of the scene.
   - Extra packages (animation library, post-processing library): Three.js already ships bloom, and a 40-line tween helper covers the animation.
   - A separate area for each gun part: the brief is 3 great areas first.
-- Result: Playable from start card to the portal exit, no console errors, production build passes. Not yet deployed to GitHub Pages (waiting on the repo decision). Letterbox bars and real-time feel are not yet confirmed on Rodrigo's machine, because the preview pane throttles animation.
+- Result: Playable from start card to the portal exit, no console errors, production build passes. Deployed to GitHub Pages at https://rodrigocaceres-coder.github.io/rick-3d/ (new public repo rodrigocaceres-coder/rick-3d, a GitHub Actions workflow rebuilds it on every push to main). Letterbox bars and real-time feel are not yet confirmed on Rodrigo's machine, because the preview pane throttles animation.
 - Evidence files: process/screenshots/2026-11-12_s1_first-render-too-bright.jpg, _dialogue-v1-too-close-white-halo.jpg, _dialogue-v2.jpg, _portal-v1-blown-out.jpg, _cold-open-rick-falls.jpg, _cold-open-gun-parts.jpg, _title-card-v1-over-morty.jpg
 - Chat link: Claude Code session "Rick and Morty 3D RPG" (desktop app link claude://claude.ai/epitaxy/local_a29351ea-a4fc-46bb-bbdc-587e649e7de1)
 - Why:
