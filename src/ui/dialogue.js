@@ -23,7 +23,7 @@ export function say({ speaker, mood = 'neutral', text }) {
   choicesEl.innerHTML = '';
   nameEl.textContent = speaker;
   portrait.src = `${base}${speaker.toLowerCase().replace(/\s+/g, '')}_${mood}.png`;
-  if (speaker !== lastSpeaker) { portrait.classList.remove('pop'); void portrait.offsetWidth; portrait.classList.add('pop'); }
+  if (speaker !== lastSpeaker) { portrait.classList.remove('enter'); void portrait.offsetWidth; portrait.classList.add('enter'); }
   lastSpeaker = speaker;
   arrow.classList.remove('on');
 

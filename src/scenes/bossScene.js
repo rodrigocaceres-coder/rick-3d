@@ -537,6 +537,9 @@ export function createBoss({ G, held, api }) {
     rig.cut(shot.mortyHero());
     rig.pushIn(0.1, 3);
     await set('aim', 1, 0.2);
+    await wait(0.5);
+    // Over Morty's shoulder for the timed press: the ring sits on the tank, so the tank has to be in shot
+    rig.cut(shot.aim());
     const q = await ui.timing({ at: bossCenter, lead: 1.1, hint: text.hints.banish });
     s.sauced = false;
     if (q === 'miss') {
@@ -567,11 +570,15 @@ export function createBoss({ G, held, api }) {
     closeDialogue();
     rig.cut(shot.wide());
     const start = tank.position.clone();
+    // Sucked in: spins around the middle of the tank (around its feet it swung through the floor and walls)
+    // while it shrinks and its middle travels into the middle of the portal
+    const MID = 1.8, mouth = exit.centerPoint();
     await tween(1.0, (t) => {
       tank.position.lerpVectors(start, spot, t);
-      tank.mesh.position.y = t * 1.2;
-      tank.mesh.rotation.z = t * t * 10;
-      tank.scale = 1 - t * 0.93;
+      const a = t * t * 10, sc = 1 - t * 0.93, mid = lerp(MID, mouth.y, t);
+      tank.scale = sc;
+      tank.mesh.rotation.z = a;
+      tank.mesh.position.set(MID * sc * Math.sin(a), mid - MID * sc * Math.cos(a), 0);
       rig.shake(0.1);
     }, ease.in);
     tank.group.visible = false;

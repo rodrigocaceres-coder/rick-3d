@@ -11,10 +11,13 @@ const ring = $('ring'), ringLabel = $('ring-label'), banner = $('bbanner'), sauc
 let onKey = null; // one key handler at a time (the menu or the timing ring)
 window.addEventListener('keydown', (e) => { if (!e.repeat && onKey) onKey(e); });
 
-// Where a point in the 3D world lands on the screen, in pixels
+// Where a point in the 3D world lands on the screen, in pixels. Kept inside the screen, so a ring or number
+// for something out of shot (or behind the camera) still shows up near the edge instead of vanishing.
 function toScreen(p) {
   const v = p.clone().project(camera);
-  return { x: (v.x * 0.5 + 0.5) * innerWidth, y: (-v.y * 0.5 + 0.5) * innerHeight };
+  if (v.z > 1) { v.x = -v.x; v.y = -v.y; } // behind the camera: projection comes out mirrored
+  const clamp = (n) => Math.min(0.85, Math.max(-0.85, n));
+  return { x: (clamp(v.x) * 0.5 + 0.5) * innerWidth, y: (-clamp(v.y) * 0.5 + 0.5) * innerHeight };
 }
 
 function setBar(el, who, tags) {
@@ -80,6 +83,8 @@ const ui = {
   timing({ at, lead = 0.9, good = 0.2, perfect = 0.08, hint = '', wobble = 0 }) {
     return new Promise((resolve) => {
       let elapsed = 0, done = false;
+      const p0 = toScreen(at());
+      ring.style.transform = `translate(${p0.x}px, ${p0.y}px)`; // in place before it shows, so it never flashes at the corner
       ring.className = 'on';
       ringLabel.textContent = hint;
       ringLabel.style.display = hint ? '' : 'none';

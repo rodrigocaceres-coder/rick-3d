@@ -172,11 +172,14 @@ export function buildShrimp(kind = 'guard') {
 // The portal gun, standing on its handle. About three times real size so it reads from the follow camera.
 export function buildGun() {
   const root = new THREE.Group();
+  // spin turns around the middle of the gun, so a tumbling gun never swings through the floor
+  const spin = new THREE.Group();
+  spin.position.y = 0.66;
+  root.add(spin);
   const g = new THREE.Group();
   g.rotation.set(0, 0.45, 0.3);
-  g.position.y = 0.6;
   g.scale.setScalar(1.45);
-  root.add(g);
+  spin.add(g);
   const METAL = 0x9aa0ac;
   box(0.6, 0.2, 0.2, METAL, { parent: g, line: 0.03 });
   cyl(0.07, 0.16, 0x59606e, { parent: g, x: 0.37, rz: Math.PI / 2, sides: 6, line: 0.03 });
@@ -185,7 +188,7 @@ export function buildGun() {
   cyl(0.1, 0.05, 0x59606e, { parent: g, x: 0.12, y: 0.12, sides: 6, line: 0.02 });
   const dome = ball(0.1, glow(0x6dff4a, 1.25), { parent: g, x: 0.12, y: 0.2, sy: 1.3, line: 0.02 });
   box(0.03, 0.02, 0.21, 0x15101c, { parent: g, x: 0.2, y: 0.02, rz: 0.6, line: 0 }); // the crack
-  return { root, parts: { root, dome }, height: 0.4 };
+  return { root, parts: { root, spin, dome }, height: 0.4 };
 }
 
 // Shrimp Rick's walking lab tank (original design): a glass fishbowl full of glowing water on four robot legs,
@@ -259,6 +262,7 @@ export class Model {
     this.squash = 1;   // below 1 = squashed flat, above 1 = stretched tall
     this.scale = 1;
     this.group = new THREE.Group();
+    this.group.userData.actor = true; // the dialogue camera sees through characters, not walls
     this.mesh = new THREE.Group();
     this.mesh.add(built.root);
     this.group.add(this.mesh);

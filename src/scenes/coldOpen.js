@@ -6,7 +6,7 @@ import audio from '../engine/audio.js';
 import { tween, wait, ease, clock, lerp } from '../engine/tween.js';
 import { say, closeDialogue } from '../ui/dialogue.js';
 import { ball, box, cyl, glow } from '../engine/toon.js';
-import { shotOn, slump } from './shots.js';
+import { shotOn, slump, SLUMP_Y } from './shots.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
@@ -42,15 +42,31 @@ export async function coldOpen(G) {
   rick.group.visible = true;
   const land = garage.spots.rick;
   rick.group.rotation.y = -1.05;
+  // Two backflips around the middle of his body (spinning around his feet swung his head through the floor),
+  // high enough that nothing touches the floor, then he drops onto his backside.
+  const MID = 1.0, FLIP_END = 0.78, LOW = MID + 0.3; // LOW: lowest the middle of his body gets while flipping
+  let sat = false;
   await tween(0.85, (t) => {
     rick.position.set(lerp(mouth.x, land.x, t), 0, lerp(mouth.z, land.z, t));
-    rick.mesh.position.y = lerp(mouth.y - 0.9, -0.56, t * t) + Math.sin(t * Math.PI) * 0.8;
-    rick.mesh.rotation.x = lerp(0, -Math.PI * 4, t); // two backflips, lands sitting
+    if (t < FLIP_END) {
+      const f = t / FLIP_END;
+      const a = lerp(0, -Math.PI * 4, f);
+      const mid = lerp(mouth.y, LOW, f) + Math.sin(f * Math.PI) * 0.8;
+      rick.mesh.rotation.set(a, 0, 0);
+      rick.mesh.position.set(0, mid - MID * Math.cos(a), -MID * Math.sin(a));
+    } else {
+      if (!sat) { slump(rick); sat = true; }
+      const f = (t - FLIP_END) / (1 - FLIP_END);
+      rick.mesh.position.y = lerp(LOW - MID, SLUMP_Y, f * f);
+    }
   }, ease.linear);
   slump(rick);
   rig.shake(0.9);
   audio.sfx('hit_enemy.mp3');
-  tween(0.35, (t) => { rick.squash = 1 - 0.3 * Math.sin(t * Math.PI); });
+  tween(0.35, (t) => {
+    rick.squash = 1 - 0.3 * Math.sin(t * Math.PI);
+    rick.mesh.position.y = SLUMP_Y + 0.5 * (1 - rick.squash); // squash toward his seat, not toward a point under the floor
+  });
 
   // 4. The gun follows, bounces, and cracks
   gun.group.visible = true;
@@ -58,7 +74,7 @@ export async function coldOpen(G) {
   await tween(0.9, (t) => {
     gun.position.set(lerp(mouth.x, spot.x, t), 0, lerp(mouth.z, spot.z, t));
     gun.mesh.position.y = (mouth.y - 0.3) * (1 - ease.outBounce(t));
-    gun.mesh.rotation.x = (1 - t) * 9;
+    gun.parts.spin.rotation.x = (1 - t) * 9; // tumbles around its middle, not its handle
   }, ease.linear);
   audio.sfx('hit_morty.mp3');
   hud.flash(0.5, 0.25);

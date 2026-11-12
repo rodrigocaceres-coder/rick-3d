@@ -24,6 +24,9 @@ const rig = {
   cut({ pos: p, look: l, fov: f = 35 }) {
     mode = 'shot'; shotId++;
     pos.copy(p); look.copy(l); fov = f;
+    // Apply it now, not next frame, so anything placed on screen this frame (the timing ring) uses the new shot
+    camera.position.copy(p); camera.lookAt(l);
+    camera.fov = f; camera.updateProjectionMatrix(); camera.updateMatrixWorld();
   },
 
   // Glide from the current view to a new one
