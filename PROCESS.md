@@ -88,3 +88,42 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Evidence files: process/screenshots/2026-11-12_s2_garage-shadows-fixed.jpg, _lab-room1-two-portals.jpg, _lab-portal-v1-side-on.jpg, _lab-room2-glass-guards.jpg, _shrimp-rick-v1-camera-behind-wall.jpg, _shrimp-rick-v3.jpg
 - Chat link: Claude Code session "Rick and Morty 3D RPG" (desktop app link claude://claude.ai/epitaxy/local_a29351ea-a4fc-46bb-bbdc-587e649e7de1)
 - Why:
+
+### Session 3, 2026-11-12
+- Goal: Build slice 3: the turn-based boss fight vs Shrimp Rick from STORY.md, staged with camera cuts and a timed Space press.
+- AI types and tools: code AI (Claude Code, Claude Fable 5.2) for design, code and testing. No new image or audio AI: portraits, music (boss_phase1, boss_phase2, ending) and sound effects are the Gemini and ElevenLabs outputs from the 2D game. The tank is a low-poly model built in code.
+- Key prompts (word for word):
+  - "Read CLAUDE.md and PROCESS.md, then build step 3: the turn-based boss fight vs Shrimp Rick from ~/rick-platformer/STORY.md, staged with camera cuts and a timed Space press. Log it as Session 3. you have plenty of creative freedom to make this great"
+- What was built:
+  - The fight happens in the Smith garage. The lab ending no longer shows a "to be continued" card: Morty tumbles home through the portal, Shrimp Rick walks out after him, a "FINAL BOSS: SHRIMP RICK" card slams in. Rick sleeps through the whole fight in the background.
+  - Rules from STORY.md in src/systems/battleRules.js (numbers only, no drawing): Morty 60 HP, Shrimp Rick 120 HP, Shoot 10 + 3 per gun part, Item, Talk, Defend, phase 2 at 60 HP, Portal Banish at 15 HP or less.
+  - Timed Space press: a green ring shrinks onto a white ring. On Shoot: PERFECT is 1.5x damage, NICE is normal, MISS is 0.6x. On his attacks: pressing as the hit lands blocks half of it.
+  - Phase 1 (on foot): Claw Snap (he runs at Morty), Shell Up (a shell bubble blocks the next shot), Sauce Spray (red splats on the camera lens, the next ring is faster and swims around).
+  - Phase 2: he whistles, a portal opens in the ceiling, his walking fishbowl tank drops out, he jumps in. Phase 2 music. Tidal Slam is announced a turn ahead ("He's winding up! DEFEND!"). Defending opens a portal shield that swallows the wave. Krill Swarm is 3 hits, each with its own block ring.
+  - Talk: mentioning Prawnsworth's rebels halves his damage for 2 turns (only if Morty helped Prawnsworth in the lab). In phase 2 Morty's honest plea makes him lose a turn. Otherwise a joke reply.
+  - Items: Mom's sandwich (+25 HP) and arcade soda (+15 HP, Morty moves again).
+  - Portal Banish finisher, the ending from STORY.md (Rick: "See, Morty? I handled it."), an end card, and a two-line post-credits gag.
+  - Camera: a different shot for the menu, aiming, each attack, every hit and every line of dialogue. HP bars with status tags, attack name banners, pop-up damage numbers.
+  - Losing shows a "TRY AGAIN" card and restarts the phase you lost in, with items back.
+  - All fight text is in src/data/dialogue/boss.json and src/data/items.json. Test links: ?boss (whole fight), ?boss=fight (skip the opening), ?boss=2 (tank phase), add &norebels to play without Prawnsworth's help.
+- Key decisions:
+  - Fight in the garage, not the lab: Portal Banish "sends him home", so he has to be away from home. It also reuses the best-looking set and the sleeping Rick joke.
+  - Sauce Spray changed from "50% chance to miss" (STORY.md) to a harder timing ring where a miss means the shot goes wide. Skill instead of a coin flip.
+  - A normal shot can never take him below 1 HP, so every win ends with the Portal Banish scene.
+  - The timing ring runs on the game clock, not a browser animation, so test scripts can step through it frame by frame.
+- What went wrong or looked weak, and the revision:
+  - Wide shot v1: the cardboard boxes along the front of the garage filled the bottom third of the picture. Camera raised from 1.9 to 3.4 so it looks over them.
+  - Tidal Slam camera v1 sat under the landing tank, so the tank filled the screen and Morty was not in the shot. v2 is a low shot from behind Morty. In v2 the shield portal was side-on, a thin sliver. v3 turns the portal toward the camera.
+  - Krill Swarm camera v1 was stuck behind the tank's claw. Moved behind Morty so the krill fly at the camera.
+  - Tank phase was too short: in the first full test run he entered the tank at 44 HP and one charged shot took him to 6. No Krill Swarm was ever seen. Now the tank water heals him back to 60 when he climbs in, and he always sends krill right after a slam.
+  - He used Shell Up 3 times in 5 turns, and Sauce Spray twice in a row. Now he never repeats either one two turns running.
+  - The menu remembered the last pick, so after Defend the cursor sat on Defend when Portal Banish came up. It now always starts on Shoot.
+  - My first test script stepped the game 60 frames in one go and nothing happened: cutscene code only continues between frames. Test scripts now step one frame at a time.
+- Rejected, and why:
+  - A separate boss arena: a new set would not be finished and tested by Nov 17.
+  - The 7 boss items from the 2D game: the 3D slice has no house or arcade to find them in. Kept the two items STORY.md names.
+  - Remembering the last menu pick (see above).
+- Result: Tested with a script that plays the game: lab room 3 through the whole fight to the ending and back to the garage, no console errors, production build passes. Loss and retry tested. 5000 simulated fights per play style: shooting only with no blocks and no items wins 36%, using the two items wins 100%, an average player (60% good timing, half the blocks) wins 96% in about 9 turns. Not confirmed on Rodrigo's machine: real-time feel of the timing ring, and the letterbox bars (the preview pane throttles animation). Not deployed yet.
+- Evidence files: process/screenshots/2026-11-12_s3_wide-v1-boxes-block-view.jpg, _slam-v1-camera-inside-tank.jpg, _slam-v2-shield-portal-side-on.jpg, _krill-v1-camera-behind-claw.jpg (the befores), _battle-menu-wide.jpg, _timing-ring-shoot.jpg, _tank-drops-from-ceiling-portal.jpg, _tank-phase-wide.jpg, _tidal-slam-v3-portal-shield.jpg, _portal-banish.jpg
+- Chat link: Claude Code session "Shrimp Rick boss fight" (desktop app link claude://claude.ai/epitaxy/local_1fb5a4e7-133c-4f2c-a970-8cca7451d740)
+- Why:

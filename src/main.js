@@ -13,6 +13,7 @@ import { Player } from './objects/player.js';
 import { Portal } from './objects/portal.js';
 import { coldOpen, afterColdOpen } from './scenes/coldOpen.js';
 import { createLab } from './scenes/labScene.js';
+import { createBoss } from './scenes/bossScene.js';
 import { shotOn } from './scenes/shots.js';
 import dialogue from './data/dialogue/garage.json';
 
@@ -49,15 +50,18 @@ const zzz = [0, 1, 2].map(() => {
 
 // G is the shared game state that cutscenes read and change
 const G = { scene: garage.group, garage, morty, rick, gun, portal, introPortal, gunLight, rickAsleep: false, rickAwake: false };
-let state = 'boot';     // boot, cutscene, play, dialogue
+let state = 'boot';     // boot, cutscene, play, dialogue, battle
 let area = 'garage';    // garage or lab
 let cooldown = 0;       // short pause after dialogue so the same key press does not start it again
 
 // ---- Shrimp Rick's lab ----
 const lab = createLab({
   scene, morty,
-  api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toGarage },
+  api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toBoss },
 });
+
+// ---- Boss fight vs Shrimp Rick, staged in the garage ----
+const boss = createBoss({ G, held: lab.held, api: { setState(s) { state = s; }, toGarage } });
 
 // ---- Things Morty can use in the garage ----
 const usable = [
@@ -88,7 +92,7 @@ const usable = [
 ];
 
 function garageGoal() {
-  if (flags.get('hasChip')) return 'All three parts. The boss fight comes next.';
+  if (flags.get('bossBeaten')) return 'Episode over. Nobody touch the gun.';
   return flags.get('portalOpen') ? 'Step into the portal.' : flags.get('rickExplained') ? 'Check the humming portal gun.' : 'Find out what broke. Talk to Rick.';
 }
 
@@ -140,7 +144,16 @@ async function toLab(room) {
   await lab.enter(room);
 }
 
-// Back from the lab (after Shrimp Rick shows up). The boss fight will start from here.
+// Out of the lab with all three parts: the boss fight starts in the garage
+function toBoss(opts) {
+  resetMortyPose();
+  area = 'garage';
+  garage.group.visible = true;
+  gun.group.visible = false; // Morty is holding it
+  return boss.start(opts);
+}
+
+// Back to walking around the garage (after the boss fight)
 async function toGarage() {
   resetMortyPose();
   area = 'garage';
@@ -233,6 +246,7 @@ function tick(dt) {
     portal.update(time);
     introPortal.update(time);
   }
+  boss.update(dt, time);
   morty.update();
   lab.update(dt, time);
   rig.update(dt, time);
@@ -242,15 +256,22 @@ function tick(dt) {
 requestAnimationFrame(frame);
 
 // Dev builds only: lets a test script run the game forward by hand, for example __game.step(120) = 2 seconds
-if (import.meta.env.DEV) window.__game = { G, flags, lab, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
+if (import.meta.env.DEV) window.__game = { G, flags, lab, boss, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
 
-// ---- Boot: start card, cold open, then play. ?skip jumps past the cold open, ?lab=1, 2 or 3 starts in that lab room. ----
+// ---- Boot: start card, cold open, then play. ?skip jumps past the cold open, ?lab=1, 2 or 3 starts in that lab room,
+// ?boss starts at the boss fight (?boss=2 at the tank phase, ?boss=fight skips the fight's opening scene). ----
 async function boot() {
   rig.cut({ pos: V(-7.2, 1.5, 5.6), look: V(1.5, 1.7, -3), fov: 38 });
   if (params.has('lab')) {
     afterColdOpen(G);
     gun.group.visible = false;
     return toLab(Math.max(0, Math.min(2, Number(params.get('lab') || 1) - 1)));
+  }
+  if (params.has('boss')) {
+    afterColdOpen(G);
+    flags.setMany({ hasCrystal: true, hasCanister: true, hasChip: true, helpedResistance: !params.has('norebels') });
+    const v = params.get('boss');
+    return toBoss({ phase: v === '2' ? 2 : 1, skipIntro: v === '2' || v === 'fight' });
   }
   if (params.has('skip')) {
     afterColdOpen(G);

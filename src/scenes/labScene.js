@@ -20,7 +20,7 @@ const FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
 const inRect = (x, z, r, pad = 0) => x > r.x0 - pad && x < r.x1 + pad && z > r.z0 - pad && z < r.z1 + pad;
 
 // Everything that happens in Shrimp Rick's lab: the portal gun, guards, gun parts, doors, and the ending.
-// api (from main.js): { setState(name), startPlay(), toGarage() }
+// api (from main.js): { setState(name), startPlay(), toBoss() }
 export function createLab({ scene, morty, api }) {
   const lab = buildLab();
   lab.group.visible = false;
@@ -232,11 +232,8 @@ export function createLab({ scene, morty, api }) {
     closeDialogue();
     await hud.fade(1, 0.6);
     alarmOn = false;
-    hud.card({ small: 'To be continued', big: 'NEXT:<br>THE BOSS FIGHT', hint: 'Press SPACE to go back to the garage', solid: true });
-    await input.nextPress('Space', 'Enter');
-    hud.hideCard();
     leave();
-    api.toGarage();
+    api.toBoss(); // Morty runs home through a portal and Shrimp Rick follows: the boss fight, in the garage
   }
 
   function leave() {
@@ -324,6 +321,7 @@ export function createLab({ scene, morty, api }) {
     },
 
     setCooldown(s) { cooldown = s; },
+    held, // the gun in Morty's hand, so the boss fight can show and aim it
     debug: { guards, portals },
   };
 

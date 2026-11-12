@@ -188,6 +188,58 @@ export function buildGun() {
   return { root, parts: { root, dome }, height: 0.4 };
 }
 
+// Shrimp Rick's walking lab tank (original design): a glass fishbowl full of glowing water on four robot legs,
+// with two big claws. Shrimp Rick rides in parts.seat. Faces +z, feet at y = 0, about 3.1 tall.
+export function buildTank() {
+  const root = new THREE.Group();
+  const body = new THREE.Group(); // everything above the legs: tips and bobs as one piece
+  root.add(body);
+  const METAL = 0x59606e, DARK = 0x3a3d48, SHELL = 0xff7a66, RED = 0xd9503f;
+  const parts = { root, body };
+
+  // Legs: a thigh reaching out and a shin reaching down, with a wide foot
+  parts.legs = [[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([sx, sz]) => {
+    const leg = limb(root, sx * 0.75, 1.2, sz * 0.55);
+    cyl(0.1, 0.95, METAL, { parent: leg, x: sx * 0.33, y: 0.12, z: sz * 0.14, rz: sx * -1.15, rx: sz * 0.3, sides: 6, line: 0.03 });
+    ball(0.15, DARK, { parent: leg, x: sx * 0.72, y: 0.3, z: sz * 0.28, detail: 0, line: 0.03 });
+    cyl(0.085, 1.3, METAL, { parent: leg, x: sx * 0.8, y: -0.4, z: sz * 0.3, rz: sx * -0.08, sides: 6, line: 0.03 });
+    box(0.42, 0.14, 0.5, DARK, { parent: leg, x: sx * 0.86, y: -1.12, z: sz * 0.32, line: 0.03 });
+    return leg;
+  });
+
+  // Base plate with two yellow lamps and a red propaganda stripe
+  cyl(1.12, 0.36, METAL, { parent: body, y: 1.25, sides: 10, radiusTop: 1.02 });
+  box(0.9, 0.16, 0.06, glow(0xff5a4a, 1.3), { parent: body, y: 1.25, z: 1.06, line: 0 });
+  for (const s of [-1, 1]) ball(0.11, glow(0xffd24a, 1.6), { parent: body, x: s * 0.72, y: 1.27, z: 0.8, line: 0.02, detail: 0 });
+
+  // Glass bowl (no outline: the outline shell would show through the glass as a black blob) and the water in it
+  const GLASS = new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.2, depthWrite: false, side: THREE.DoubleSide });
+  const WATER = new THREE.MeshBasicMaterial({ color: 0x2ad0ff, transparent: true, opacity: 0.42, depthWrite: false });
+  WATER.toneMapped = false;
+  parts.water = cyl(0.9, 0.75, WATER, { parent: body, y: 1.8, sides: 10, line: 0, cast: false, receive: false });
+  cyl(0.98, 1.55, GLASS, { parent: body, y: 2.2, sides: 10, radiusTop: 0.9, line: 0, cast: false, receive: false });
+  cyl(0.96, 0.1, DARK, { parent: body, y: 2.99, sides: 10, radiusTop: 0.93, line: 0.03 });
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2 + 0.3;
+    box(0.07, 1.55, 0.07, DARK, { parent: body, x: Math.sin(a) * 0.96, y: 2.2, z: Math.cos(a) * 0.96, line: 0.02 });
+  }
+  parts.seat = limb(body, 0, 1.38, 0);
+
+  // Claws on thick arms
+  parts.arms = [-1, 1].map((s) => {
+    const arm = limb(body, s * 1.08, 1.75, 0.2);
+    ball(0.2, DARK, { parent: arm, detail: 0, line: 0.03 });
+    cyl(0.1, 0.9, METAL, { parent: arm, x: s * 0.18, z: 0.4, rx: Math.PI / 2, rz: s * -0.4, sides: 6, line: 0.03 });
+    const claw = limb(arm, s * 0.36, 0, 0.85);
+    ball(0.24, SHELL, { parent: claw, sz: 1.3, line: 0.03 });
+    cone(0.17, 0.62, SHELL, { parent: claw, y: 0.14, z: 0.45, rx: 1.35, sides: 4, line: 0.03 });
+    cone(0.14, 0.5, RED, { parent: claw, y: -0.14, z: 0.4, rx: 1.8, sides: 4, line: 0.03 });
+    return arm;
+  });
+
+  return { root, parts, height: 3.1, blob: 1.5 };
+}
+
 // The three gun parts, as small glowing props
 export const PARTS = [
   { id: 'crystal', name: 'Focus Crystal', color: 0x4affe0, make: (o) => shape(new THREE.OctahedronGeometry(0.22), glow(0x4affe0, 1.5), { line: 0.03, sy: 1.5, ...o }) },

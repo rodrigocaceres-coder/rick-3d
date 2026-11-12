@@ -1,0 +1,100 @@
+{
+  "intro": {
+    "arrive": [
+      { "speaker": "Morty", "mood": "happy", "text": "Home. Home, home, home. Okay. Now close the portal. How do you close the por-" }
+    ],
+    "faceOff": [
+      { "speaker": "Shrimp Rick", "mood": "happy", "text": "Nice garage. Bit dry." },
+      { "speaker": "Shrimp Rick", "mood": "angry", "text": "You took my crystal, my chip and my fluid. So I'm taking your garage." },
+      { "speaker": "Morty", "mood": "neutral", "text": "Rick! Rick, wake up! There's a shrimp you in the garage!" },
+      { "speaker": "Rick", "mood": "neutral", "text": "Zzzz... tell him... we gave at the office... zzzz." },
+      { "speaker": "Morty", "mood": "angry", "text": "Okay. Okay. I can do this. I can probably do this." }
+    ]
+  },
+  "menu": {
+    "shoot": { "label": "Shoot", "desc": "{dmg} damage. Hit SPACE when the rings meet for a critical hit." },
+    "shootCharged": { "label": "Shoot  x2", "desc": "Charged: {dmg} damage. Hit SPACE when the rings meet for a critical hit." },
+    "banish": { "label": "PORTAL BANISH!", "desc": "Send him home. Do not miss the timing." },
+    "item": { "label": "Item", "desc": "{n} left in Morty's pockets." },
+    "itemEmpty": { "label": "Item", "desc": "Morty's pockets are empty." },
+    "talk": { "label": "Talk", "desc": "One thing Morty can say works in each phase." },
+    "defend": { "label": "Defend", "desc": "Half damage this turn. The next shot hits double." },
+    "back": { "label": "Back", "desc": "Back to actions." }
+  },
+  "hints": {
+    "shoot": "SPACE when the rings meet",
+    "block": "SPACE as it hits to block",
+    "banish": "SPACE. Don't miss."
+  },
+  "banners": {
+    "claw": "CLAW SNAP",
+    "shell": "SHELL UP",
+    "sauce": "SAUCE SPRAY",
+    "krill": "KRILL SWARM",
+    "slam": "TIDAL SLAM",
+    "banish": "PORTAL BANISH"
+  },
+  "captions": {
+    "shell": "His shell will block the next shot.",
+    "shellBlocked": "The shot bounces off his shell.",
+    "sauce": "Cocktail sauce in Morty's eyes. The next shot is hard to aim.",
+    "sauceMiss": "Morty can't see a thing. The shot goes wide.",
+    "defend": "Morty braces. His next shot will hit double.",
+    "windup": "He's winding up! DEFEND!",
+    "soaked": "The portal gun soaks up the whole slam.",
+    "skip": "Shrimp Rick just stares at the floor.",
+    "rebels": "Shrimp Rick is rattled. His attacks are weaker for 2 turns.",
+    "plea": "Shrimp Rick loses his turn.",
+    "extraTurn": "Sugar rush! Morty moves again.",
+    "banishReady": "He's barely standing. The gun glows: PORTAL BANISH is ready!",
+    "banishMiss": "The portal fizzles out. So close.",
+    "whistle": "He whistles. Something very heavy answers."
+  },
+  "talk": {
+    "rebels": [
+      { "speaker": "Morty", "mood": "neutral", "text": "Prawnsworth says hi. Not all of them like the parades." },
+      { "speaker": "Shrimp Rick", "mood": "angry", "text": "They LOVE the parades! Attendance is mandatory!" }
+    ],
+    "noRebels": [
+      { "speaker": "Morty", "mood": "neutral", "text": "Your own shrimp don't even like you!" },
+      { "speaker": "Shrimp Rick", "mood": "happy", "text": "Name one." },
+      { "speaker": "Morty", "mood": "neutral", "text": "...I didn't get his name." }
+    ],
+    "plea": [
+      { "speaker": "Morty", "mood": "neutral", "text": "I don't even want to fight. I want to fix the gun and eat dinner with my family." },
+      { "speaker": "Shrimp Rick", "mood": "neutral", "text": "...Dinner. Mom used to make plankton on Sundays." }
+    ],
+    "joke": [
+      { "speaker": "Morty", "mood": "neutral", "text": "Can we talk about this?" },
+      { "speaker": "Shrimp Rick", "mood": "happy", "text": "We are talking. With claws." }
+    ]
+  },
+  "phase2": {
+    "before": [
+      { "speaker": "Shrimp Rick", "mood": "angry", "text": "Enough! I didn't want to do this in front of the lawn tools." }
+    ],
+    "after": [
+      { "speaker": "Shrimp Rick", "mood": "happy", "text": "Now we fight in my element. It's water. The element is water." },
+      { "speaker": "Morty", "mood": "angry", "text": "Why is it always shrimp? Why is it never something normal?" }
+    ]
+  },
+  "banish": [
+    { "speaker": "Shrimp Rick", "mood": "angry", "text": "This isn't over! I'm telling my mom!" }
+  ],
+  "ending": [
+    { "speaker": "Morty", "mood": "happy", "text": "I did it. Rick! I actually did it!" },
+    { "speaker": "Rick", "mood": "happy", "text": "See, Morty? I handled it. Zzzz." },
+    { "speaker": "Morty", "mood": "neutral", "text": "...The gun's humming again." },
+    { "speaker": "Morty", "mood": "angry", "text": "Nobody touch it." }
+  ],
+  "lose": [
+    { "speaker": "Shrimp Rick", "mood": "happy", "text": "Glory to the tank. And to me. Mostly me." }
+  ],
+  "postCredits": {
+    "caption": "MEANWHILE. DIMENSION SHRIMP.",
+    "lines": [
+      { "speaker": "Shrimp Rick", "mood": "neutral", "text": "Mom? ...Yes, I lost. ...To a boy. In a garage." },
+      { "speaker": "Shrimp Rick", "mood": "angry", "text": "No, I do NOT want cocktail sauce." }
+    ]
+  }
+}

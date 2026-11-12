@@ -126,3 +126,107 @@ body.play #hint.on { opacity: 1; }
 @keyframes slam { from { transform: rotate(-3deg) scale(2.2); opacity: 0; } to { transform: rotate(-3deg) scale(1); opacity: 1; } }
 #card-hint { margin-top: 4vh; font-size: 2.4vh; color: #d9d4c5; animation: blink 1s steps(2) infinite; }
 @keyframes blink { 50% { opacity: 0.25; } }
+
+/* ---- Boss fight ---- */
+#battle { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+#battle.on { opacity: 1; }
+
+/* HP bars sit on the top movie bar */
+.hp { position: absolute; top: 1.6vh; left: 3vw; width: 34vw; }
+.hp.right { left: auto; right: 3vw; text-align: right; }
+.hp-name { font-size: 2.3vh; font-weight: 900; letter-spacing: 0.25vh; color: var(--paper); display: inline-block; }
+.hp-num { display: inline-block; margin: 0 1vw; font-family: 'Courier New', monospace; font-size: 2.1vh; color: #cfe; }
+.hp-track {
+  position: relative; height: 2.6vh; margin-top: 0.4vh; background: #2b2536; border: 0.45vh solid var(--ink);
+  border-radius: 1vh 1.4vh 1vh 1.3vh; overflow: hidden; box-shadow: 0 0 0 0.25vh #f4efe2;
+}
+.hp-fill, .hp-ghost { position: absolute; top: 0; bottom: 0; left: 0; width: 100%; }
+.hp.right .hp-fill, .hp.right .hp-ghost { left: auto; right: 0; }
+.hp-fill { background: var(--green); transition: width 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s; }
+.hp-fill.mid { background: #ffd24a; }
+.hp-fill.low { background: #ff5a4a; }
+.hp-ghost { background: #fff; transition: width 0.7s 0.35s ease-in; }
+.hp.hit { animation: hpshake 0.3s; }
+@keyframes hpshake { 25% { transform: translate(-0.6vh, 0.3vh); } 50% { transform: translate(0.5vh, -0.3vh); } 75% { transform: translate(-0.3vh, 0.2vh); } }
+.hp-tags { margin-top: 1.9vh; display: flex; gap: 0.8vh; flex-wrap: wrap; }
+.hp.right .hp-tags { justify-content: flex-end; }
+.tag {
+  padding: 0.3vh 1vh; font-size: 1.8vh; font-weight: bold; border: 0.35vh solid var(--ink); border-radius: 0.8vh;
+  background: var(--paper); color: var(--ink); transform: rotate(-2deg); animation: tagin 0.25s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+.tag.good { background: var(--green); }
+.tag.bad { background: #ff8a6a; }
+.tag.warn { background: #ffd24a; animation: tagin 0.25s cubic-bezier(0.2, 1.6, 0.4, 1), blink 0.5s steps(2) infinite; }
+@keyframes tagin { from { transform: scale(0.3) rotate(-12deg); } }
+
+/* Action menu, bottom left above the movie bar */
+#bmenu {
+  position: absolute; left: 50%; bottom: 13.5vh; display: flex; flex-direction: column; align-items: center; gap: 1vh;
+  opacity: 0; transform: translate(-50%, 3vh); transition: opacity 0.18s, transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+#bmenu.on { opacity: 1; transform: translate(-50%, 0); }
+#bmenu-list {
+  padding: 1.2vh; min-width: 30vh; background: var(--paper); color: var(--ink); border: 0.6vh solid var(--ink);
+  border-radius: 2vh 2.4vh 1.8vh 2.6vh; box-shadow: 0.9vh 0.9vh 0 rgba(0, 0, 0, 0.5);
+}
+.bopt { padding: 0.8vh 1.6vh; font-size: 3vh; font-weight: bold; border: 0.4vh solid transparent; border-radius: 1.2vh; white-space: nowrap; }
+.bopt.sel { background: var(--green); border-color: var(--ink); }
+.bopt.sel::before { content: '▶ '; }
+.bopt.hot { color: #0a3b05; }
+.bopt.hot.sel { background: #b8ff4a; animation: blink 0.4s steps(2) infinite; }
+.bopt.off { opacity: 0.4; }
+#bmenu-desc {
+  max-width: 46vw; text-align: center; padding: 1vh 1.6vh; font-size: 2.3vh; line-height: 1.3;
+  background: rgba(21, 16, 28, 0.85); border: 0.4vh solid var(--ink); border-left: 0.9vh solid var(--green); border-radius: 1vh;
+}
+
+/* Attack name slams in under the top bar */
+#bbanner {
+  position: absolute; top: 15vh; left: 50%; font-size: 9vh; font-weight: 900; white-space: nowrap; letter-spacing: -0.1vh;
+  color: #ffd24a; -webkit-text-stroke: 0.5vh var(--ink); paint-order: stroke fill; text-shadow: 0.6vh 0.6vh 0 #7a2a12;
+  transform: translateX(-50%) rotate(-3deg) scale(2); opacity: 0; transition: opacity 0.12s, transform 0.22s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+#bbanner.on { opacity: 1; transform: translateX(-50%) rotate(-3deg) scale(1); }
+#bbanner.green { color: var(--green); text-shadow: 0 0 4vh rgba(125, 255, 74, 0.75), 0.6vh 0.6vh 0 #0a3b05; }
+
+/* The timing ring. The game sets --s (size of the moving ring) every frame. */
+#ring { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; --s: 3; }
+#ring.on { opacity: 1; }
+#ring-target, #ring-moving { position: absolute; left: 0; top: 0; width: 15vh; height: 15vh; margin: -7.5vh 0 0 -7.5vh; border-radius: 50%; }
+#ring-target { border: 0.7vh solid var(--paper); box-shadow: 0 0 0 0.4vh var(--ink), inset 0 0 0 0.4vh var(--ink); }
+#ring-moving { border: 1vh solid var(--green); box-shadow: 0 0 2.5vh var(--green); transform: scale(var(--s)); }
+#ring.close #ring-target { border-color: var(--green); background: rgba(125, 255, 74, 0.2); }
+#ring.perfect #ring-target, #ring.good #ring-target { background: rgba(125, 255, 74, 0.55); transform: scale(1.25); transition: transform 0.12s; }
+#ring.miss #ring-target { border-color: #ff5a4a; background: rgba(255, 90, 74, 0.3); }
+#ring.done #ring-moving { opacity: 0; }
+#ring-label {
+  position: absolute; left: 0; top: 9.5vh; transform: translateX(-50%); padding: 0.5vh 1.4vh; font-size: 2.6vh; font-weight: bold;
+  white-space: nowrap; background: var(--paper); color: var(--ink); border: 0.45vh solid var(--ink); border-radius: 1vh;
+}
+#ring.perfect #ring-label, #ring.good #ring-label { background: var(--green); font-size: 3.6vh; }
+#ring.miss #ring-label { background: #ff8a6a; font-size: 3.2vh; }
+
+/* Damage numbers */
+.pop {
+  position: absolute; transform: translate(-50%, -50%); font-size: 7vh; font-weight: 900; white-space: nowrap;
+  color: var(--paper); -webkit-text-stroke: 0.45vh var(--ink); paint-order: stroke fill; animation: popup 1s ease-out forwards;
+}
+.pop.crit { font-size: 10vh; color: #ffd24a; }
+.pop.hurt { color: #ff6a55; }
+.pop.heal { color: var(--green); }
+.pop.small { font-size: 4.6vh; }
+@keyframes popup {
+  0% { transform: translate(-50%, -50%) scale(0.3) rotate(-10deg); opacity: 0; }
+  18% { transform: translate(-50%, -90%) scale(1.25) rotate(4deg); opacity: 1; }
+  35% { transform: translate(-50%, -100%) scale(1) rotate(-2deg); }
+  80% { opacity: 1; }
+  100% { transform: translate(-50%, -190%) scale(1); opacity: 0; }
+}
+
+/* Cocktail sauce on the camera lens */
+#sauce { position: absolute; inset: 0; opacity: 0; transition: opacity 0.5s; }
+#sauce.on { opacity: 1; transition: opacity 0.1s; }
+#sauce i {
+  position: absolute; border-radius: 47% 53% 60% 40% / 55% 45% 58% 42%; background: #d8342a;
+  box-shadow: inset -1.2vh -1.6vh 0 rgba(90, 10, 10, 0.35), inset 1vh 1vh 0 rgba(255, 150, 120, 0.35); border: 0.5vh solid var(--ink);
+}
