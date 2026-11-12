@@ -10,9 +10,9 @@ export function shotOn(speaker, listener, lookY = 0.95) {
   if (side.z < 0) side.negate();
   side.z = Math.max(side.z, 0.45); // always lean toward the front, where there is no wall
   side.normalize();
-  const pos = speaker.clone().lerp(listener, 0.35).addScaledVector(side, 6.8).addScaledVector(d, 1.5);
-  pos.y = 1.9;
-  pos.x = THREE.MathUtils.clamp(pos.x, -8.2, 8.2);
+  // In front of the speaker's face: out toward the listener, then off to the open side
+  const pos = speaker.clone().addScaledVector(d, 4.2).addScaledVector(side, 4.8);
+  pos.y = 1.75;
   return { pos, look: speaker.clone().setY(lookY), fov: 30 };
 }
 

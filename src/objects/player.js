@@ -30,7 +30,7 @@ export class Player extends Character {
   }
 }
 
-function blocked(x, z, { bounds, colliders }) {
+export function blocked(x, z, { bounds, colliders }) {
   if (x < bounds.x0 || x > bounds.x1 || z < bounds.z0 || z > bounds.z1) return true;
   for (const c of colliders) {
     const cx = Math.max(c.x0, Math.min(x, c.x1));

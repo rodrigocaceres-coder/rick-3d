@@ -38,6 +38,13 @@ const hud = {
     toastTimer = setTimeout(() => $('toast').classList.remove('on'), 1400);
   },
 
+  // Which of the 3 gun parts Morty has: hud.parts([true, false, false]). Pass null to hide the tray.
+  parts(list) {
+    $('parts').classList.toggle('on', Boolean(list));
+    if (list) [...$('parts').children].forEach((el, i) => el.classList.toggle('got', Boolean(list[i])));
+  },
+  hint(text) { $('hint').textContent = text || ''; $('hint').classList.toggle('on', Boolean(text)); },
+
   card({ small = '', big = '', hint = '', solid = false }) {
     $('card-small').textContent = small;
     $('card-big').innerHTML = big;

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { box, cyl, decal, toon, glow, INK } from '../engine/toon.js';
+import { box, cyl, decal, toon, soft, glow, INK } from '../engine/toon.js';
 
 // The Smith garage at night, built from boxes and cylinders to match the painted 2D background:
 // shelf and red tool cabinet on the left of the back wall, pegboard, garage door, jar shelves,
@@ -30,17 +30,16 @@ export function buildGarage() {
   const add = (o) => ({ parent: g, ...o });
 
   // Floor and walls
-  const floorMat = toon(0xffffff).clone();
-  floorMat.map = tileTexture();
+  const floorMat = new THREE.MeshLambertMaterial({ map: tileTexture() });
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   g.add(floor);
   box(W + 0.6, 0.5, 0.5, 0x2a2633, add({ y: -0.25, z: D / 2 + 0.25, cast: false })); // front lip of the floor slab
-  const WALL = 0xcbbfa8;
-  box(W + 0.6, H, 0.3, WALL, add({ y: H / 2, z: -D / 2 - 0.15, line: 0 }));
-  box(0.3, H, D, WALL, add({ x: -W / 2 - 0.15, y: H / 2, line: 0 }));
-  box(0.3, H, D, WALL, add({ x: W / 2 + 0.15, y: H / 2, line: 0 }));
+  const WALL = soft(0xcbbfa8); // walls take smooth light and cast no shadow, so no giant dark wedge on the floor
+  box(W + 0.6, H, 0.3, WALL, add({ y: H / 2, z: -D / 2 - 0.15, line: 0, cast: false }));
+  box(0.3, H, D, WALL, add({ x: -W / 2 - 0.15, y: H / 2, line: 0, cast: false }));
+  box(0.3, H, D, WALL, add({ x: W / 2 + 0.15, y: H / 2, line: 0, cast: false }));
   box(W, 0.22, 0.08, 0x6d6456, add({ y: 0.11, z: -5.96, line: 0.02 })); // baseboard
 
   // Left of back wall: metal shelf with cardboard boxes
@@ -96,7 +95,7 @@ export function buildGarage() {
   for (const x of [-4.6, 5.4]) {
     box(3, 0.16, 0.4, 0x8a8f9c, add({ x, y: 4.62, z: -5.7 }));
     box(2.8, 0.08, 0.3, glow(0xfff4d6, 1.5), add({ x, y: 4.5, z: -5.7, line: 0 }));
-    const l = new THREE.PointLight(0xffe9bf, 5, 11, 1.5);
+    const l = new THREE.PointLight(0xffe9bf, 3, 11, 1.5);
     l.position.set(x, 4.1, -4.6);
     g.add(l);
   }
@@ -122,7 +121,7 @@ export function buildGarage() {
   box(0.55, 0.5, 0.6, 0x59606e, add({ x: bx + 0.25, y: 1.62, z: bz - 2.0 }));
   box(0.5, 0.12, 0.7, 0x3f7a55, add({ x: bx - 0.25, y: 1.43, z: bz - 0.2, ry: 0.2 }));
   box(0.45, 0.3, 0.6, 0xb9a36a, add({ x: bx + 0.2, y: 1.52, z: bz + 1.75, ry: -0.15 }));
-  const purple = new THREE.PointLight(0xb060ff, 6, 9, 1.5);
+  const purple = new THREE.PointLight(0xb060ff, 4, 8, 1.5);
   purple.position.set(bx - 0.6, 2.4, bz - 0.4);
   g.add(purple);
 
@@ -142,9 +141,9 @@ export function buildGarage() {
   decal(0.5, 0x1c4a12, 0.55, add({ x: 4.4, z: -3.1, sx: 1.5, sz: 0.5 }));
 
   // Lighting: dim blue night fill, one warm key light that casts the shadows
-  g.add(new THREE.HemisphereLight(0x7f8cff, 0x2e2440, 0.85));
-  const key = new THREE.DirectionalLight(0xffe6c8, 1.0);
-  key.position.set(-5, 11, 7);
+  g.add(new THREE.HemisphereLight(0x9aa4ff, 0x40344f, 1.5));
+  const key = new THREE.DirectionalLight(0xffe6c8, 1.3);
+  key.position.set(-2.5, 14, 4.5); // nearly overhead: short, tidy shadows
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
   Object.assign(key.shadow.camera, { left: -13, right: 13, top: 12, bottom: -12, near: 1, far: 40 });
@@ -158,18 +157,18 @@ export function buildGarage() {
       { x0: -8.3, x1: -3.1, z0: -6, z1: -4.75 },   // shelf and tool cabinet
       { x0: 7.2, x1: 9, z0: -1.8, z1: 3.0 },       // workbench
       { x0: -3.5, x1: 5.15, z0: 4.75, z1: 6 },     // boxes and paint cans
-      { x0: 5.75, x1: 7.2, z0: 0.7, z1: 1.75 },      // Rick, passed out
+      { x0: 5.7, x1: 7.2, z0: 2.3, z1: 3.5 },      // Rick, passed out
       { x0: 4.25, x1: 4.55, z0: -3.2, z1: -3.0 },   // the gun
     ],
     spots: {
       door: new THREE.Vector3(-8.1, 0, 0),
-      rick: new THREE.Vector3(6.55, 0, 1.0),
+      rick: new THREE.Vector3(6.5, 0, 2.7),
       gun: new THREE.Vector3(4.4, 0, -3.1),
     },
     update(time) {
       jars.forEach((j, i) => j.scale.setScalar(1 + 0.03 * Math.sin(time * 5 + i * 2)));
       tubes.forEach((t, i) => { t.scale.x = t.scale.z = 1 + 0.06 * Math.sin(time * 7 + i * 1.7); });
-      purple.intensity = 6 + Math.sin(time * 7) * 1;
+      purple.intensity = 4 + Math.sin(time * 7) * 0.7;
     },
   };
 }

@@ -1,0 +1,69 @@
+{
+  "intro": [
+    { "speaker": "Morty", "mood": "neutral", "text": "It smells like a seafood buffet. And a police state." },
+    { "speaker": "Morty", "mood": "angry", "text": "Okay. The gun still sputters. Point, shoot, walk through. I can probably do this." }
+  ],
+  "pickups": {
+    "crystal": [
+      { "speaker": "Morty", "mood": "happy", "text": "The Focus Crystal! The beam feels... pointier. It reaches farther now. And I think it goes through glass." }
+    ],
+    "canister": [
+      { "speaker": "Morty", "mood": "happy", "text": "Shrimp Rick's Fluid Canister. Full charge. This thing could hit the far wall now." },
+      { "speaker": "Morty", "mood": "neutral", "text": "It's humming. Mom said not to touch anything that hums. Sorry, Mom." }
+    ],
+    "chip": [
+      { "speaker": "Morty", "mood": "happy", "text": "The Coordinate Chip. That's all three! Okay. Home. Home, home, home." }
+    ]
+  },
+  "caught": [
+    { "speaker": "Officer Krillson", "mood": "angry", "text": "HALT. Your shell is not regulation." },
+    { "speaker": "Officer Krillson", "mood": "angry", "text": "Back to the start, citizen. Glory to the tank." },
+    { "speaker": "Officer Krillson", "mood": "neutral", "text": "I saw nothing. Wait. No. I saw everything. HALT." }
+  ],
+  "shotGuard": [
+    { "speaker": "Officer Krillson", "mood": "angry", "text": "You PORTALED an officer? That is so many forms. HALT." }
+  ],
+  "shrimpRick": [
+    { "speaker": "Shrimp Rick", "mood": "angry", "text": "You walked into my dimension and took my fluid. In this economy?" },
+    { "speaker": "Morty", "mood": "neutral", "text": "It's Rick's! He dropped it! ...Technically." },
+    { "speaker": "Shrimp Rick", "mood": "happy", "text": "I am the smartest shrimp in any ocean, Morty." },
+    { "speaker": "Morty", "mood": "angry", "text": "Why is it always shrimp? Why is it never something normal?" },
+    { "speaker": "Shrimp Rick", "mood": "angry", "text": "Fine. You want a fight? I'll bring the sauce." }
+  ],
+  "prawnsworth": {
+    "entry": [
+      { "if": "metPrawnsworth", "goto": "again" },
+      { "goto": "intro" }
+    ],
+    "nodes": {
+      "intro": {
+        "set": { "metPrawnsworth": true },
+        "lines": [
+          { "speaker": "Prawnsworth", "mood": "neutral", "text": "Psst. Not all of us like the parades." },
+          { "speaker": "Morty", "mood": "neutral", "text": "Uh. Hi. I'm just here for some gun parts." },
+          { "speaker": "Prawnsworth", "mood": "neutral", "text": "The canister is behind the glass. Officer Krillson walks the square all day." },
+          { "speaker": "Prawnsworth", "mood": "happy", "text": "Your beam goes through glass now. Fire when his back is turned. Never shoot the guard. He takes it personally." }
+        ],
+        "choices": [
+          { "text": "I'll hurt Shrimp Rick's feelings for you.", "set": { "helpedResistance": true }, "goto": "help" },
+          { "text": "I don't do politics.", "goto": "nope" }
+        ]
+      },
+      "help": {
+        "lines": [
+          { "speaker": "Prawnsworth", "mood": "happy", "text": "Take the canister. Hurt his feelings. Please." }
+        ]
+      },
+      "nope": {
+        "lines": [
+          { "speaker": "Prawnsworth", "mood": "angry", "text": "Nobody does. That's how we got parades." }
+        ]
+      },
+      "again": {
+        "lines": [
+          { "speaker": "Prawnsworth", "mood": "neutral", "text": "Glory to the tank. That was sarcasm. Go." }
+        ]
+      }
+    }
+  }
+}

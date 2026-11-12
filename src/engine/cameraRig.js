@@ -14,9 +14,11 @@ let shotId = 0;
 
 const FOLLOW = { offset: new THREE.Vector3(0, 10, 12), lookUp: 0.9, fov: 35, snap: 3.2 };
 const tmp = new THREE.Vector3();
+let limits = { x0: -3.2, x1: 3.2, z0: -3, z1: 2.5 }; // how far the follow camera may slide in this area
 
 const rig = {
   follow(obj) { target = obj; mode = 'follow'; shotId++; },
+  setLimits(l) { limits = l; },
 
   // Jump straight to a shot, like a cut in a TV show
   cut({ pos: p, look: l, fov: f = 35 }) {
@@ -48,8 +50,8 @@ const rig = {
       const k = 1 - Math.exp(-dt * FOLLOW.snap);
       // Clamp so the camera never drifts far outside the room
       tmp.copy(target.position);
-      tmp.x = THREE.MathUtils.clamp(tmp.x, -3.2, 3.2);
-      tmp.z = THREE.MathUtils.clamp(tmp.z, -3, 2.5);
+      tmp.x = THREE.MathUtils.clamp(tmp.x, limits.x0, limits.x1);
+      tmp.z = THREE.MathUtils.clamp(tmp.z, limits.z0, limits.z1);
       pos.lerp(tmp.clone().add(FOLLOW.offset), k);
       tmp.y += FOLLOW.lookUp;
       look.lerp(tmp, k);

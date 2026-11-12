@@ -56,6 +56,24 @@ body.play #goal.on { opacity: 1; }
 }
 #toast.on { opacity: 1; }
 
+/* Gun parts tray (top right) and the control hint (bottom) */
+#parts {
+  position: fixed; top: 18px; right: 22px; display: flex; gap: 8px; padding: 8px 10px; opacity: 0; transition: opacity 0.4s;
+  background: rgba(21, 16, 28, 0.78); border: 3px solid var(--ink); border-radius: 8px;
+}
+body.play #parts.on { opacity: 1; }
+#parts span { width: 26px; height: 26px; border-radius: 6px; border: 3px dashed #6b6478; transition: all 0.3s; }
+#parts span.got { border-style: solid; border-color: var(--ink); transform: rotate(8deg) scale(1.1); }
+#parts span.got:nth-child(1) { background: #4affe0; box-shadow: 0 0 12px #4affe0; }
+#parts span.got:nth-child(2) { background: #c45aff; box-shadow: 0 0 12px #c45aff; }
+#parts span.got:nth-child(3) { background: #ffb03a; box-shadow: 0 0 12px #ffb03a; }
+#hint {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 7px 14px; font-size: 15px; white-space: nowrap;
+  background: rgba(21, 16, 28, 0.78); border: 3px solid var(--ink); border-radius: 8px; opacity: 0; transition: opacity 0.4s;
+}
+body.play #hint.on { opacity: 1; }
+#toast { top: 64px; }
+
 /* Dialogue: big portrait like a TV close-up, speech box next to it */
 #dialogue {
   position: fixed; left: 50%; bottom: 13.5vh; width: min(980px, 92vw); transform: translate(-50%, 30px);

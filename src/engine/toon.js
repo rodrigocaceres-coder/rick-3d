@@ -10,15 +10,19 @@ const gradientMap = new THREE.DataTexture(steps, steps.length, 1, THREE.RedForma
 gradientMap.minFilter = gradientMap.magFilter = THREE.NearestFilter;
 gradientMap.needsUpdate = true;
 
-// Characters get a lighter shadow tone and a little light of their own, so faces read in a dark room
-const brightSteps = new Uint8Array([150, 150, 255, 255]);
-const brightMap = new THREE.DataTexture(brightSteps, brightSteps.length, 1, THREE.RedFormat);
-brightMap.minFilter = brightMap.magFilter = THREE.NearestFilter;
-brightMap.needsUpdate = true;
+// Characters use smooth shading on flat faces (each face a slightly different tone) plus a little light
+// of their own, so faces stay readable in a dark room and never break into hard dark patches.
 const skinCache = new Map();
 export function charMat(color) {
-  if (!skinCache.has(color)) skinCache.set(color, new THREE.MeshToonMaterial({ color, gradientMap: brightMap, emissive: color, emissiveIntensity: 0.07 }));
+  if (!skinCache.has(color)) skinCache.set(color, new THREE.MeshLambertMaterial({ color, emissive: color, emissiveIntensity: 0.28 }));
   return skinCache.get(color);
+}
+
+// Floors and walls: smooth light, no hard-edged pools
+const softCache = new Map();
+export function soft(color) {
+  if (!softCache.has(color)) softCache.set(color, new THREE.MeshLambertMaterial({ color }));
+  return softCache.get(color);
 }
 
 const toonCache = new Map();
