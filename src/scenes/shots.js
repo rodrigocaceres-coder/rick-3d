@@ -10,15 +10,19 @@ export function shotOn(speaker, listener, lookY = 0.95) {
   if (side.z < 0) side.negate();
   side.z = Math.max(side.z, 0.45); // always lean toward the front, where there is no wall
   side.normalize();
-  const pos = speaker.clone().lerp(listener, 0.35).addScaledVector(side, 9).addScaledVector(d, 1.6);
-  pos.y = 2.1;
+  const pos = speaker.clone().lerp(listener, 0.35).addScaledVector(side, 6.8).addScaledVector(d, 1.5);
+  pos.y = 1.9;
   pos.x = THREE.MathUtils.clamp(pos.x, -8.2, 8.2);
   return { pos, look: speaker.clone().setY(lookY), fov: 30 };
 }
 
-// Put a cutout flat on its side (Rick, passed out)
-export function layDown(cut) {
-  cut.mesh.rotation.z = -Math.PI / 2;
-  cut.mesh.position.set(-cut.height / 2, cut.width / 2, 0);
-  cut.lying = true;
+// Slump a character on the floor, sitting with legs out and head down (Rick, passed out against the workbench)
+export function slump(model) {
+  model.group.rotation.y = -1.05;            // back to the workbench, turned a little toward the camera
+  model.mesh.rotation.set(-0.2, 0, 0.08);    // leaning back
+  model.mesh.position.set(0, -0.56, 0);      // hips on the floor
+  const { legs, arms, head } = model.parts;
+  legs[0].rotation.set(-1.45, 0, -0.18); legs[1].rotation.set(-1.4, 0, 0.22);
+  arms[0].rotation.set(-0.25, 0, -0.5); arms[1].rotation.set(-0.15, 0, 0.6);
+  head.rotation.set(0.5, 0, 0.18);
 }

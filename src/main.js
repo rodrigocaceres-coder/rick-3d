@@ -8,7 +8,7 @@ import hud from './ui/hud.js';
 import { converse } from './ui/dialogue.js';
 import flags from './systems/flags.js';
 import { buildGarage } from './areas/garage.js';
-import { Cutout } from './objects/cutout.js';
+import { Model, Character, buildRick, buildGun } from './objects/models.js';
 import { Player } from './objects/player.js';
 import { Portal } from './objects/portal.js';
 import { coldOpen, afterColdOpen } from './scenes/coldOpen.js';
@@ -23,15 +23,15 @@ const garage = buildGarage();
 scene.add(garage.group);
 
 const morty = new Player();
-const rick = new Cutout('sprites/rick.png', 1.95);
-const gun = new Cutout('sprites/item_gun.png', 0.6, { tint: 0xffffff });
+const rick = new Character(buildRick());
+const gun = new Model(buildGun());
 const portal = new Portal();                       // the one Morty opens and walks into
 const introPortal = new Portal({ y: 3.0 });        // the one Rick falls out of, high in the air
 portal.position.set(0.9, 0, -4.4);
 const gunLight = new THREE.PointLight(0x5dff2e, 0, 6, 1.5);
-gunLight.position.set(garage.spots.gun.x, 0.8, garage.spots.gun.z + 0.3);
+gunLight.position.set(garage.spots.gun.x, 1.7, garage.spots.gun.z + 0.6);
 scene.add(morty.group, rick.group, gun.group, portal.group, introPortal.group, gunLight);
-const cutouts = [morty, rick, gun];
+const models = [morty, rick, gun];
 
 // Floating Z's over sleeping Rick
 const zzz = [0, 1, 2].map(() => {
@@ -46,7 +46,7 @@ const zzz = [0, 1, 2].map(() => {
 });
 
 // G is the shared game state that cutscenes read and change
-const G = { scene, garage, morty, rick, gun, portal, introPortal, gunLight, rickAsleep: false };
+const G = { scene, garage, morty, rick, gun, portal, introPortal, gunLight, rickAsleep: false, rickAwake: false };
 let state = 'boot';   // boot, cutscene, play, dialogue
 let cooldown = 0;     // short pause after dialogue so the same key press does not start it again
 
@@ -58,10 +58,12 @@ const usable = [
       const rickPos = garage.spots.rick;
       await converse(dialogue.rick, {
         onLine(line) {
-          rig.cut(line.speaker === 'Rick' ? shotOn(rickPos, morty.position, 0.5) : shotOn(morty.position, rickPos));
+          G.rickAwake = line.speaker === 'Rick'; // he lifts his head only for his own lines
+          rig.cut(G.rickAwake ? shotOn(rickPos, morty.position, 0.8) : shotOn(morty.position, rickPos));
           rig.pushIn(0.1, 7);
         },
       });
+      G.rickAwake = false;
       setGoal();
     },
   },
@@ -86,8 +88,8 @@ function setGoal() {
 async function firePortal() {
   const spot = garage.spots.gun;
   rig.cut({ pos: V(spot.x + 3.2, 0.7, spot.z + 3.4), look: V(2.2, 1.3, -4), fov: 36 });
-  await tween(0.7, (t) => { gun.mesh.rotation.z = Math.sin(t * 60) * 0.25 * t; gunLight.intensity = 3 + t * 9; }, ease.in);
-  gun.mesh.rotation.z = 0;
+  await tween(0.7, (t) => { gun.mesh.rotation.y = Math.sin(t * 60) * 0.4 * t; gunLight.intensity = 3 + t * 9; }, ease.in);
+  gun.mesh.rotation.y = 0;
   hud.flash(0.9);
   rig.shake(0.7);
   gunLight.intensity = 0;
@@ -109,7 +111,7 @@ async function enterPortal() {
     morty.squash = 1 + t * 0.5;
     morty.mesh.position.y = t * 0.6;
     morty.mesh.rotation.z = t * 5;
-    morty.height = 1.55 * (1 - t * 0.85);
+    morty.scale = 1 - t * 0.85;
   }, ease.in);
   morty.group.visible = false;
   hud.flash(1, 0.5);
@@ -117,9 +119,10 @@ async function enterPortal() {
   hud.card({ small: 'To be continued', big: "NEXT:<br>SHRIMP RICK'S LAB", hint: 'Press SPACE to go back to the garage', solid: true });
   await input.nextPress('Space', 'Enter');
   hud.hideCard();
-  Object.assign(morty, { height: 1.55, squash: 1 });
+  Object.assign(morty, { scale: 1, squash: 1 });
   morty.mesh.rotation.z = 0; morty.mesh.position.y = 0;
   morty.position.set(0.9, 0, -1.6);
+  morty.group.rotation.y = 0;
   morty.group.visible = true;
   startPlay();
   await hud.fade(0, 0.6);
@@ -137,6 +140,7 @@ async function use(thing) {
   state = 'dialogue';
   hud.prompt('');
   hud.cinema(true);
+  morty.faceToward(thing.at());
   morty.animate(0.016, 0);
   await thing.run();
   startPlay();
@@ -180,17 +184,22 @@ function tick(dt) {
   // Idle life: the gun hums, Rick snores
   if (state !== 'boot' && gunLight.intensity > 0 && gunLight.intensity < 4.5) {
     gunLight.intensity = 3 + Math.sin(time * 11) * 1;
-    gun.mesh.position.y = 0.05 + Math.abs(Math.sin(time * 23)) * 0.02;
+    gun.mesh.position.y = Math.abs(Math.sin(time * 23)) * 0.025;
   }
   zzz.forEach((s, i) => {
     const t = (time * 0.45 + i / 3) % 1;
-    s.visible = G.rickAsleep;
-    s.position.set(rick.position.x + rick.height / 2 + 0.15 + t * 0.5 + Math.sin(t * 7) * 0.08, 0.7 + t * 1.5, rick.position.z);
+    s.visible = G.rickAsleep && !G.rickAwake;
+    s.position.set(rick.position.x - 0.1 + t * 0.5 + Math.sin(t * 7) * 0.08, 1.45 + t * 1.5, rick.position.z + 0.2);
     s.scale.setScalar(0.22 + t * 0.3);
     s.material.opacity = Math.sin(t * Math.PI);
   });
 
-  cutouts.forEach((c) => c.update(camera));
+  // Rick's head hangs and bobs while he snores, and lifts when he talks
+  if (G.rickAsleep) {
+    const want = G.rickAwake ? -0.05 : 0.5 + Math.sin(time * 1.6) * 0.07;
+    rick.parts.head.rotation.x += (want - rick.parts.head.rotation.x) * Math.min(1, dt * 10);
+  }
+  models.forEach((m) => m.update());
   garage.update(time);
   portal.update(time);
   introPortal.update(time);

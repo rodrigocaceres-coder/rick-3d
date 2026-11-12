@@ -158,12 +158,12 @@ export function buildGarage() {
       { x0: -8.3, x1: -3.1, z0: -6, z1: -4.75 },   // shelf and tool cabinet
       { x0: 7.2, x1: 9, z0: -1.8, z1: 3.0 },       // workbench
       { x0: -3.5, x1: 5.15, z0: 4.75, z1: 6 },     // boxes and paint cans
-      { x0: 4.55, x1: 6.3, z0: 0.95, z1: 1.5 },      // Rick, passed out
+      { x0: 5.75, x1: 7.2, z0: 0.7, z1: 1.75 },      // Rick, passed out
       { x0: 4.25, x1: 4.55, z0: -3.2, z1: -3.0 },   // the gun
     ],
     spots: {
       door: new THREE.Vector3(-8.1, 0, 0),
-      rick: new THREE.Vector3(5.4, 0, 1.3),
+      rick: new THREE.Vector3(6.55, 0, 1.0),
       gun: new THREE.Vector3(4.4, 0, -3.1),
     },
     update(time) {

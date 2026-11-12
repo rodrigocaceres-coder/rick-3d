@@ -6,7 +6,7 @@ import audio from '../engine/audio.js';
 import { tween, wait, ease, clock, lerp } from '../engine/tween.js';
 import { say, closeDialogue } from '../ui/dialogue.js';
 import { ball, box, cyl, glow } from '../engine/toon.js';
-import { shotOn, layDown } from './shots.js';
+import { shotOn, slump } from './shots.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
@@ -41,12 +41,13 @@ export async function coldOpen(G) {
   rig.cut({ pos: V(-1.5, 0.8, 4.6), look: V(3.6, 1.5, -1), fov: 36 });
   rick.group.visible = true;
   const land = garage.spots.rick;
+  rick.group.rotation.y = -1.05;
   await tween(0.85, (t) => {
     rick.position.set(lerp(mouth.x, land.x, t), 0, lerp(mouth.z, land.z, t));
-    rick.mesh.position.set(-rick.height / 2 * t, lerp(mouth.y - 0.9, rick.width / 2, t * t) + Math.sin(t * Math.PI) * 0.8, 0);
-    rick.mesh.rotation.z = lerp(0, -Math.PI * 2.5, t);
+    rick.mesh.position.y = lerp(mouth.y - 0.9, -0.56, t * t) + Math.sin(t * Math.PI) * 0.8;
+    rick.mesh.rotation.x = lerp(0, -Math.PI * 4, t); // two backflips, lands sitting
   }, ease.linear);
-  layDown(rick);
+  slump(rick);
   rig.shake(0.9);
   audio.sfx('hit_enemy.mp3');
   tween(0.35, (t) => { rick.squash = 1 - 0.3 * Math.sin(t * Math.PI); });
@@ -57,7 +58,7 @@ export async function coldOpen(G) {
   await tween(0.9, (t) => {
     gun.position.set(lerp(mouth.x, spot.x, t), 0, lerp(mouth.z, spot.z, t));
     gun.mesh.position.y = (mouth.y - 0.3) * (1 - ease.outBounce(t));
-    gun.mesh.rotation.z = (1 - t) * 9;
+    gun.mesh.rotation.x = (1 - t) * 9;
   }, ease.linear);
   audio.sfx('hit_morty.mp3');
   hud.flash(0.5, 0.25);
@@ -96,7 +97,7 @@ export async function coldOpen(G) {
 
   // 6. Rick, face down
   G.rickAsleep = true;
-  rig.cut(shotOn(land, V(land.x - 3, 0, land.z + 1), 0.5));
+  rig.cut(shotOn(land, V(land.x - 3, 0, land.z + 1), 0.8));
   rig.pushIn(0.1, 6);
   await say({ speaker: 'Rick', mood: 'happy', text: 'Nailed it. Zzzz.' });
   closeDialogue();
@@ -107,11 +108,12 @@ export async function coldOpen(G) {
   rig.pushIn(0.08, 6);
   audio.sfx('door.mp3');
   morty.position.copy(door);
+  morty.group.rotation.y = Math.PI / 2;
   morty.group.visible = true;
   let last = 0;
   await tween(1.5, (t) => {
     morty.position.lerpVectors(door, stop, t);
-    morty.animate((t - last) * 1.5, t < 0.97 ? 3 : 0, 1);
+    morty.animate((t - last) * 1.5, t < 0.97 ? 3 : 0, stop.x - door.x, stop.z - door.z);
     last = t;
   }, ease.linear);
   morty.animate(0.016, 0);
@@ -136,9 +138,10 @@ export async function coldOpen(G) {
 export function afterColdOpen(G) {
   const { morty, rick, gun, garage } = G;
   rick.position.copy(garage.spots.rick);
-  layDown(rick);
+  slump(rick);
   gun.position.copy(garage.spots.gun);
   morty.position.set(-5.4, 0, 0.7);
+  morty.group.rotation.y = Math.PI / 2;
   G.gunLight.intensity = 3;
   G.rickAsleep = true;
 }

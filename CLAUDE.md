@@ -14,16 +14,16 @@ Story change from 2D: all 3 gun parts land in the shrimp lab.
 - `?skip` skips the cold open. `?low` turns off the glow for slow laptops. M mutes.
 
 ## Look
-- Characters are paper cutouts (src/objects/cutout.js) using the Gemini art, animated in code. No 3D character models.
-- Sets are boxes and cylinders from src/engine/toon.js (two-tone shading, inside-out outline hull). Glow comes from colors brighter than white.
-- Keep cutouts under about 40% of screen height: the source sprites are only 210 px tall.
+- Low poly (Rodrigo rejected the first paper-cutout look on Nov 12). Characters and props are faceted models built in code in src/objects/models.js. No model files.
+- Sets and props use src/engine/toon.js (two-tone shading, outline hull, flat faces). Characters use charMat (lighter shadow tone). Glow comes from colors brighter than white.
+- The 2D Gemini portraits appear only in the dialogue box.
 - Keep lights low. Floors blow out to white fast.
 - Never prompt image AI for show characters. Never use show audio.
 
 ## Layout
 - src/engine/: core (renderer, glow), toon (materials, shapes), cameraRig, input, tween, audio
 - src/areas/: one file per set, returns { group, bounds, colliders, spots, update }
-- src/objects/: cutout, player, portal
+- src/objects/: models (Morty, Rick, gun, walk cycle), player, portal (cutout.js is the unused first version)
 - src/scenes/: cutscenes written with await (coldOpen), camera shot helpers
 - src/ui/: hud (bars, fades, cards), dialogue (box and conversation runner)
 - src/data/dialogue/: dialogue JSON, same format as the 2D game. Never hardcode story dialogue in scenes.

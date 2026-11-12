@@ -1,18 +1,15 @@
-import { Cutout } from './cutout.js';
+import { Character, buildMorty } from './models.js';
 import input from '../engine/input.js';
 
-// Morty. 8-direction movement with smooth speed-up and slow-down, and code-driven cutout animation.
+// Morty. 8-direction movement with smooth speed-up and slow-down. The walk animation lives in models.js.
 const SPEED = 5.2;      // units per second at full speed
 const ACCEL = 11;       // higher = snappier starts and stops
 const RADIUS = 0.34;    // Morty's footprint for bumping into things
 
-export class Player extends Cutout {
+export class Player extends Character {
   constructor() {
-    super('sprites/morty.png', 1.55);
+    super(buildMorty());
     this.vx = 0; this.vz = 0;
-    this.phase = 0;
-    this.wasMoving = false;
-    this.squashT = 0;
   }
 
   // world: { bounds: {x0, x1, z0, z1}, colliders: [{x0, x1, z0, z1}] }
@@ -29,24 +26,7 @@ export class Player extends Cutout {
     const nz = p.z + this.vz * dt;
     if (!blocked(p.x, nz, world)) p.z = nz; else this.vz = 0;
 
-    this.animate(dt, Math.hypot(this.vx, this.vz), this.vx);
-  }
-
-  // Also used by cutscenes that move Morty by hand
-  animate(dt, speed, vx = 0) {
-    const moving = speed > 0.6;
-    if (moving) {
-      this.phase += dt * speed * 2.4;
-      if (Math.abs(vx) > 0.5) this.flip = vx < 0 ? -1 : 1;
-    } else if (this.wasMoving) {
-      this.squashT = 1; // just stopped: quick squash
-    }
-    this.wasMoving = moving;
-    this.squashT = Math.max(0, this.squashT - dt * 6);
-    const walk = moving ? Math.min(speed / SPEED, 1) : 0;
-    this.mesh.position.y = Math.abs(Math.sin(this.phase)) * 0.11 * walk;
-    this.mesh.rotation.z = Math.sin(this.phase) * 0.07 * walk - (vx / SPEED) * 0.1;
-    this.squash = 1 - 0.13 * Math.sin(this.squashT * Math.PI);
+    this.animate(dt, Math.hypot(this.vx, this.vz), this.vx, this.vz, SPEED);
   }
 }
 

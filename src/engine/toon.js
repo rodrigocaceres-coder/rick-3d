@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 // Cartoon look: flat colors with one shadow tone, plus a dark outline around every prop.
 // The outline is a second, slightly bigger copy of the shape drawn inside out in near-black.
@@ -8,6 +9,17 @@ const steps = new Uint8Array([105, 105, 255, 255]); // two tones: shadow and lit
 const gradientMap = new THREE.DataTexture(steps, steps.length, 1, THREE.RedFormat);
 gradientMap.minFilter = gradientMap.magFilter = THREE.NearestFilter;
 gradientMap.needsUpdate = true;
+
+// Characters get a lighter shadow tone and a little light of their own, so faces read in a dark room
+const brightSteps = new Uint8Array([150, 150, 255, 255]);
+const brightMap = new THREE.DataTexture(brightSteps, brightSteps.length, 1, THREE.RedFormat);
+brightMap.minFilter = brightMap.magFilter = THREE.NearestFilter;
+brightMap.needsUpdate = true;
+const skinCache = new Map();
+export function charMat(color) {
+  if (!skinCache.has(color)) skinCache.set(color, new THREE.MeshToonMaterial({ color, gradientMap: brightMap, emissive: color, emissiveIntensity: 0.07 }));
+  return skinCache.get(color);
+}
 
 const toonCache = new Map();
 export function toon(color) {
@@ -46,18 +58,51 @@ export function box(w, h, d, color, o = {}) {
   return finish(mesh, t ? new THREE.BoxGeometry(w + 2 * t, h + 2 * t, d + 2 * t) : null, o);
 }
 
-// cyl(radius, height, color, { radiusTop, ... })
+// ---- Low-poly shapes ----
+// Every round shape is drawn with few, flat faces. The outline is a smooth copy of the shape pushed outward
+// along its surface by a fixed amount, so the line is the same thickness on every shape.
+const hullCache = new Map();
+function hullMat(t) {
+  if (!hullCache.has(t)) {
+    const m = new THREE.MeshBasicMaterial({ color: INK, side: THREE.BackSide });
+    m.onBeforeCompile = (sh) => {
+      sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>\n  transformed += normalize(normal) * ${t.toFixed(4)};`);
+    };
+    m.customProgramCacheKey = () => `hull${t}`;
+    hullCache.set(t, m);
+  }
+  return hullCache.get(t);
+}
+
+// shape(geometry, color, { x, y, z, rx, ry, rz, sx, sy, sz, line, parent })
+export function shape(geo, color, o = {}) {
+  const t = o.line ?? 0.04;
+  const flat = geo.toNonIndexed();
+  flat.computeVertexNormals(); // one normal per face = the faceted low-poly look
+  const mesh = new THREE.Mesh(flat, asMat(color));
+  if (t) {
+    const smooth = geo.clone();
+    smooth.deleteAttribute('normal'); smooth.deleteAttribute('uv');
+    const merged = mergeVertices(smooth);
+    merged.computeVertexNormals();
+    mesh.add(new THREE.Mesh(merged, hullMat(t)));
+  }
+  finish(mesh, null, o);
+  mesh.scale.set(o.sx ?? 1, o.sy ?? 1, o.sz ?? 1);
+  return mesh;
+}
+
+// cyl(radius, height, color, { radiusTop, sides, ... })
 export function cyl(r, h, color, o = {}) {
-  const t = o.line ?? 0.045;
-  const rt = o.radiusTop ?? r;
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, r, h, o.sides ?? 16), asMat(color));
-  return finish(mesh, t ? new THREE.CylinderGeometry(rt + t, r + t, h + 2 * t, o.sides ?? 16) : null, o);
+  return shape(new THREE.CylinderGeometry(o.radiusTop ?? r, r, h, o.sides ?? 8), color, o);
 }
 
 export function ball(r, color, o = {}) {
-  const t = o.line ?? 0.045;
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), asMat(color));
-  return finish(mesh, t ? new THREE.SphereGeometry(r + t, 16, 12) : null, o);
+  return shape(new THREE.IcosahedronGeometry(r, o.detail ?? 1), color, o);
+}
+
+export function cone(r, h, color, o = {}) {
+  return shape(new THREE.ConeGeometry(r, h, o.sides ?? 5), color, o);
 }
 
 // Flat sticker on the floor (stains, mats, scorch marks)

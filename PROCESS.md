@@ -20,7 +20,7 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
   - Cold open (about 25 seconds, Escape skips): portal rips open, Rick falls out spinning, the gun bounces and cracks, three glowing parts fly back into the portal, Rick says one line, Morty walks in, title card.
   - Playable loop: talk to Rick, check the gun, pull the trigger, the gun fires a portal, walk in, "Next: Shrimp Rick's lab" card, back to the garage.
 - Key decisions:
-  - Paper cutouts in 3D sets instead of 3D character models. Reuses the graded Gemini art, keeps the flat cartoon look, and there is no time before Nov 17 to model characters.
+  - First choice: paper cutouts in 3D sets instead of 3D character models, to reuse the graded Gemini art. Rodrigo rejected this after playing it (see the revision below).
   - Story compressed for the 3-area slice: all 3 gun parts land in Shrimp Rick's lab (the 2D game spreads them over 3 areas). Rick's "where" line and the gun screen line were rewritten for this. Two new lines in the cold open: Rick "Nailed it. Zzzz." and Morty "Rick? What was that noise?"
   - Dialogue box is drawn by the browser (HTML) on top of the 3D picture, so text and portraits stay sharp.
   - Outlines are a second, slightly bigger copy of each shape drawn inside out in near-black. Cheap, and works on a slow laptop.
@@ -33,12 +33,20 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
   - Portal v1 was a solid white blob. Portal brightness 1.6 to 1.2, glow strength 0.85 to 0.5, so only the hot bands glow.
   - Title card v1 landed on top of Morty's face. It now cuts to a high wide shot of the garage first.
   - The preview pane runs the game in slow motion, so key-hold tests did nothing. Added a dev-only __game.step() hook to run frames by hand.
+- Revision after Rodrigo played the first build: "i dont like the paper 3d, switch to low poly"
+  - Morty, Rick and the portal gun are now low-poly 3D models built in code (src/objects/models.js): faceted shapes, same two-tone shading and outlines as the set. No model files and no new image AI. The 2D Gemini portraits stay in the dialogue box only.
+  - Real walk cycle: legs and arms swing, the body leans and turns to face where it walks, slow breathing when standing.
+  - Jars, tubes and paint cans in the set got flat faces too (8 sides) so the whole room matches.
+  - Low-poly v1 looked weak: faces sat in the dark shadow tone, eyes were the same color as skin, Rick lying flat on his back was an unreadable pile, the gun stood on its barrel and its glow washed it out.
+  - Low-poly v2: characters get a lighter shadow tone and unlit white eyes, Rick now sits slumped against the workbench with his head hanging (he lifts it only for his own lines), he lands sitting after two backflips, the gun stands on its handle and its light moved up.
+  - Dialogue camera moved back in from 9 to 6.8 units, because 3D models stay sharp up close (the paper cutouts did not).
 - Rejected, and why:
-  - Full 3D character models: no time, and would not match the show's flat look.
+  - Paper cutout characters (my first design): Rodrigo did not like the look. Kept in git history and in the screenshots as the before.
+  - Sculpted or downloaded character models: no time, and model files from the internet would not be our own work.
   - Outline as a screen effect (edge detection): draws boxes around the flat cutouts and costs a second render of the scene.
   - Extra packages (animation library, post-processing library): Three.js already ships bloom, and a 40-line tween helper covers the animation.
   - A separate area for each gun part: the brief is 3 great areas first.
 - Result: Playable from start card to the portal exit, no console errors, production build passes. Deployed to GitHub Pages at https://rodrigocaceres-coder.github.io/rick-3d/ (new public repo rodrigocaceres-coder/rick-3d, a GitHub Actions workflow rebuilds it on every push to main). Letterbox bars and real-time feel are not yet confirmed on Rodrigo's machine, because the preview pane throttles animation.
-- Evidence files: process/screenshots/2026-11-12_s1_first-render-too-bright.jpg, _dialogue-v1-too-close-white-halo.jpg, _dialogue-v2.jpg, _portal-v1-blown-out.jpg, _cold-open-rick-falls.jpg, _cold-open-gun-parts.jpg, _title-card-v1-over-morty.jpg
+- Evidence files: process/screenshots/2026-11-12_s1_first-render-too-bright.jpg, _dialogue-v1-too-close-white-halo.jpg, _dialogue-v2.jpg, _portal-v1-blown-out.jpg, _cold-open-rick-falls.jpg, _cold-open-gun-parts.jpg, _title-card-v1-over-morty.jpg, _lowpoly-v1-dark-faces-rick-flat.jpg, _lowpoly-v2-dialogue.jpg, _lowpoly-v2-play.jpg (the paper cutout screenshots above are the before)
 - Chat link: Claude Code session "Rick and Morty 3D RPG" (desktop app link claude://claude.ai/epitaxy/local_a29351ea-a4fc-46bb-bbdc-587e649e7de1)
 - Why:
