@@ -10,6 +10,7 @@ import flags from './systems/flags.js';
 import save from './systems/save.js';
 import { buildGarage } from './areas/garage.js';
 import { Model, Character, buildRick, buildGun } from './objects/models.js';
+import { cyl, glow } from './engine/toon.js';
 import { Player } from './objects/player.js';
 import { Portal } from './objects/portal.js';
 import { coldOpen, afterColdOpen, garageArrival } from './scenes/coldOpen.js';
@@ -18,6 +19,7 @@ import phone from './ui/phone.js';
 import houseText from './data/dialogue/house.json';
 import { createLab } from './scenes/labScene.js';
 import { createBoss } from './scenes/bossScene.js';
+import { createArcade } from './scenes/arcadeScene.js';
 import { shotOn } from './scenes/shots.js';
 import dialogue from './data/dialogue/garage.json';
 
@@ -25,9 +27,9 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const params = new URLSearchParams(location.search);
 const GARAGE_LIMITS = { x0: -4, x1: 4, z0: -3, z1: 2.5 };
 // Test links start mid-episode with made-up flags, so they neither load nor overwrite the real save
-const TEST_LINK = ['skip', 'garage', 'lab', 'boss'].some((k) => params.has(k));
+const TEST_LINK = ['skip', 'garage', 'lab', 'boss', 'arcade'].some((k) => params.has(k));
 const PART_FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
-const SAVED_WHERE = { house: 'the Smith house', garage: 'the garage', lab: "Shrimp Rick's lab", boss: 'the boss fight' };
+const SAVED_WHERE = { house: 'the Smith house', garage: 'the garage', lab: "Shrimp Rick's lab", boss: 'the boss fight', arcade: 'Blips and Chitz' };
 
 // ---- Garage world ----
 const garage = buildGarage();
@@ -39,10 +41,15 @@ const gun = new Model(buildGun());
 const portal = new Portal();                       // the one Morty opens and walks into
 const introPortal = new Portal({ y: 3.0 });        // the one Rick falls out of, high in the air
 portal.position.set(0.9, 0, -4.4);
+const arcadePortal = new Portal({ radius: 1.05, y: 1.3 }); // Rick's vial opens this one, to Blips and Chitz
+arcadePortal.position.set(-6.4, 0, 3.4);
+arcadePortal.group.rotation.y = 0.35;
+const vial = cyl(0.06, 0.18, glow(0x7dff4a, 1.6), { line: 0.015 });
+vial.visible = false;
 const gunLight = new THREE.PointLight(0x5dff2e, 0, 6, 1.5);
 gunLight.position.set(garage.spots.gun.x, 1.7, garage.spots.gun.z + 0.6);
 scene.add(morty.group);
-garage.group.add(rick.group, gun.group, portal.group, introPortal.group, gunLight);
+garage.group.add(rick.group, gun.group, portal.group, introPortal.group, arcadePortal.group, vial, gunLight);
 
 // Floating Z's over sleeping Rick
 const zzz = [0, 1, 2].map(() => {
@@ -58,8 +65,8 @@ const zzz = [0, 1, 2].map(() => {
 
 // G is the shared game state that cutscenes read and change
 const G = { scene: garage.group, garage, morty, rick, gun, portal, introPortal, gunLight, rickAsleep: false, rickAwake: false };
-let state = 'boot';     // boot, cutscene, play, dialogue, battle, phone
-let area = 'garage';    // house, garage or lab
+let state = 'boot';     // boot, cutscene, play, dialogue, battle, phone, minigame
+let area = 'garage';    // house, garage, lab or arcade
 let cooldown = 0;       // short pause after dialogue so the same key press does not start it again
 
 // ---- Shrimp Rick's lab ----
@@ -74,6 +81,12 @@ const house = createHouse({
   api: { camera, setState(s) { state = s; }, startPlay, toGarage: houseToGarage },
 });
 
+// ---- Blips and Chitz: a side trip through Rick's vial portal, for the arcade soda ----
+const arcade = createArcade({
+  scene, morty,
+  api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toGarage: arcadeToGarage },
+});
+
 // ---- Boss fight vs Shrimp Rick, staged in the garage ----
 const boss = createBoss({ G, held: lab.held, api: { setState(s) { state = s; }, toGarage, checkpoint: (phase) => checkpoint({ area: 'boss', phase }) } });
 
@@ -83,7 +96,7 @@ const usable = [
     label: 'Talk', at: () => garage.spots.rick, radius: 2.3, hintY: 1.7, when: () => true,
     async run() {
       const rickPos = garage.spots.rick;
-      await converse(dialogue.rick, {
+      const todo = await converse(dialogue.rick, {
         onLine(line) {
           G.rickAwake = line.speaker === 'Rick'; // he lifts his head only for his own lines
           rig.cut(G.rickAwake ? shotOn(rickPos, morty.position, 0.9) : shotOn(morty.position, rickPos));
@@ -91,6 +104,7 @@ const usable = [
         },
       });
       G.rickAwake = false;
+      if (todo.some((d) => d.vial)) await throwVial();
     },
   },
   {
@@ -108,7 +122,33 @@ const usable = [
 
 function garageGoal() {
   if (flags.get('bossBeaten')) return 'Episode over. Nobody touch the gun.';
-  return flags.get('portalOpen') ? 'Step into the portal.' : flags.get('rickExplained') ? 'Check the humming portal gun.' : 'Find out what broke. Talk to Rick.';
+  const soda = flags.get('arcadeOpen') && !flags.get('hasSoda') ? ' Or get Rick\'s soda first: Blips and Chitz portal.' : '';
+  return (flags.get('portalOpen') ? 'Step into the portal.' : flags.get('rickExplained') ? 'Check the humming portal gun.' : 'Find out what broke. Talk to Rick.') + soda;
+}
+
+// Morty throws Rick's vial at the wall by the door: a portal to Blips and Chitz splats open
+async function throwVial() {
+  const to = arcadePortal.position;
+  rig.cut({ pos: V(-1.2, 2.1, 6.4), look: V(-4.6, 1.2, 2.0), fov: 40 });
+  morty.faceToward(to);
+  morty.animate(0.016, 0);
+  await wait(0.3);
+  const from = morty.position.clone().setY(1.1), end = V(to.x, 1.3, to.z);
+  vial.visible = true;
+  morty.parts.arms[1].rotation.x = -2.4;
+  audio.sfx('menu_move.mp3');
+  await tween(0.6, (t) => {
+    vial.position.lerpVectors(from, end, t);
+    vial.position.y += Math.sin(t * Math.PI) * 1.2;
+    vial.rotation.z = t * 14;
+  }, ease.linear);
+  vial.visible = false;
+  morty.parts.arms[1].rotation.x = 0;
+  hud.flash(0.7);
+  rig.shake(0.5);
+  await arcadePortal.open();
+  rig.pushIn(0.12, 3);
+  await wait(0.9);
 }
 
 // The gun fires its last charge on its own
@@ -145,6 +185,50 @@ async function enterPortal() {
   await hud.fade(1, 0.5);
   portal.close(0.1);
   await toLab(0);
+}
+
+// Into the vial portal: on to Blips and Chitz
+async function enterArcade() {
+  state = 'cutscene';
+  hud.cinema(true);
+  hud.prompt('');
+  const from = morty.position.clone(), to = arcadePortal.position.clone();
+  rig.move({ pos: V(to.x + 2.5, 1.4, to.z + 5.2), look: V(to.x, 1.3, to.z), fov: 32 }, 0.8);
+  audio.sfx('portal.mp3');
+  await tween(0.7, (t) => {
+    morty.position.lerpVectors(from, to, t);
+    morty.mesh.position.y = t * 0.5;
+    morty.mesh.rotation.z = t * 5;
+    morty.scale = 1 - t * 0.85;
+  }, ease.in);
+  hud.flash(1, 0.5);
+  await hud.fade(1, 0.5);
+  await toArcade();
+}
+
+async function toArcade() {
+  resetMortyPose();
+  garage.group.visible = false;
+  area = 'arcade';
+  await arcade.enter();
+}
+
+// Back out of the arcade: Morty tumbles out of the vial portal in the garage
+async function arcadeToGarage() {
+  arcade.leave();
+  resetMortyPose();
+  area = 'garage';
+  garage.group.visible = true;
+  rig.setLimits(GARAGE_LIMITS);
+  const from = arcadePortal.position.clone(), stop = V(-5.6, 0, 2.2);
+  morty.position.copy(from);
+  morty.group.rotation.y = 2.4;
+  rig.follow(morty, true);
+  audio.music('smith_house.m4a');
+  hud.fade(0, 0.4);
+  await tween(0.45, (t) => { morty.position.lerpVectors(from, stop, t); morty.scale = 0.2 + 0.8 * t; morty.mesh.position.y = Math.sin(t * Math.PI) * 0.5; }, ease.out);
+  resetMortyPose();
+  startPlay();
 }
 
 // ---- The door between the house and the garage ----
@@ -212,6 +296,7 @@ function toBoss(opts) {
   area = 'garage';
   garage.group.visible = true;
   gun.group.visible = false; // Morty is holding it
+  arcadePortal.isOpen = false; arcadePortal.group.visible = false; // the vial portal closed while he was gone
   checkpoint({ area: 'boss', phase: opts?.phase ?? 1 });
   return boss.start(opts);
 }
@@ -232,11 +317,13 @@ async function toGarage() {
 function startPlay() {
   hud.cinema(false);
   rig.follow(morty);
-  hud.goal(area === 'garage' ? garageGoal() : area === 'house' ? house.goal() : lab.goal());
-  if (area !== 'lab') hud.hint(flags.get('hasPhone') ? houseText.hints.phone : '');
+  hud.goal(area === 'garage' ? garageGoal() : area === 'house' ? house.goal() : area === 'arcade' ? arcade.goal() : lab.goal());
+  if (area === 'arcade') hud.hint(arcade.hint());
+  else if (area !== 'lab') hud.hint(flags.get('hasPhone') ? houseText.hints.phone : '');
   cooldown = 0.3;
   lab.setCooldown(0.3);
   house.setCooldown(0.3);
+  arcade.setCooldown(0.3);
   state = 'play';
   checkpoint();
 }
@@ -253,6 +340,7 @@ async function continueFrom(saved) {
   afterColdOpen(G);
   gun.group.visible = !flags.get('bossBeaten');
   if (flags.get('portalOpen') && !flags.get('bossBeaten')) { gunLight.intensity = 0; portal.open(); }
+  if (flags.get('arcadeOpen') && !flags.get('bossBeaten') && saved.area !== 'boss') arcadePortal.open();
   await wait(0.3);
   if (saved.area === 'boss') {
     gun.group.visible = false;
@@ -262,6 +350,7 @@ async function continueFrom(saved) {
     gun.group.visible = false;
     return toLab(Math.min(2, PART_FLAGS.filter((f) => flags.get(f)).length));
   }
+  if (saved.area === 'arcade') return toArcade();
   if (saved.area === 'house') {
     garage.group.visible = false;
     area = 'house';
@@ -298,11 +387,12 @@ function garageTick() {
   } else hud.prompt('');
 
   if (portal.isOpen && state === 'play' && Math.hypot(morty.position.x - portal.position.x, morty.position.z - portal.position.z) < 0.85) enterPortal();
+  if (arcadePortal.isOpen && state === 'play' && Math.hypot(morty.position.x - arcadePortal.position.x, morty.position.z - arcadePortal.position.z) < 0.85) enterArcade();
 }
 
 // ---- Main loop ----
 const tmp = new THREE.Vector3();
-const worlds = { garage, house: house.world, lab: lab.world };
+const worlds = { garage, house: house.world, lab: lab.world, arcade: arcade.world };
 let last = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
@@ -318,7 +408,7 @@ function tick(dt) {
   if (state === 'play') {
     morty.move(dt, worlds[area], true);
     cooldown -= dt;
-    if (area === 'garage') garageTick(); else if (area === 'house') house.tick(dt); else lab.tick(dt);
+    if (area === 'garage') garageTick(); else if (area === 'house') house.tick(dt); else if (area === 'arcade') arcade.tick(dt); else lab.tick(dt);
   } else if (state === 'phone') {
     morty.move(dt, worlds[area], false); // he slows to a stop while he reads
     if (input.pressed('Escape')) togglePhone();
@@ -349,11 +439,13 @@ function tick(dt) {
     garage.update(time);
     portal.update(time);
     introPortal.update(time);
+    arcadePortal.update(time);
   }
   boss.update(dt, time);
   house.update(dt, time);
   morty.update();
   lab.update(dt, time);
+  arcade.update(dt, time);
   rig.update(dt, time);
   render();
   input.endFrame();
@@ -361,12 +453,13 @@ function tick(dt) {
 requestAnimationFrame(frame);
 
 // Dev builds only: lets a test script run the game forward by hand, for example __game.step(120) = 2 seconds
-if (import.meta.env.DEV) window.__game = { G, flags, save, lab, boss, house, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
+if (import.meta.env.DEV) window.__game = { G, flags, save, lab, boss, house, arcade, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
 
 // ---- Boot: start card, cold open (garage, then the house), then play in the house. ?skip jumps past the cold open,
 // ?garage starts in the garage with Beth's errand done, ?lab=1, 2 or 3 starts in that lab room,
 // ?boss starts at the boss fight (?boss=2 at the tank phase, ?boss=fight skips the fight's opening scene, &nosandwich
-// plays it without Beth's sandwich). ----
+// plays it without Beth's sandwich, &nosoda without the arcade soda), ?arcade starts at Blips and Chitz (?arcade=tip
+// with Glorp's golden ticket tip already heard). ----
 async function boot() {
   rig.cut({ pos: V(-7.2, 1.5, 5.6), look: V(1.5, 1.7, -3), fov: 38 });
   if (params.has('lab')) {
@@ -376,9 +469,15 @@ async function boot() {
   }
   if (params.has('boss')) {
     afterColdOpen(G);
-    flags.setMany({ hasCrystal: true, hasCanister: true, hasChip: true, helpedResistance: !params.has('norebels'), hasSandwich: !params.has('nosandwich'), askedToCheckGarage: true, sawGarage: true });
+    flags.setMany({ hasCrystal: true, hasCanister: true, hasChip: true, helpedResistance: !params.has('norebels'), hasSandwich: !params.has('nosandwich'), hasSoda: !params.has('nosoda'), askedToCheckGarage: true, sawGarage: true });
     const v = params.get('boss');
     return toBoss({ phase: v === '2' ? 2 : 1, skipIntro: v === '2' || v === 'fight' });
+  }
+  if (params.has('arcade')) {
+    afterColdOpen(G);
+    flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, hasSandwich: true, hasPhone: true, hasVial: true, arcadeOpen: true, glorpTip: params.get('arcade') === 'tip' });
+    arcadePortal.open();
+    return toArcade();
   }
   if (params.has('garage')) {
     afterColdOpen(G);

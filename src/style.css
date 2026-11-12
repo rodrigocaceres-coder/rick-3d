@@ -270,3 +270,30 @@ body.play #hint.on { opacity: 1; }
 }
 #phone-note::after { content: ' - S'; font-weight: bold; font-style: normal; }
 #phone-close { margin-top: 1vh; text-align: center; font-size: 1.8vh; font-weight: bold; color: var(--ink); }
+
+/* Ticket Tumble (Blips and Chitz): score and timer up top, a progress bar to 5000, big countdown, +100 pops */
+#tumble {
+  position: fixed; top: 16px; left: 50%; transform: translate(-50%, -20px); width: min(460px, 80vw); padding: 8px 14px 10px;
+  background: rgba(21, 16, 28, 0.82); border: 3px solid var(--ink); border-top: 5px solid #ff5fa2; border-radius: 8px;
+  opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none;
+}
+#tumble.on { opacity: 1; transform: translate(-50%, 0); }
+#tumble-top { display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+#tumble-score { color: #ffd84c; }
+#tumble-time.low { color: #ff5a4a; animation: blink 0.5s infinite; }
+#tumble-bar { height: 10px; margin-top: 6px; background: #2a2048; border: 2px solid var(--ink); border-radius: 5px; overflow: hidden; }
+#tumble-fill { height: 100%; width: 0; background: linear-gradient(90deg, #ff5fa2, #ffd84c); transition: width 0.15s; }
+#tumble-big {
+  position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); font-size: 13vh; font-weight: 900; color: #ffd84c;
+  -webkit-text-stroke: 0.6vh var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none;
+}
+#tumble-big.on { opacity: 1; animation: tslam 0.35s cubic-bezier(0.2, 1.6, 0.4, 1); }
+@keyframes tslam { from { transform: translate(-50%, -50%) scale(2.2); opacity: 0; } }
+#tumble-pops { position: fixed; inset: 0; pointer-events: none; }
+.tpop {
+  position: absolute; transform: translate(-50%, -50%); font-size: 22px; font-weight: 900; color: #ffd84c;
+  -webkit-text-stroke: 4px var(--ink); paint-order: stroke fill; animation: tpop 0.9s ease-out forwards;
+}
+.tpop.bad { color: #ff5a4a; font-size: 26px; }
+.tpop.gold { color: #fff2b0; font-size: 34px; }
+@keyframes tpop { to { transform: translate(-50%, -160%); opacity: 0; } }

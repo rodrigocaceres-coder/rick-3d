@@ -5,8 +5,9 @@
   ],
   "rick": {
     "entry": [
-      { "if": "portalOpen", "goto": "asleepPortal" },
-      { "if": "rickExplained", "goto": "asleep" },
+      { "if": "arcadeOpen", "goto": "asleepPortal" },
+      { "if": "hasVial", "goto": "vialAgain" },
+      { "if": "rickExplained", "goto": "soda" },
       { "goto": "intro" }
     ],
     "nodes": {
@@ -27,16 +28,38 @@
         "lines": [
           { "speaker": "Rick", "mood": "neutral", "text": "Through the last portal I opened. Shrimp place. All three. Zzzz." },
           { "speaker": "Morty", "mood": "angry", "text": "Why is it always shrimp? Why is it never something normal?" }
-        ]
+        ],
+        "goto": "soda"
       },
       "cant": {
         "lines": [
           { "speaker": "Rick", "mood": "angry", "text": "I'm doing it right now, Morty. I'm delegating. Zzzz." }
+        ],
+        "goto": "soda"
+      },
+      "soda": {
+        "set": { "hasVial": true },
+        "lines": [
+          { "speaker": "Rick", "mood": "neutral", "text": "Mmf. Shrimp fights go better on sugar, Morty. Blips and Chitz soda. Portal vial, coat pocket. Throw it at a wall. Zzzz." },
+          { "speaker": "Morty", "mood": "neutral", "text": "A vial. It says BLIPS in Rick's handwriting. And it's humming." }
+        ],
+        "goto": "throw"
+      },
+      "vialAgain": {
+        "lines": [
+          { "speaker": "Rick", "mood": "neutral", "text": "Zzzz... wall... vial... why are you still here... zzzz." }
+        ],
+        "goto": "throw"
+      },
+      "throw": {
+        "choices": [
+          { "text": "Throw it at the wall.", "set": { "arcadeOpen": true }, "do": { "vial": true } },
+          { "text": "Keep it for later.", "goto": "later" }
         ]
       },
-      "asleep": {
+      "later": {
         "lines": [
-          { "speaker": "Rick", "mood": "neutral", "text": "Zzzz... crystal... canister... don't touch the thing that hums... zzzz." }
+          { "speaker": "Morty", "mood": "neutral", "text": "I'll hang on to it. It's still humming. At me." }
         ]
       },
       "asleepPortal": {

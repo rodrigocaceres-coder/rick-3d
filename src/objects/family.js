@@ -6,7 +6,7 @@ import { limb, eyes } from './models.js';
 // Every model faces +z and stands with its feet at y = 0.
 
 // A standing person: two legs, a body, two arms, a neck and a head. o gives sizes and colors.
-function person(o) {
+export function person(o) {
   const root = new THREE.Group();
   const parts = { root };
   const SKIN = C(o.skin), TOP = C(o.top);
@@ -36,11 +36,11 @@ function person(o) {
 }
 
 // Hair cap: the top part of a ball, tipped back
-function hairCap(head, r, color, how = 0.5, tip = -0.35, y = 0.03) {
+export function hairCap(head, r, color, how = 0.5, tip = -0.35, y = 0.03) {
   shape(new THREE.SphereGeometry(r, 12, 5, 0, Math.PI * 2, 0, Math.PI * how), color, { parent: head, y, z: -0.03, rx: tip });
 }
 
-function face(head, o) {
+export function face(head, o) {
   eyes(head, o.eyeX, 0.03, o.eyeZ, o.eyeR);
   for (const s of [-1, 1]) box(0.09, 0.018, 0.03, C(o.brow), { parent: head, x: s * o.eyeX, y: o.browY, z: o.eyeZ + 0.05, rz: s * o.browTilt, line: 0 });
   ball(0.032, o.skin, { parent: head, y: -0.05, z: o.eyeZ + 0.07, line: 0.016, detail: 0 });
