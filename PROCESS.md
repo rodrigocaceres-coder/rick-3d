@@ -204,6 +204,7 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
   - "the game goes straight to shrimp lab and boss fight, storyline has to be adjusted"
   - "fix story"
   - "the ticket tumble is too difficult"
+  - "change blitz and chips num of tickets to 2500" (Nov 13, in the "Next session" chat, after Session 9)
 - What was built:
   - The arcade set (src/areas/arcade.js): Blips and Chitz at two in the morning. Dark carpet with neon squiggles, rows of cabinets with glowing screens, Gorbi's prize counter with the prizes on a lit top shelf, a claw machine, Glorp's machine, and the Ticket Tumble floor, a grid of light-up tiles.
   - Two new low-poly characters (src/objects/aliens.js), both original characters from STORY.md: Gorbi, the bored green alien teen at the prize counter (antennae, heavy eyelids, purple work polo), and Glorp, the round orange regular who has played the same machine for twelve years (huge eyes that never blink).
@@ -222,12 +223,13 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
   - That was then too hard for a real person. Rodrigo: "the ticket tumble is too difficult." Fix: tickets carry over between rounds, and the numbers got gentler. Even a sloppy bot that ignores bombs now wins in about 24 seconds.
   - The arcade was built as a side trip off Rick's portal vial, so the live game still went straight from the garage to the lab and the boss. Rodrigo caught it on the live site. The story fix made the arcade required and removed the vial.
   - The hidden preview pane slowed the test script's timers to a crawl. The test switched to faster yields.
+  - Follow-up on Nov 13 (commit ee2dafe): Rodrigo asked for the goal to drop from 5000 to 2500 tickets. Changed the sign over the Ticket Tumble floor, the goal lines, the win banner and Gorbi's price line ("Twenty-five hundred tickets"). Tickets still carry over between rounds and the golden ticket is still worth 1000, so the round is now about half as long.
 - Rejected, and why:
   - Keeping the arcade optional (the first build): the roadmap wants it to matter, and nobody would find the soda.
   - Option (b), arcade then lab with all 3 parts in the lab: it leaves the Citadel without a reason to go.
-  - Lowering the 5000 goal: carrying tickets over fixed the difficulty and keeps the number from the 2D game.
+  - Lowering the 5000 goal: carrying tickets over fixed the difficulty and keeps the number from the 2D game. Reversed on Nov 13 (see the last revision above).
 - Result: Tested with a script in the browser: the portal there and back, Gorbi, Glorp's tip and Jerry, a full won round, Gorbi's handover with the flag set, the boss item menu with and without the soda, and (after the story fix) garage, arcade, lab in order. After the tuning pass, a lost round with 2100 tickets starts the next round at 2100. Pushed and deployed after the story fix and again after the tuning pass. Session 9's bot later also covered a lost round and Continue from saves. Not checked as a real player except by Rodrigo, who found it too hard before the tuning pass.
-- Evidence files: none saved during this session. The commits are the record: 4de72a6 (the build), 1ff4e23 (story fix), 788bde4 (easier Ticket Tumble).
+- Evidence files: none saved during this session. The commits are the record: 4de72a6 (the build), 1ff4e23 (story fix), 788bde4 (easier Ticket Tumble), ee2dafe (goal 2500).
 - Chat link: Claude Code session "run whats next, skip log for prev session" (transcript 2946bace-b2e0-4b92-a16d-ff1f0d42ef76)
 - Why:
 
