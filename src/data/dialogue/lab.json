@@ -1,7 +1,7 @@
 {
   "intro": [
     { "speaker": "Morty", "mood": "neutral", "text": "It smells like a seafood buffet. And a police state." },
-    { "speaker": "Morty", "mood": "angry", "text": "Okay. The gun still sputters. Point, shoot, walk through. I can probably do this." }
+    { "speaker": "Morty", "mood": "angry", "text": "Okay. The crystal clicked in and the gun works again. Point, shoot, walk through. I can probably do this." }
   ],
   "pickups": {
     "crystal": [

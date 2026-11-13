@@ -250,11 +250,12 @@ export function createLab({ scene, morty, api }) {
     world,
     goal() {
       const n = FLAGS.filter((f) => flags.get(f)).length;
-      return ['Cross the goo. Get the Focus Crystal.', 'Get the Fluid Canister from behind the glass.', 'Get the Coordinate Chip past the last patrol.', 'Get out.'][n];
+      return ['Cross the goo. Get the Focus Crystal.', 'Cross the goo. Get the Fluid Canister from behind the glass.', 'Get the Coordinate Chip past the last patrol.', 'Get out.'][n];
     },
 
-    // Arrive in the lab. room: 0, 1 or 2 (rooms after 0 are for testing with ?lab=2 or ?lab=3).
+    // Arrive in the lab with the Focus Crystal already in the gun. room: 0, 1 or 2 (rooms after 0 are for testing with ?lab=2 or ?lab=3).
     async enter(room = 0) {
+      flags.set('hasCrystal'); // Morty won it at Blips and Chitz: it is what powers the gun here
       FLAGS.forEach((f, i) => { if (i < room) flags.set(f); });
       parts.forEach((m, i) => { m.visible = !flags.get(FLAGS[i]); m.scale.setScalar(1); m.position.copy(lab.partSpots[i]).setY(1); });
       lab.doors.forEach((d) => { d.open = Boolean(flags.get(d.flag)); d.mesh.position.y = d.open ? -1.3 : 1.1; });

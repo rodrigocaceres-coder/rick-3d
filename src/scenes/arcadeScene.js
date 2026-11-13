@@ -7,7 +7,7 @@ import flags from '../systems/flags.js';
 import { tween, wait, ease, lerp } from '../engine/tween.js';
 import { say, closeDialogue, converse } from '../ui/dialogue.js';
 import { buildArcade, PAD } from '../areas/arcade.js';
-import { Character } from '../objects/models.js';
+import { Character, PARTS } from '../objects/models.js';
 import { buildJerry } from '../objects/family.js';
 import { buildGorbi, buildGlorp, buildSoda, buildTicket, buildBomb } from '../objects/aliens.js';
 import { Portal } from '../objects/portal.js';
@@ -51,7 +51,7 @@ function turnTo(now, want, k) {
   return now + d * Math.min(1, k);
 }
 
-// Everything that happens at Blips and Chitz. api (from main.js): { camera, state(), setState(name), startPlay(), toGarage() }
+// Everything that happens at Blips and Chitz. api (from main.js): { camera, state(), setState(name), startPlay(), toLab() }
 export function createArcade({ scene, morty, api }) {
   const set = buildArcade();
   set.group.visible = false;
@@ -71,6 +71,8 @@ export function createArcade({ scene, morty, api }) {
   portal.position.copy(spots.portal);
   const flySoda = buildSoda(1);
   flySoda.visible = false;
+  const flyCrystal = PARTS[0].make({ parent: set.group });
+  flyCrystal.visible = false;
   set.group.add(gorbi.group, glorp.group, jerry.group, portal.group, flySoda);
 
   const world = {
@@ -83,10 +85,11 @@ export function createArcade({ scene, morty, api }) {
 
   function refresh() {
     set.soda.visible = !flags.get('hasSoda');
+    set.crystal.visible = !flags.get('hasCrystal');
   }
 
   function goal() {
-    if (flags.get('hasSoda')) return text.goals.done;
+    if (flags.get('hasCrystal')) return text.goals.done;
     if (flags.get('wonTickets')) return text.goals.prize;
     return flags.get('metGorbi') ? text.goals.play : text.goals.start;
   }
@@ -102,31 +105,54 @@ export function createArcade({ scene, morty, api }) {
     });
   }
 
-  // Gorbi climbs nothing, reaches up, and throws the soda over the counter
-  async function giveSoda() {
+  // Something flies off the top shelf, over the counter, into Morty's hands
+  async function toss(prop, shelfProp, from, caption) {
+    shelfProp.visible = false;
+    const to = morty.position.clone().setY(0.95);
+    prop.visible = true;
+    await tween(0.75, (t) => {
+      prop.position.lerpVectors(from, to, t);
+      prop.position.y += Math.sin(t * Math.PI) * 0.9;
+      prop.rotation.z = t * Math.PI * 4;
+    }, ease.linear);
+    prop.visible = false;
+    tween(0.3, (t) => { morty.squash = 1 - 0.18 * Math.sin(t * Math.PI); });
+    audio.sfx('pickup.mp3');
+    hud.caption(caption);
+    await wait(1.5);
+    hud.caption('');
+  }
+
+  // Gorbi reaches up and throws the prizes over the counter: first the crystal, then the soda
+  async function givePrize(what) {
     const mid = gorbi.position.clone().lerp(morty.position, 0.5);
     rig.cut({ pos: V(mid.x + 4.6, 2.2, mid.z + 4.4), look: V(mid.x - 0.3, 1.6, mid.z - 0.4), fov: 36 });
     stage.gorbiShelf = true;
     await wait(0.5);
-    set.soda.visible = false;
-    const from = spots.soda.clone(), to = morty.position.clone().setY(0.95);
-    flySoda.visible = true;
-    await tween(0.75, (t) => {
-      flySoda.position.lerpVectors(from, to, t);
-      flySoda.position.y += Math.sin(t * Math.PI) * 0.9;
-      flySoda.rotation.z = t * Math.PI * 4;
-    }, ease.linear);
-    flySoda.visible = false;
+    if (what === 'crystal') await toss(flyCrystal, set.crystal, spots.crystal.clone(), text.got.crystal);
+    else await toss(flySoda, set.soda, spots.soda.clone(), text.got.soda);
     stage.gorbiShelf = false;
-    tween(0.3, (t) => { morty.squash = 1 - 0.18 * Math.sin(t * Math.PI); });
-    audio.sfx('pickup.mp3');
-    hud.caption(text.got.soda);
-    await wait(1.6);
-    hud.caption('');
+  }
+
+  // The crystal clicks into the gun and it fires once more: a portal to Shrimp Rick's lab
+  async function openLabPortal() {
+    const p = portal.position;
+    rig.cut({ pos: V(p.x + 3.2, 2.0, p.z + 5.2), look: V(p.x, 1.3, p.z), fov: 36 });
+    morty.faceToward(p);
+    morty.animate(0.016, 0);
+    await wait(0.4);
+    hud.flash(0.8);
+    rig.shake(0.5);
+    await portal.open();
+    rig.pushIn(0.1, 3);
+    await wait(0.9);
   }
 
   const usable = [
-    { label: 'Talk', at: () => spots.gorbi, radius: 2.4, hintY: 2.5, run: () => talk(text.gorbi, () => spots.gorbi, 1.75, (d) => (d.give ? giveSoda() : null)) },
+    { label: 'Talk', at: () => spots.gorbi, radius: 2.4, hintY: 2.5, run: async () => {
+      const todo = await talk(text.gorbi, () => spots.gorbi, 1.75, (d) => (d.give ? givePrize(d.give) : null));
+      if (todo.some((d) => d.portal)) await openLabPortal();
+    } },
     { label: 'Talk', at: () => glorp.position, radius: 2.0, hintY: 1.8, run: talkGlorp },
     { label: 'Talk', at: () => jerry.position, radius: 2.0, hintY: 2.3, run: () => talk(text.jerry, () => jerry.position, 1.4) },
     { label: 'Play', at: () => spots.podium, radius: 1.6, hintY: 1.5, run: podium },
@@ -407,8 +433,8 @@ export function createArcade({ scene, morty, api }) {
     await hud.fade(0, 0.35);
   }
 
-  // ---- Leaving: walk into the portal home ----
-  async function jumpHome() {
+  // ---- Leaving: walk into the portal to the lab ----
+  async function jumpToLab() {
     leaving = true;
     api.setState('cutscene');
     hud.cinema(true); hud.prompt('');
@@ -424,7 +450,7 @@ export function createArcade({ scene, morty, api }) {
     hud.flash(1, 0.5);
     await hud.fade(1, 0.5);
     leaving = false;
-    api.toGarage();
+    api.toLab();
   }
 
   const tmp = new THREE.Vector3();
@@ -455,6 +481,7 @@ export function createArcade({ scene, morty, api }) {
       await tween(0.45, (t) => { morty.position.lerpVectors(spots.portal, a, t); morty.scale = 0.2 + 0.8 * t; morty.mesh.position.y = Math.sin(t * Math.PI) * 0.5; }, ease.out);
       morty.mesh.position.y = 0; morty.scale = 1;
       rig.shake(0.15);
+      if (!flags.get('hasCrystal')) portal.close(0.4); // the gun's last charge: no way back until Morty has the crystal
       await wait(1.2);
       hud.caption('');
       if (!flags.get('sawArcade')) {
@@ -472,7 +499,7 @@ export function createArcade({ scene, morty, api }) {
     tick(dt) {
       cooldown -= dt;
       const m = morty.position;
-      if (!leaving && Math.hypot(m.x - portal.position.x, m.z - portal.position.z) < 0.85) { jumpHome(); return; }
+      if (!leaving && portal.isOpen && Math.hypot(m.x - portal.position.x, m.z - portal.position.z) < 0.85) { jumpToLab(); return; }
       let best = null, bestD = Infinity;
       for (const u of usable) {
         const d = u.at().distanceTo(m);

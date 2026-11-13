@@ -10,7 +10,6 @@ import flags from './systems/flags.js';
 import save from './systems/save.js';
 import { buildGarage } from './areas/garage.js';
 import { Model, Character, buildRick, buildGun } from './objects/models.js';
-import { cyl, glow } from './engine/toon.js';
 import { Player } from './objects/player.js';
 import { Portal } from './objects/portal.js';
 import { coldOpen, afterColdOpen, garageArrival } from './scenes/coldOpen.js';
@@ -41,15 +40,10 @@ const gun = new Model(buildGun());
 const portal = new Portal();                       // the one Morty opens and walks into
 const introPortal = new Portal({ y: 3.0 });        // the one Rick falls out of, high in the air
 portal.position.set(0.9, 0, -4.4);
-const arcadePortal = new Portal({ radius: 1.05, y: 1.3 }); // Rick's vial opens this one, to Blips and Chitz
-arcadePortal.position.set(-6.4, 0, 3.4);
-arcadePortal.group.rotation.y = 0.35;
-const vial = cyl(0.06, 0.18, glow(0x7dff4a, 1.6), { line: 0.015 });
-vial.visible = false;
 const gunLight = new THREE.PointLight(0x5dff2e, 0, 6, 1.5);
 gunLight.position.set(garage.spots.gun.x, 1.7, garage.spots.gun.z + 0.6);
 scene.add(morty.group);
-garage.group.add(rick.group, gun.group, portal.group, introPortal.group, arcadePortal.group, vial, gunLight);
+garage.group.add(rick.group, gun.group, portal.group, introPortal.group, gunLight);
 
 // Floating Z's over sleeping Rick
 const zzz = [0, 1, 2].map(() => {
@@ -81,10 +75,10 @@ const house = createHouse({
   api: { camera, setState(s) { state = s; }, startPlay, toGarage: houseToGarage },
 });
 
-// ---- Blips and Chitz: a side trip through Rick's vial portal, for the arcade soda ----
+// ---- Blips and Chitz: where the gun's last charge goes. The Focus Crystal is the top prize. ----
 const arcade = createArcade({
   scene, morty,
-  api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toGarage: arcadeToGarage },
+  api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toLab: arcadeToLab },
 });
 
 // ---- Boss fight vs Shrimp Rick, staged in the garage ----
@@ -96,7 +90,7 @@ const usable = [
     label: 'Talk', at: () => garage.spots.rick, radius: 2.3, hintY: 1.7, when: () => true,
     async run() {
       const rickPos = garage.spots.rick;
-      const todo = await converse(dialogue.rick, {
+      await converse(dialogue.rick, {
         onLine(line) {
           G.rickAwake = line.speaker === 'Rick'; // he lifts his head only for his own lines
           rig.cut(G.rickAwake ? shotOn(rickPos, morty.position, 0.9) : shotOn(morty.position, rickPos));
@@ -104,7 +98,6 @@ const usable = [
         },
       });
       G.rickAwake = false;
-      if (todo.some((d) => d.vial)) await throwVial();
     },
   },
   {
@@ -122,34 +115,9 @@ const usable = [
 
 function garageGoal() {
   if (flags.get('bossBeaten')) return 'Episode over. Nobody touch the gun.';
-  const soda = flags.get('arcadeOpen') && !flags.get('hasSoda') ? ' Or get Rick\'s soda first: Blips and Chitz portal.' : '';
-  return (flags.get('portalOpen') ? 'Step into the portal.' : flags.get('rickExplained') ? 'Check the humming portal gun.' : 'Find out what broke. Talk to Rick.') + soda;
+  return flags.get('portalOpen') ? 'Step into the portal.' : flags.get('rickExplained') ? 'Check the humming portal gun.' : 'Find out what broke. Talk to Rick.';
 }
 
-// Morty throws Rick's vial at the wall by the door: a portal to Blips and Chitz splats open
-async function throwVial() {
-  const to = arcadePortal.position;
-  rig.cut({ pos: V(-1.2, 2.1, 6.4), look: V(-4.6, 1.2, 2.0), fov: 40 });
-  morty.faceToward(to);
-  morty.animate(0.016, 0);
-  await wait(0.3);
-  const from = morty.position.clone().setY(1.1), end = V(to.x, 1.3, to.z);
-  vial.visible = true;
-  morty.parts.arms[1].rotation.x = -2.4;
-  audio.sfx('menu_move.mp3');
-  await tween(0.6, (t) => {
-    vial.position.lerpVectors(from, end, t);
-    vial.position.y += Math.sin(t * Math.PI) * 1.2;
-    vial.rotation.z = t * 14;
-  }, ease.linear);
-  vial.visible = false;
-  morty.parts.arms[1].rotation.x = 0;
-  hud.flash(0.7);
-  rig.shake(0.5);
-  await arcadePortal.open();
-  rig.pushIn(0.12, 3);
-  await wait(0.9);
-}
 
 // The gun fires its last charge on its own
 async function firePortal() {
@@ -165,7 +133,7 @@ async function firePortal() {
   await wait(0.4);
 }
 
-// Morty grabs the gun and jumps into the portal: on to the lab
+// Morty grabs the gun and jumps into the portal: on to Blips and Chitz
 async function enterPortal() {
   state = 'cutscene';
   hud.cinema(true);
@@ -184,25 +152,6 @@ async function enterPortal() {
   hud.flash(1, 0.5);
   await hud.fade(1, 0.5);
   portal.close(0.1);
-  await toLab(0);
-}
-
-// Into the vial portal: on to Blips and Chitz
-async function enterArcade() {
-  state = 'cutscene';
-  hud.cinema(true);
-  hud.prompt('');
-  const from = morty.position.clone(), to = arcadePortal.position.clone();
-  rig.move({ pos: V(to.x + 2.5, 1.4, to.z + 5.2), look: V(to.x, 1.3, to.z), fov: 32 }, 0.8);
-  audio.sfx('portal.mp3');
-  await tween(0.7, (t) => {
-    morty.position.lerpVectors(from, to, t);
-    morty.mesh.position.y = t * 0.5;
-    morty.mesh.rotation.z = t * 5;
-    morty.scale = 1 - t * 0.85;
-  }, ease.in);
-  hud.flash(1, 0.5);
-  await hud.fade(1, 0.5);
   await toArcade();
 }
 
@@ -213,22 +162,10 @@ async function toArcade() {
   await arcade.enter();
 }
 
-// Back out of the arcade: Morty tumbles out of the vial portal in the garage
-async function arcadeToGarage() {
+// The Focus Crystal fixes the gun enough for one more jump: from the arcade to Shrimp Rick's lab
+async function arcadeToLab() {
   arcade.leave();
-  resetMortyPose();
-  area = 'garage';
-  garage.group.visible = true;
-  rig.setLimits(GARAGE_LIMITS);
-  const from = arcadePortal.position.clone(), stop = V(-5.6, 0, 2.2);
-  morty.position.copy(from);
-  morty.group.rotation.y = 2.4;
-  rig.follow(morty, true);
-  audio.music('smith_house.m4a');
-  hud.fade(0, 0.4);
-  await tween(0.45, (t) => { morty.position.lerpVectors(from, stop, t); morty.scale = 0.2 + 0.8 * t; morty.mesh.position.y = Math.sin(t * Math.PI) * 0.5; }, ease.out);
-  resetMortyPose();
-  startPlay();
+  await toLab(0);
 }
 
 // ---- The door between the house and the garage ----
@@ -296,7 +233,6 @@ function toBoss(opts) {
   area = 'garage';
   garage.group.visible = true;
   gun.group.visible = false; // Morty is holding it
-  arcadePortal.isOpen = false; arcadePortal.group.visible = false; // the vial portal closed while he was gone
   checkpoint({ area: 'boss', phase: opts?.phase ?? 1 });
   return boss.start(opts);
 }
@@ -340,7 +276,6 @@ async function continueFrom(saved) {
   afterColdOpen(G);
   gun.group.visible = !flags.get('bossBeaten');
   if (flags.get('portalOpen') && !flags.get('bossBeaten')) { gunLight.intensity = 0; portal.open(); }
-  if (flags.get('arcadeOpen') && !flags.get('bossBeaten') && saved.area !== 'boss') arcadePortal.open();
   await wait(0.3);
   if (saved.area === 'boss') {
     gun.group.visible = false;
@@ -387,7 +322,6 @@ function garageTick() {
   } else hud.prompt('');
 
   if (portal.isOpen && state === 'play' && Math.hypot(morty.position.x - portal.position.x, morty.position.z - portal.position.z) < 0.85) enterPortal();
-  if (arcadePortal.isOpen && state === 'play' && Math.hypot(morty.position.x - arcadePortal.position.x, morty.position.z - arcadePortal.position.z) < 0.85) enterArcade();
 }
 
 // ---- Main loop ----
@@ -439,7 +373,6 @@ function tick(dt) {
     garage.update(time);
     portal.update(time);
     introPortal.update(time);
-    arcadePortal.update(time);
   }
   boss.update(dt, time);
   house.update(dt, time);
@@ -475,8 +408,8 @@ async function boot() {
   }
   if (params.has('arcade')) {
     afterColdOpen(G);
-    flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, hasSandwich: true, hasPhone: true, hasVial: true, arcadeOpen: true, glorpTip: params.get('arcade') === 'tip' });
-    arcadePortal.open();
+    flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, portalOpen: true, hasSandwich: true, hasPhone: true, glorpTip: params.get('arcade') === 'tip' });
+    gun.group.visible = false;
     return toArcade();
   }
   if (params.has('garage')) {

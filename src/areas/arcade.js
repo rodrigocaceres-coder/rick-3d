@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { box, cyl, ball, cone, decal, soft, glow } from '../engine/toon.js';
 import { buildSoda } from '../objects/aliens.js';
+import { PARTS } from '../objects/models.js';
 
 // Blips and Chitz at two in the morning: dark carpet with neon squiggles, rows of cabinets with glowing screens,
 // Gorbi's prize counter on the left of the back wall (the soda on the top shelf, in a spotlight), a claw machine,
@@ -106,11 +107,13 @@ export function buildArcade() {
     else if (i % 3 === 1) cone(0.13, 0.3, col, add({ x, y: y + 0.15, z: -5.65, line: 0.02 }));
     else box(0.24, 0.24, 0.24, col, add({ x, y: y + 0.12, z: -5.65, ry: 0.4, line: 0.02 }));
   }
-  // Top shelf: one can of soda on a little stand, in a spotlight. The grand prize.
-  box(1.2, 0.08, 0.5, 0xa9713f, add({ x: px, y: 3.1, z: -5.7 }));
-  cyl(0.32, 0.14, 0xffd84c, add({ x: px, y: 3.21, z: -5.65 }));
-  const soda = buildSoda(1.7);
-  soda.position.set(px, 3.28, -5.6);
+  // Top shelf, in a spotlight: the grand prize. Rick's Focus Crystal (traded for nachos last night), and a soda next to it.
+  box(1.6, 0.08, 0.5, 0xa9713f, add({ x: px, y: 3.1, z: -5.7 }));
+  cyl(0.3, 0.14, 0xffd84c, add({ x: px - 0.3, y: 3.21, z: -5.65 }));
+  const crystal = PARTS[0].make({ parent: g });
+  crystal.position.set(px - 0.3, 3.62, -5.6);
+  const soda = buildSoda(1.3);
+  soda.position.set(px + 0.42, 3.14, -5.6);
   g.add(soda);
   const spot = new THREE.SpotLight(0xfff2c0, 9, 5, 0.45, 0.5, 1.2);
   spot.position.set(px, 4.6, -4.4);
@@ -219,12 +222,14 @@ export function buildArcade() {
       jerry: new THREE.Vector3(-2.6, 0, -3.9),
       podium: new THREE.Vector3(0.2, 0, 3.6),
       padCenter: new THREE.Vector3(5, 0, -0.2),
-      soda: new THREE.Vector3(px, 3.28, -5.6),
+      soda: new THREE.Vector3(px + 0.42, 3.3, -5.6),
+      crystal: new THREE.Vector3(px - 0.3, 3.62, -5.6),
     },
-    soda, tiles, button, claw,
+    soda, crystal, tiles, button, claw,
     // mode: 'idle' (slow chase lights), 'play' (fast), 'win' (everything flashes)
     update(time, mode = 'idle') {
       soda.rotation.y = time * 0.8;
+      crystal.rotation.y = time * 1.5; crystal.position.y = 3.62 + Math.sin(time * 2.5) * 0.05;
       claw.position.x = cx + Math.sin(time * 0.7) * 0.35;
       claw.position.z = -5.0 + Math.sin(time * 0.53) * 0.3;
       button.scale.setScalar(1 + 0.08 * Math.sin(time * 6));

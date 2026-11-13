@@ -1,193 +1,446 @@
 {
-  "_note": "Blips and Chitz. Gorbi, Glorp and Jerry are talked to; the Ticket Tumble machine talks through its podium. Lines adapted from STORY.md.",
+  "_note": "Blips and Chitz: where the cracked gun's last charge goes. Rick's bender was here; the Focus Crystal fell back through his portal onto the prize counter; 5000 Ticket Tumble tickets buy it back (plus a soda), and the crystal powers one more portal, to Shrimp Rick's lab.",
   "arrive": [
-    { "speaker": "Morty", "mood": "neutral", "text": "Blips and Chitz. At two in the morning. Who is even here at two in the morning?" }
+    {
+      "speaker": "Morty",
+      "mood": "neutral",
+      "text": "Blips and Chitz. At two in the morning. Who is even here at two in the morning?"
+    }
   ],
   "goals": {
-    "start": "Win the Arcade Soda. Ask at the prize counter.",
+    "start": "The Focus Crystal is here. Ask at the prize counter.",
     "play": "Win 5000 tickets on the Ticket Tumble floor.",
     "prize": "5000 tickets! Cash them in with Gorbi.",
-    "done": "Got the soda. Walk into the portal to go home."
+    "done": "Step into the portal to Shrimp Rick's lab."
   },
-  "got": { "soda": "GOT: ARCADE SODA. IT HEALS AND MAKES YOU FAST IN A FIGHT." },
-  "hint": "SPACE: talk or play. Walk into the portal to go home.",
+  "got": {
+    "crystal": "GOT: THE FOCUS CRYSTAL. GUN PART 1 OF 3.",
+    "soda": "GOT: ARCADE SODA. IT HEALS AND MAKES YOU FAST IN A FIGHT."
+  },
+  "hint": "SPACE: talk or play.",
   "tumbleHint": "Arrows or WASD: run. Grab tickets. Get off a red ring before it blows.",
   "win": "5000 TICKETS. GO SEE GORBI.",
   "gorbi": {
     "entry": [
-      { "if": "hasSoda", "goto": "after" },
-      { "if": "wonTickets", "goto": "prize" },
-      { "if": "metGorbi", "goto": "again" },
-      { "goto": "intro" }
+      {
+        "if": "hasCrystal",
+        "goto": "after"
+      },
+      {
+        "if": "wonTickets",
+        "goto": "prize"
+      },
+      {
+        "if": "metGorbi",
+        "goto": "again"
+      },
+      {
+        "goto": "intro"
+      }
     ],
     "nodes": {
       "intro": {
-        "set": { "metGorbi": true },
+        "set": {
+          "metGorbi": true
+        },
         "lines": [
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Welcome to the prize counter. Try to look excited." },
-          { "speaker": "Morty", "mood": "neutral", "text": "Is that a soda? On the top shelf? In a spotlight?" },
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Arcade Soda. Five thousand tickets. I don't make the prices. I just make you sad." }
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Welcome to the prize counter. Try to look excited."
+          },
+          {
+            "speaker": "Morty",
+            "mood": "neutral",
+            "text": "That glowing crystal on the top shelf. How much?"
+          },
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Five thousand tickets. I don't make the prices. I just make you sad."
+          }
         ],
         "choices": [
-          { "text": "Can I pay with a sandwich?", "if": "hasSandwich", "goto": "sandwich" },
-          { "text": "Why is a soda in a spotlight?", "goto": "spotlight" },
-          { "text": "How do I get tickets?", "goto": "how" }
+          {
+            "text": "Can I pay with a sandwich?",
+            "if": "hasSandwich",
+            "goto": "sandwich"
+          },
+          {
+            "text": "Where did you even get it?",
+            "goto": "spotlight"
+          },
+          {
+            "text": "How do I get tickets?",
+            "goto": "how"
+          }
         ]
       },
       "sandwich": {
         "lines": [
-          { "speaker": "Gorbi", "mood": "angry", "text": "No, you can't pay in sandwich." }
+          {
+            "speaker": "Gorbi",
+            "mood": "angry",
+            "text": "No, you can't pay in sandwich."
+          }
         ],
         "goto": "how"
       },
       "spotlight": {
         "lines": [
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Some old guy came in last night. Drank eleven of them. Threw up a portal." },
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Management made it the top prize so nobody can do that again." },
-          { "speaker": "Morty", "mood": "neutral", "text": "...That was my grandpa." },
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Cool. Still five thousand." }
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Some old guy drank eleven sodas and threw up a portal. Then that fell out of it. Lost and found goes on the prize shelf."
+          },
+          {
+            "speaker": "Morty",
+            "mood": "neutral",
+            "text": "...That was my grandpa."
+          },
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Cool. Still five thousand."
+          }
         ],
         "goto": "how"
       },
       "how": {
         "lines": [
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Ticket Tumble. The big glowing floor. Catch tickets, don't catch bombs. Thrilling." }
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Ticket Tumble. The big glowing floor. Catch tickets, don't catch bombs. Thrilling."
+          }
         ]
       },
       "again": {
         "lines": [
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Five thousand tickets. The number didn't get smaller while you were gone." }
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Five thousand tickets. The number didn't get smaller while you were gone."
+          }
         ]
       },
       "prize": {
-        "set": { "hasSoda": true },
+        "set": {
+          "hasCrystal": true
+        },
         "lines": [
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Five thousand. Huh. Nobody's ever done that." },
-          { "speaker": "Gorbi", "mood": "angry", "text": "Now I have to get the ladder." }
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Five thousand. Huh. Nobody's ever done that."
+          },
+          {
+            "speaker": "Gorbi",
+            "mood": "angry",
+            "text": "Now I have to get the ladder."
+          }
         ],
-        "do": { "give": "soda" },
+        "do": {
+          "give": "crystal"
+        },
         "goto": "prize2"
       },
       "prize2": {
+        "set": {
+          "hasSoda": true
+        },
         "lines": [
-          { "speaker": "Gorbi", "mood": "happy", "text": "One Arcade Soda. Please leave." },
-          { "speaker": "Morty", "mood": "happy", "text": "It's fizzing. Through the can. Is that normal?" },
-          { "speaker": "Gorbi", "mood": "neutral", "text": "Nothing here is normal. That's the brand." }
-        ]
+          {
+            "speaker": "Gorbi",
+            "mood": "happy",
+            "text": "One Focus Crystal. Please leave."
+          },
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Also take this soda. Your grandpa left it. It's been fizzing at me all night."
+          }
+        ],
+        "do": {
+          "give": "soda"
+        },
+        "goto": "prize3"
       },
       "after": {
         "lines": [
-          { "speaker": "Gorbi", "mood": "neutral", "text": "No refunds. Your portal is right there. Please use it." }
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "No refunds. Your portal is right there. Please use it."
+          }
         ]
+      },
+      "prize3": {
+        "lines": [
+          {
+            "speaker": "Morty",
+            "mood": "happy",
+            "text": "The crystal clicked into the gun! The screen says... \"SHRIMP RICK'S LAB\". Of course it does."
+          },
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "Do your portal somewhere else. Like, away from my counter."
+          }
+        ],
+        "do": {
+          "portal": true
+        }
       }
     }
   },
   "glorp": {
     "entry": [
-      { "if": "glorpTip", "goto": "again" },
-      { "goto": "intro" }
+      {
+        "if": "glorpTip",
+        "goto": "again"
+      },
+      {
+        "goto": "intro"
+      }
     ],
     "nodes": {
       "intro": {
         "lines": [
-          { "speaker": "Glorp", "mood": "neutral", "text": "Kid. I haven't blinked since the second quarter of last decade." },
-          { "speaker": "Glorp", "mood": "neutral", "text": "You going for the soda? Then listen." }
+          {
+            "speaker": "Glorp",
+            "mood": "neutral",
+            "text": "Kid. I haven't blinked since the second quarter of last decade."
+          },
+          {
+            "speaker": "Glorp",
+            "mood": "neutral",
+            "text": "You going for the crystal? Then listen."
+          }
         ],
         "choices": [
-          { "text": "I'm listening.", "set": { "glorpTip": true }, "goto": "tip" },
-          { "text": "Please blink.", "goto": "blink" }
+          {
+            "text": "I'm listening.",
+            "set": {
+              "glorpTip": true
+            },
+            "goto": "tip"
+          },
+          {
+            "text": "Please blink.",
+            "goto": "blink"
+          }
         ]
       },
       "tip": {
         "lines": [
-          { "speaker": "Glorp", "mood": "happy", "text": "Once a round, a golden ticket drops. A thousand points. And it runs." },
-          { "speaker": "Morty", "mood": "neutral", "text": "Tickets can run?" },
-          { "speaker": "Glorp", "mood": "happy", "text": "In here? Everything can run. Don't chase where it is. Cut it off." },
-          { "speaker": "Glorp", "mood": "neutral", "text": "Only the gold ones matter, kid. Do it for me. Do it for my eyes." }
+          {
+            "speaker": "Glorp",
+            "mood": "happy",
+            "text": "Once a round, a golden ticket drops. A thousand points. And it runs."
+          },
+          {
+            "speaker": "Morty",
+            "mood": "neutral",
+            "text": "Tickets can run?"
+          },
+          {
+            "speaker": "Glorp",
+            "mood": "happy",
+            "text": "In here? Everything can run. Don't chase where it is. Cut it off."
+          },
+          {
+            "speaker": "Glorp",
+            "mood": "neutral",
+            "text": "Only the gold ones matter, kid. Do it for me. Do it for my eyes."
+          }
         ]
       },
       "blink": {
         "lines": [
-          { "speaker": "Glorp", "mood": "angry", "text": "Never. Come back when you're serious." }
+          {
+            "speaker": "Glorp",
+            "mood": "angry",
+            "text": "Never. Come back when you're serious."
+          }
         ]
       },
       "again": {
         "lines": [
-          { "speaker": "Glorp", "mood": "neutral", "text": "Gold ones, kid. Cut it off. Don't chase it.", "if": "!wonTickets" },
-          { "speaker": "Glorp", "mood": "happy", "text": "You won? I'm not crying. I physically can't.", "if": "wonTickets" }
+          {
+            "speaker": "Glorp",
+            "mood": "neutral",
+            "text": "Gold ones, kid. Cut it off. Don't chase it.",
+            "if": "!wonTickets"
+          },
+          {
+            "speaker": "Glorp",
+            "mood": "happy",
+            "text": "You won? I'm not crying. I physically can't.",
+            "if": "wonTickets"
+          }
         ]
       }
     }
   },
   "jerry": {
     "entry": [
-      { "if": "metArcadeJerry", "goto": "again" },
-      { "goto": "intro" }
+      {
+        "if": "metArcadeJerry",
+        "goto": "again"
+      },
+      {
+        "goto": "intro"
+      }
     ],
     "nodes": {
       "intro": {
-        "set": { "metArcadeJerry": true },
+        "set": {
+          "metArcadeJerry": true
+        },
         "lines": [
-          { "speaker": "Jerry", "mood": "happy", "text": "Morty! I'm not lost, I'm networking. In an arcade. For aliens." },
-          { "speaker": "Morty", "mood": "angry", "text": "Dad? You were just in the living room. How did you even get here?" },
-          { "speaker": "Jerry", "mood": "happy", "text": "Great question. Do aliens need lawn chairs? I'm asking for a pitch." },
-          { "speaker": "Jerry", "mood": "neutral", "text": "Don't tell your mother about the chair. It's in a better place now.", "if": "jerrySat" }
+          {
+            "speaker": "Jerry",
+            "mood": "happy",
+            "text": "Morty! I'm not lost, I'm networking. In an arcade. For aliens."
+          },
+          {
+            "speaker": "Morty",
+            "mood": "angry",
+            "text": "Dad? You were just in the living room. How did you even get here?"
+          },
+          {
+            "speaker": "Jerry",
+            "mood": "happy",
+            "text": "Great question. Do aliens need lawn chairs? I'm asking for a pitch."
+          },
+          {
+            "speaker": "Jerry",
+            "mood": "neutral",
+            "text": "Don't tell your mother about the chair. It's in a better place now.",
+            "if": "jerrySat"
+          }
         ]
       },
       "again": {
         "lines": [
-          { "speaker": "Jerry", "mood": "neutral", "text": "The claw machine won't return my calls." }
+          {
+            "speaker": "Jerry",
+            "mood": "neutral",
+            "text": "The claw machine won't return my calls."
+          }
         ]
       }
     }
   },
   "machine": {
     "entry": [
-      { "if": "wonTickets", "goto": "done" },
-      { "if": "tumblePlayed", "goto": "again" },
-      { "goto": "intro" }
+      {
+        "if": "wonTickets",
+        "goto": "done"
+      },
+      {
+        "if": "tumblePlayed",
+        "goto": "again"
+      },
+      {
+        "goto": "intro"
+      }
     ],
     "nodes": {
       "intro": {
         "lines": [
-          { "speaker": "Ticket Tumble", "mood": "happy", "text": "TICKET TUMBLE! 5000 tickets in 45 seconds! Tickets 100! Bombs minus 300! Gold tickets: a MYSTERY!" },
-          { "speaker": "Morty", "mood": "neutral", "text": "Not a mystery. Glorp told me. They run.", "if": "glorpTip" }
+          {
+            "speaker": "Ticket Tumble",
+            "mood": "happy",
+            "text": "TICKET TUMBLE! 5000 tickets in 45 seconds! Tickets 100! Bombs minus 300! Gold tickets: a MYSTERY!"
+          },
+          {
+            "speaker": "Morty",
+            "mood": "neutral",
+            "text": "Not a mystery. Glorp told me. They run.",
+            "if": "glorpTip"
+          }
         ],
         "choices": [
-          { "text": "Play.", "do": { "play": true } },
-          { "text": "Not now." }
+          {
+            "text": "Play.",
+            "do": {
+              "play": true
+            }
+          },
+          {
+            "text": "Not now."
+          }
         ]
       },
       "again": {
         "lines": [
-          { "speaker": "Ticket Tumble", "mood": "happy", "text": "BACK FOR MORE! The floor believes in you!" }
+          {
+            "speaker": "Ticket Tumble",
+            "mood": "happy",
+            "text": "BACK FOR MORE! The floor believes in you!"
+          }
         ],
         "choices": [
-          { "text": "Play.", "do": { "play": true } },
-          { "text": "Not now." }
+          {
+            "text": "Play.",
+            "do": {
+              "play": true
+            }
+          },
+          {
+            "text": "Not now."
+          }
         ]
       },
       "done": {
         "lines": [
-          { "speaker": "Ticket Tumble", "mood": "happy", "text": "HIGH SCORE! You are legally a legend." }
+          {
+            "speaker": "Ticket Tumble",
+            "mood": "happy",
+            "text": "HIGH SCORE! You are legally a legend."
+          }
         ],
         "choices": [
-          { "text": "Play for fun.", "do": { "play": true } },
-          { "text": "Leave." }
+          {
+            "text": "Play for fun.",
+            "do": {
+              "play": true
+            }
+          },
+          {
+            "text": "Leave."
+          }
         ]
       }
     }
   },
   "lost": {
-    "entry": [{ "goto": "lost" }],
+    "entry": [
+      {
+        "goto": "lost"
+      }
+    ],
     "nodes": {
       "lost": {
         "lines": [
-          { "speaker": "Ticket Tumble", "mood": "angry", "text": "TIME! {score} tickets! So close! Or not! I can't do math!" }
+          {
+            "speaker": "Ticket Tumble",
+            "mood": "angry",
+            "text": "TIME! {score} tickets! So close! Or not! I can't do math!"
+          }
         ],
         "choices": [
-          { "text": "Again.", "do": { "play": true } },
-          { "text": "Take a break." }
+          {
+            "text": "Again.",
+            "do": {
+              "play": true
+            }
+          },
+          {
+            "text": "Take a break."
+          }
         ]
       }
     }
