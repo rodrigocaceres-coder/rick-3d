@@ -277,7 +277,7 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Rejected, and why:
   - Turning the glow off by default: it is a big part of the look (portals, goo, tanks), and this Mac runs it at 60.
   - Showing the aim guide only while a key is held: one more control to explain at the demo.
-- Result: The bot played the whole episode start to end with no console errors after the two fixes. Continue was checked from a lab save and a boss phase 2 save. Production build checked in vite preview: start card loads, no failed files, no errors. Not checked: real-time feel on Rodrigo's machine, and the automatic glow switch with real slow frames (the preview pane throttles frames, so it was tested by feeding it frame times).
+- Result: The bot played the whole episode start to end with no console errors after the two fixes. Continue was checked from a lab save and a boss phase 2 save. A second bot pass took the other branches: wrong answers at Desk Rick and Guard Rick (number goes up, passed checkpoints stay passed), the soda given to Cop Rick (gone from the boss fight), losing the boss fight on purpose (TRY AGAIN, same phase, items back, then a win with perfect timing presses), and a lost Ticket Tumble round (tickets banked, Take a break). Production build checked in vite preview: start card loads, no failed files, no errors. Not checked: real-time feel on Rodrigo's machine, and the automatic glow switch with real slow frames (the preview pane throttles frames, so it was tested by feeding it frame times).
 - Evidence files: process/screenshots/2026-11-13_s9_aim-guide-room2.jpg
 - Chat link: Claude Code session "next session" (desktop app)
 - Why:
