@@ -39,8 +39,9 @@ export function createLab({ scene, morty, api }) {
     new Guard([V(39.5, 0, -3.7), V(39.5, 0, 3.7)], { x0: 38, x1: 41 }, 2.6),
   ];
   const prawn = new Character(buildShrimp('rebel'));
-  prawn.position.set(18.0, 0, 3.4); // front corner, away from the beam emitter on the back wall
-  prawn.group.rotation.y = 2.5;
+  // Back corner by the door: the guard never faces this way, and it is out of talking range of the beam emitter
+  prawn.position.set(16.9, 0, -3.9);
+  prawn.group.rotation.y = 0.8;
   const shrimpRick = new Character(buildShrimp('rick'));
   shrimpRick.group.visible = false;
   lab.group.add(prawn.group, shrimpRick.group, ...guards.map((g) => g.model.group));
@@ -252,11 +253,10 @@ export function createLab({ scene, morty, api }) {
 
   const roomOf = (x) => (x < 16 ? 0 : x < 32 ? 1 : 2);
 
-  async function fire() {
-    firing = true;
-    // Snap to the nearest of 8 directions, so aiming with the keyboard is predictable
-    const a = Math.round(morty.group.rotation.y / (Math.PI / 4)) * (Math.PI / 4);
-    morty.group.rotation.y = a;
+  // Where a shot fired right now would go: the same rules fire() uses, with no side effects.
+  // Used by fire() and by the aim guide on the floor.
+  function planShot() {
+    const a = Math.round(morty.group.rotation.y / (Math.PI / 4)) * (Math.PI / 4); // nearest of 8 directions
     const dx = Math.sin(a), dz = Math.cos(a);
     const from = morty.position;
     let d = 0.6, hitGuard = null, inLaser = false;
@@ -268,6 +268,17 @@ export function createLab({ scene, morty, api }) {
     }
     if (!hitGuard && d < range()) d -= 0.55; // hit a wall: step back so the portal stands in front of it
     const end = V(from.x + dx * d, 0, from.z + dz * d);
+    const inGoo = lab.hazards.some((r) => inRect(end.x, end.z, r, 0.3));
+    const onGlass = lab.glass.some((r) => inRect(end.x, end.z, r, 0.4));
+    const fizzle = inLaser ? 'The shot fizzles in the laser.' : d < 1.1 ? 'Too close. Back up and fire again.' : inGoo ? 'The shot fizzles in the goo.' : onGlass ? 'The shot fizzles on the glass.' : '';
+    return { a, dx, dz, d, end, hitGuard, fizzle };
+  }
+
+  async function fire() {
+    firing = true;
+    const { a, dx, dz, d, end, hitGuard, fizzle } = planShot();
+    morty.group.rotation.y = a; // snap, so aiming with the keyboard is predictable
+    const from = morty.position;
 
     audio.sfx('blip.mp3', 0.9);
     shot.visible = true;
@@ -276,10 +287,8 @@ export function createLab({ scene, morty, api }) {
     shot.visible = false;
 
     if (hitGuard) { firing = false; return caught(hitGuard, text.shotGuard[0]); }
-    const inGoo = lab.hazards.some((r) => inRect(end.x, end.z, r, 0.3));
-    const onGlass = lab.glass.some((r) => inRect(end.x, end.z, r, 0.4));
-    if (d < 1.1 || inGoo || onGlass || inLaser) {
-      hud.toast(inLaser ? 'The shot fizzles in the laser.' : d < 1.1 ? 'Too close. Back up and fire again.' : inGoo ? 'The shot fizzles in the goo.' : 'The shot fizzles on the glass.');
+    if (fizzle) {
+      hud.toast(fizzle);
       audio.sfx('menu_move.mp3');
     } else {
       const p = portals[next];
@@ -291,6 +300,34 @@ export function createLab({ scene, morty, api }) {
       p.open(0.3);
     }
     firing = false;
+  }
+
+  // ---- Aim guide: a dotted line on the floor to where the next shot lands. Green: a portal opens there.
+  // Grey: it fizzles. Red: it hits a guard. Aiming in 8 directions on a projector is hard to judge by eye. ----
+  const AIM_DOTS = 40;
+  const aimMats = { ok: new THREE.MeshBasicMaterial({ color: 0x8dff5a, transparent: true, opacity: 0.45, depthWrite: false }),
+    off: new THREE.MeshBasicMaterial({ color: 0xb8c4c8, transparent: true, opacity: 0.3, depthWrite: false }),
+    guard: new THREE.MeshBasicMaterial({ color: 0xff3a3a, transparent: true, opacity: 0.55, depthWrite: false }) };
+  const dotGeo = new THREE.CircleGeometry(0.06, 8).rotateX(-Math.PI / 2);
+  const aimDots = Array.from({ length: AIM_DOTS }, () => { const m = new THREE.Mesh(dotGeo, aimMats.ok); m.visible = false; lab.group.add(m); return m; });
+  const aimRing = new THREE.Mesh(new THREE.RingGeometry(0.32, 0.42, 20).rotateX(-Math.PI / 2), aimMats.ok);
+  aimRing.visible = false;
+  lab.group.add(aimRing);
+  function showAim(on, time = 0) {
+    if (!on) { aimDots.forEach((m) => { m.visible = false; }); aimRing.visible = false; return; }
+    const { dx, dz, d, end, hitGuard, fizzle } = planShot();
+    const mat = hitGuard ? aimMats.guard : fizzle ? aimMats.off : aimMats.ok;
+    const from = morty.position, scroll = (time * 1.2) % 0.35;
+    aimDots.forEach((m, i) => {
+      const k = 0.6 + scroll + i * 0.35;
+      m.visible = k < d;
+      if (!m.visible) return;
+      m.material = mat;
+      m.position.set(from.x + dx * k, 0.035, from.z + dz * k);
+    });
+    aimRing.visible = true;
+    aimRing.material = mat;
+    aimRing.position.set(end.x, 0.04, end.z);
   }
 
   function closePortals() { portals.forEach((p) => { if (p.isOpen) p.close(0.15); }); next = 0; }
@@ -638,6 +675,7 @@ export function createLab({ scene, morty, api }) {
       parts.forEach((mesh, i) => { if (mesh.visible && api.state() === 'play') { mesh.position.y = 1 + Math.sin(time * 2.5 + i) * 0.12; mesh.rotation.y = time * 1.5; } });
       [...portals, bossPortal].forEach((p) => p.update(time));
       beams.forEach((b) => drawBeam(b, time));
+      showAim(api.state() === 'play' && !firing, time);
     },
 
     setCooldown(s) { cooldown = s; },

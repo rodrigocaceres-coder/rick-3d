@@ -256,3 +256,28 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Evidence files: process/screenshots/2026-11-12_s8_room1-crate-on-plate.jpg, _room2-beam-in-plug-v1-wall-fills-frame.jpg and _room3-v1-barrier-hides-laser.jpg (befores), _room3-v2-crate-blocks-laser.jpg, _room3-tripwire-caught.jpg
 - Chat link: Claude Code session "next session" (desktop app)
 - Why:
+
+### Session 9, 2026-11-12 to 11-13 (overnight)
+- Goal: The roadmap is done, so this was a fix session: play the whole episode from a fresh start with a script, fix what breaks, and make the demo safer on an unknown laptop.
+- AI types and tools: code AI (Claude Code, Claude Opus 5.5), running on its own overnight. No image or audio AI.
+- Key prompts (word for word):
+  - "once youre done run next session. run for as long as possible im going to bed"
+- What was built:
+  - A test bot (in the browser console, not in the game) that plays the full episode from New episode: cold open, Beth (rude answer, then the apology and the sandwich), Summer's phone, Jerry's chair, Rick, the gun, Blips and Chitz, all three lab rooms with their new puzzles, Prawnsworth, the Citadel's three checkpoints and the chip, the boss fight with timed presses, the ending, the post-credits gag, and the family's lines after.
+  - Aim guide in the lab: a dotted line on the floor to where the next portal will land. Green: a portal opens there. Grey: the shot fizzles (goo, glass, laser, too close). Red: it hits a guard. It uses the same code as the real shot, so it never lies.
+  - Automatic glow switch: if the game runs under about 25 frames a second for two seconds, it turns the glow off by itself (the same as ?low) and says "Slow laptop: glow off".
+- Key decisions:
+  - The glow switch only fires under 25 fps, not under 60. A projector that runs at 30 Hz would otherwise lose the glow for no reason.
+  - The aim guide stays on all the time in the lab. Keyboard aiming in 8 directions with a tilted camera is hard to judge, and the room 2 beam puzzle needs a straight line.
+- What went wrong or looked weak, and the revision:
+  - Bug from Session 8: Prawnsworth's new spot was inside the room 2 guard's view, so walking up to talk to him got Morty caught. Moved him to the back corner by the door. The guard never faces that corner, and it is out of talking range of the beam emitter.
+  - Bug in the boss fight: a new timing ring showed the last ring's final size for one frame before it started shrinking. Players would see a small flash; the test bot read it as "press now" and missed every time. The ring now starts big.
+  - The bot itself had bugs: it clicked menu items that only take keys, it pressed Space during the fight and spoiled its own timing, and old copies kept running after errors. Fixed in the bot; none of that was in the game.
+  - Speed measured at 1280x720 on this MacBook: about 14 to 15 ms a frame with the glow (60 fps needs under 16.7), 3 to 5 ms with ?low. The glow costs about 10 ms a frame, so a weaker school laptop could drop below 60. That is why the automatic switch exists.
+- Rejected, and why:
+  - Turning the glow off by default: it is a big part of the look (portals, goo, tanks), and this Mac runs it at 60.
+  - Showing the aim guide only while a key is held: one more control to explain at the demo.
+- Result: The bot played the whole episode start to end with no console errors after the two fixes. Continue was checked from a lab save and a boss phase 2 save. Production build checked in vite preview: start card loads, no failed files, no errors. Not checked: real-time feel on Rodrigo's machine, and the automatic glow switch with real slow frames (the preview pane throttles frames, so it was tested by feeding it frame times).
+- Evidence files: process/screenshots/2026-11-13_s9_aim-guide-room2.jpg
+- Chat link: Claude Code session "next session" (desktop app)
+- Why:

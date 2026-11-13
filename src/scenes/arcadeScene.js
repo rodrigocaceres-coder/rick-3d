@@ -460,7 +460,7 @@ export function createArcade({ scene, morty, api }) {
     world,
     goal,
     hint: () => text.hint,
-    debug: { gorbi, glorp, jerry, portal, TUMBLE, get round() { return g; } },
+    debug: { gorbi, glorp, jerry, portal, TUMBLE, usable, get round() { return g; } },
 
     async enter() {
       refresh();

@@ -239,7 +239,7 @@ export function createHouse({ scene, morty, api }) {
   return {
     world: house,
     goal,
-    debug: { beth, summer, jerry, chair, stage },
+    debug: { beth, summer, jerry, chair, stage, usable },
 
     // Walk in. from: 'door' (back from the garage) or 'hall' (start of the episode)
     enter(from = 'door') {

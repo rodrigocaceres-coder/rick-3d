@@ -85,6 +85,7 @@ const ui = {
       let elapsed = 0, done = false;
       const p0 = toScreen(at());
       ring.style.transform = `translate(${p0.x}px, ${p0.y}px)`; // in place before it shows, so it never flashes at the corner
+      ring.style.setProperty('--s', '3.2'); // start big: otherwise it shows the last ring's final size for a frame
       ring.className = 'on';
       ringLabel.textContent = hint;
       ringLabel.style.display = hint ? '' : 'none';

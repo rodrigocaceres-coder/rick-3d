@@ -24,7 +24,7 @@ Cut line: stop new builds at the end of Nov 15. Nov 16 is for fixes, a friend pl
 ## Stack
 - Three.js 0.187 (pinned), Vite, vanilla JavaScript. Packages: three, vite. Ask before adding or removing any package.
 - Run: `npm run dev`. Deploy target: GitHub Pages (vite base './').
-- `?skip` skips the cold open (play starts in the house). `?garage` starts in the garage with Beth's errand done. `?lab=1`, `2` or `3` starts in that lab room. `?boss` starts at the boss fight (`?boss=fight` skips its opening, `?boss=2` starts at the tank phase, `&norebels` plays without Prawnsworth's help, `&nosandwich` without Beth's sandwich, `&nosoda` without the arcade soda). `?arcade` starts at Blips and Chitz (`?arcade=tip` with Glorp's tip heard). `?citadel` starts at the Citadel (`?citadel=cop` with Desk Rick and Guard Rick already passed). `?low` turns off the glow for slow laptops. M mutes.
+- `?skip` skips the cold open (play starts in the house). `?garage` starts in the garage with Beth's errand done. `?lab=1`, `2` or `3` starts in that lab room. `?boss` starts at the boss fight (`?boss=fight` skips its opening, `?boss=2` starts at the tank phase, `&norebels` plays without Prawnsworth's help, `&nosandwich` without Beth's sandwich, `&nosoda` without the arcade soda). `?arcade` starts at Blips and Chitz (`?arcade=tip` with Glorp's tip heard). `?citadel` starts at the Citadel (`?citadel=cop` with Desk Rick and Guard Rick already passed). `?low` turns off the glow for slow laptops (the game also turns it off by itself under ~25 fps; `?speedtest` turns that check on in dev builds). M mutes.
 
 ## Look
 - Low poly (Rodrigo rejected the first paper-cutout look on Nov 12). Characters and props are faceted models built in code in src/objects/models.js. No model files.

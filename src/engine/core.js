@@ -40,6 +40,26 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+// Demo-day safety net: if the game runs under ~25 frames a second for two seconds with the glow on,
+// turn the glow off by itself (the same as ?low). A 30 Hz projector (33 ms a frame) does not set it off.
+// Off in dev builds, where the preview pane throttles frames on purpose; ?speedtest turns it on there.
+const watchOn = !import.meta.env.DEV || new URLSearchParams(location.search).has('speedtest');
+const recent = [];
+let watched = 0;
+export function watchSpeed(ms) {
+  if (!watchOn || !composer || ms > 250) return false; // over 250 ms: a hidden tab or a hitch, not slowness
+  if (++watched < 180) return false;                    // skip the loading hitches of the first few seconds
+  recent.push(ms);
+  if (recent.length > 120) recent.shift();
+  if (recent.length < 120) return false;
+  const median = [...recent].sort((x, y) => x - y)[60];
+  if (median < 40) return false;
+  composer = null; bloom = null;
+  renderer.setPixelRatio(1);
+  resize();
+  return true;
+}
+
 export function render() {
   if (composer) composer.render();
   else renderer.render(scene, camera);

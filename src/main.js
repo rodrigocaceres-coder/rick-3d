@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, camera, render } from './engine/core.js';
+import { scene, camera, render, watchSpeed } from './engine/core.js';
 import rig from './engine/cameraRig.js';
 import input from './engine/input.js';
 import audio from './engine/audio.js';
@@ -346,6 +346,7 @@ const worlds = { garage, house: house.world, lab: lab.world, arcade: arcade.worl
 let last = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
+  if (watchSpeed(now - last)) hud.toast('Slow laptop: glow off');
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
   tick(dt);
@@ -404,7 +405,7 @@ function tick(dt) {
 requestAnimationFrame(frame);
 
 // Dev builds only: lets a test script run the game forward by hand, for example __game.step(120) = 2 seconds
-if (import.meta.env.DEV) window.__game = { G, morty, flags, save, lab, boss, house, arcade, citadel, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
+if (import.meta.env.DEV) window.__game = { G, morty, usable, flags, save, lab, boss, house, arcade, citadel, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
 
 // ---- Boot: start card, cold open (garage, then the house), then play in the house. ?skip jumps past the cold open,
 // ?garage starts in the garage with Beth's errand done, ?lab=1, 2 or 3 starts in that lab room,
