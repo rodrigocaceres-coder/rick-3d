@@ -223,3 +223,36 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Evidence files: process/screenshots/2026-11-12_s7_citadel-hall.jpg, _lab-room3-jammer.jpg, _back-of-line-v1-machine-blocks.jpg and _ending-v1-cop-shot-blocked.jpg, _ending-v1-shrimp-shot-off-set.jpg (befores), _back-of-line-v2.jpg, _ending-v2-shrimp-rick.jpg, _ending-v2-desk-rick.jpg, _ending-v2-cop-rick.jpg, _ending-v2-morty.jpg
 - Chat link: Claude Code session "run whats next" (desktop app link claude://claude.ai/epitaxy/local_2cb56cf5-7ad7-443b-abd0-79e59c00de8d)
 - Why:
+
+### Session 8, 2026-11-12
+- Goal: Build roadmap item 8: lab extras. Crates and beams through portals (cut from Session 2). One new puzzle beat per room, old solutions still work.
+- AI types and tools: code AI (Claude Code, Claude Opus 5.5) for design, code and testing. No image or audio AI. Crates, plate, emitters, plug and clamp are low-poly props built in code.
+- Key prompts (word for word):
+  - "next session"
+- What was built:
+  - Crates (src/scenes/labScene.js): walk into one to push it (no pulling). They go through linked portals, sink in goo (a fresh one drops in), and block shots and beams. R drops a fresh crate if one gets stuck in a corner.
+  - Beams: straight lines of light traced every frame. They pass through glass, go into one portal and out of the other, and stop at walls, doors, crates, guards and Morty.
+  - Room 1: the door to room 2 is shut until a crate sits on the pressure plate across the goo. Morty sends the crate through a portal, hops after it, and pushes it onto the plate. The plate stays latched.
+  - Room 2: the Fluid Canister is locked in a clamp. A cyan laser on the back wall shoots at nothing; a plug on the far wall, behind the glass, has a cable running to the clamp. Put one portal in front of the laser and fire the other one so it points at the plug; step out of the beam and the clamp sinks into the floor. Then the old glass shot gets the canister.
+  - Room 3: a red tripwire laser runs in front of Shrimp Rick's jammer. Touching it is a "LASER GRID BREACH" and back to the start; shots fizzle in it, so no portal can skip past. Morty sends the room's crate through the slot portal and pushes it into the laser, then walks around.
+  - New lines: Morty's first look at each puzzle, the clamp letting go, Krillson over the speakers, and one new Prawnsworth hint about the clamp. Goal text per step. Save and Continue know the new steps.
+- Key decisions:
+  - Crates leave a portal 1.9 units out (Morty steps out at 1.05), so he never lands on top of the crate he just sent.
+  - A crate never leaves a portal right against the goo, or on the far side of a wall or the glass. Pushing only, so a crate next to the goo could never be pushed away from it.
+  - The room 2 beam puzzle is a latch: the plug only needs one hit. The guard walks through the beam and would otherwise turn the clamp on and off.
+  - Prawnsworth moved to the front corner of room 2. Standing under the laser to aim at it put Morty in talking range, so SPACE started a conversation instead of firing.
+  - Continue now starts in room 1 if the plate is not done yet. Before this, Continue always skipped room 1 (the crystal was the room 1 flag, and the arcade already gives it).
+- What went wrong or looked weak, and the revision:
+  - Crate v1 could come out of a portal flush against the goo, where it can only be pushed into the goo. Now it needs a step of floor between it and the goo.
+  - Shooting into the tripwire from close up said "Too close" instead of "The shot fizzles in the laser". The laser message now wins.
+  - Clamp shot v1: the room's side wall filled a quarter of the frame. Camera moved left.
+  - Room 3 v1: the barrier hid the tripwire and the jammer during play (the camera stopped following at x 42). It now follows to x 45.
+  - Claude's test bot walked diagonally, pushed the room 3 crate against the far wall (only R gets it out), and walked into its own portal twice. The fixed test walks one axis at a time. It also proved R works.
+- Rejected, and why:
+  - Pulling crates: a second key and a second rule. R covers the stuck-crate case.
+  - A beam that hurts Morty in room 2: the room already has a guard; the cyan beam is a puzzle, the red one in room 3 is the danger.
+  - Crates that block a guard's view: guards would need line-of-sight checks against moving objects, a day before the cut line.
+- Result: Tested with a script in the browser, by playing: room 1 crate through the portal and onto the plate, door opens; room 2 first look, clamp blocks the canister, beam through two portals into the plug, canister by the old glass shot; room 3 first look, crate through the slot portal, shot fizzles in the laser, tripwire catch and reset, R, crate into the laser, jammer, Shrimp Rick, on to the Citadel. Continue from a lab save starts in the right room with the crate still on the plate. ?boss=fight, ?garage, ?arcade, ?citadel, ?skip and ?lab start with no errors. Production build passes. Not checked on Rodrigo's machine: how hard the room 2 aim feels in real time with the keyboard.
+- Evidence files: process/screenshots/2026-11-12_s8_room1-crate-on-plate.jpg, _room2-beam-in-plug-v1-wall-fills-frame.jpg and _room3-v1-barrier-hides-laser.jpg (befores), _room3-v2-crate-blocks-laser.jpg, _room3-tripwire-caught.jpg
+- Chat link: Claude Code session "next session" (desktop app)
+- Why:

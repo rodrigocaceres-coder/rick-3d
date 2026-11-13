@@ -44,6 +44,7 @@
           { "speaker": "Prawnsworth", "mood": "neutral", "text": "Psst. Not all of us like the parades." },
           { "speaker": "Morty", "mood": "neutral", "text": "Uh. Hi. I'm just here for some gun parts." },
           { "speaker": "Prawnsworth", "mood": "neutral", "text": "The canister is behind the glass. Officer Krillson walks the square all day." },
+          { "speaker": "Prawnsworth", "mood": "neutral", "text": "And it's clamped. The clamp drinks from the plug on the far wall. Put the laser in a portal and the other end spits it out." },
           { "speaker": "Prawnsworth", "mood": "happy", "text": "Your beam goes through glass now. Fire when his back is turned. Never shoot the guard. He takes it personally." }
         ],
         "choices": [
@@ -67,5 +68,26 @@
         ]
       }
     }
-  }
+  },
+  "rooms": {
+    "plate": [
+      { "speaker": "Morty", "mood": "neutral", "text": "The door's shut. There's a pressure plate on the other side of the goo. And a crate on this side. Of course there is." },
+      { "speaker": "Morty", "mood": "angry", "text": "Portals took me across. Maybe they take crates too. I push it in one, it comes out the other." }
+    ],
+    "labSaw2": [
+      { "speaker": "Morty", "mood": "neutral", "text": "A laser on the back wall, shooting at nothing. A plug on the far wall. A cable from the plug to a clamp on the canister." },
+      { "speaker": "Morty", "mood": "angry", "text": "So the laser has to hit the plug. Through a portal. Somebody here loves puzzles and I hate that guy." }
+    ],
+    "power": [
+      { "speaker": "Morty", "mood": "happy", "text": "The clamp let go! Lasers go through portals. I'm basically a physicist now." },
+      { "speaker": "Morty", "mood": "neutral", "text": "Don't tell Rick I said that." }
+    ],
+    "labSaw3": [
+      { "speaker": "Morty", "mood": "neutral", "text": "A red laser right in front of the jammer. If I touch that, every shrimp in this dimension hears about it." },
+      { "speaker": "Morty", "mood": "angry", "text": "Something has to block it. Something big and square. Something like... the crate I walked past." }
+    ]
+  },
+  "tripwire": [
+    { "speaker": "Officer Krillson", "mood": "angry", "text": "LASER GRID BREACH. Over the speakers, citizen: back to the start. That laser was very expensive." }
+  ]
 }

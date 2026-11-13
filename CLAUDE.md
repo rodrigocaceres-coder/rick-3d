@@ -17,7 +17,7 @@ One build per session, in this order. Each line is a goal, not a design: the bui
 5. Save progress: done, see Game above.
 6. Blips and Chitz (built Nov 12, now on the main path, see Story order). An arcade set, Gorbi and Glorp, one arcade challenge that is fun in 3D, the arcade soda as its reward. Done: reachable by portal, beatable, sets a flag the boss fight reads. (The soda is free in the fight until then: give it a "flag" in src/data/items.json like the sandwich has.)
 7. Citadel of Ricks: done, see Game above.
-8. Lab extras: crates and beams through portals, cut from Session 2. Done: one new puzzle beat per room, old solutions still work.
+8. Lab extras: done (built Nov 12: crates and beams through portals; room 1 crate onto a plate opens the door, room 2 beam into a plug unclamps the canister, room 3 crate blocks a tripwire in front of the jammer; R drops a fresh crate).
 Rules for every build: the episode must stay playable start to end after each session, the `?boss`, `?lab`, `?garage`, `?arcade` and `?citadel` test links keep working, test with a script before the commit, log the session.
 Cut line: stop new builds at the end of Nov 15. Nov 16 is for fixes, a friend playtest and slides. If time runs short, drop from the bottom of the list.
 

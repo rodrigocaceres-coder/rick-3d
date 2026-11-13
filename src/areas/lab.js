@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import { box, cyl, decal, soft, glow, shape } from '../engine/toon.js';
 
 // Shrimp Rick's lab: three rooms in a row along x, each 16 wide (x 0-16, 16-32, 32-48) and 10 deep (z -5 to 5).
-// Room 1: one goo channel to cross. Room 2: a glass wall and a patrol. Room 3: two channels, a patrol and a slot to shoot through.
-// A door between rooms opens when Morty picks up that room's gun part.
+// Room 1: one goo channel to cross, and a crate to send across it onto a pressure plate (that opens the door).
+// Room 2: a glass wall, a patrol, and a beam to bend through portals into a plug (that unclamps the canister).
+// Room 3: two channels, a patrol, a slot to shoot through, and a laser tripwire in front of the jammer that only a crate can block.
 const LEN = 48, D = 10, H = 5;
 
 function tileTexture() {
@@ -45,7 +46,7 @@ export function buildLab() {
 
   // Low walls between rooms, with a doorway in the middle
   const doors = [];
-  [[16, 'hasCrystal'], [32, 'hasCanister']].forEach(([x, flag]) => {
+  [[16, 'labPlate'], [32, 'hasCanister']].forEach(([x, flag]) => {
     for (const z of [-3.1, 3.1]) {
       box(0.5, 2.3, 3.8, 0x5d2c44, add({ x, y: 1.15, z }));
       solids.push(rect(x - 0.25, x + 0.25, z - 1.9, z + 1.9));
@@ -109,6 +110,39 @@ export function buildLab() {
   const partSpots = [new THREE.Vector3(13, 0, -1.5), new THREE.Vector3(29.6, 0, 0), new THREE.Vector3(46.4, 0, 2.6)];
   partSpots.forEach((p, i) => decal(0.55, [0x4affe0, 0xc45aff, 0xffb03a][i], 0.35, add({ x: p.x, z: p.z })));
 
+  // ---- Session 8 extras: crates, a pressure plate, beams ----
+  // Room 1: the pressure plate across the goo. A crate on it opens the door to room 2.
+  const plateAt = new THREE.Vector3(13.6, 0, 2.7);
+  cyl(0.62, 0.08, 0x2c4a55, add({ x: plateAt.x, y: 0.04, z: plateAt.z, sides: 10, line: 0.02, cast: false }));
+  const plateTop = cyl(0.5, 0.06, 0xff5a4a, add({ x: plateAt.x, y: 0.11, z: plateAt.z, sides: 10, line: 0.015, cast: false }));
+  const plateRing = decal(0.85, 0xff5a4a, 0.28, add({ x: plateAt.x, z: plateAt.z }));
+
+  // Room 2: a beam emitter on the back wall, a plug on the far wall behind the glass, and a cable on the floor between them.
+  const emitter2 = { x: 19.4, z: -4.4 }; // where the beam starts, just in front of the lens
+  box(0.7, 0.9, 0.5, 0x3d6e7a, add({ x: emitter2.x, y: 1.1, z: -4.75 }));
+  cyl(0.18, 0.2, glow(0x5affff, 1.8), add({ x: emitter2.x, y: 1.1, z: -4.45, rx: Math.PI / 2, line: 0.02 }));
+  solids.push(rect(emitter2.x - 0.4, emitter2.x + 0.4, -5, -4.45));
+  const plugAt = new THREE.Vector3(31.62, 0, -2.5);
+  box(0.26, 0.9, 0.8, 0x3d6e7a, add({ x: 31.62, y: 1.1, z: plugAt.z }));
+  const plugLens = cyl(0.22, 0.12, glow(0xff5a4a, 1.4), add({ x: 31.46, y: 1.1, z: plugAt.z, rz: Math.PI / 2, line: 0.02 }));
+  const cable = box(14.2, 0.03, 0.12, 0x24404a, add({ x: 17.3 + 7.1, y: 0.02, z: plugAt.z, line: 0, cast: false }));
+  box(0.12, 1.1, 0.12, 0x24404a, add({ x: 31.5, y: 0.55, z: plugAt.z, line: 0, cast: false }));
+  // The clamp around the canister: four bars and a ring. It sinks into the floor when the plug lights up.
+  const clamp = new THREE.Group();
+  for (let k = 0; k < 4; k++) {
+    const a = k * Math.PI / 2 + Math.PI / 4;
+    box(0.12, 2.0, 0.12, 0xffb03a, { parent: clamp, x: Math.cos(a) * 0.55, y: 1.0, z: Math.sin(a) * 0.55, line: 0.025 });
+  }
+  shape(new THREE.TorusGeometry(0.6, 0.07, 4, 10), 0xffb03a, { parent: clamp, y: 2.0, rx: Math.PI / 2, line: 0.02 });
+  clamp.position.set(29.6, 0, 0);
+  g.add(clamp);
+
+  // Room 3: a laser tripwire from the barrier's back face to the far wall, in front of the jammer
+  const trip = { x: 44.3, z: 1.5 };
+  box(0.3, 0.6, 0.5, 0x3a3d48, add({ x: 44.4, y: 1.1, z: trip.z }));
+  cyl(0.13, 0.12, glow(0xff3030, 1.8), add({ x: 44.58, y: 1.1, z: trip.z, rz: Math.PI / 2, line: 0.02 }));
+  box(0.2, 0.5, 0.4, 0x3a3d48, add({ x: 47.75, y: 1.1, z: trip.z }));
+
   // Lighting: cool fill, one overhead key light that follows Morty so its shadow stays sharp
   g.add(new THREE.HemisphereLight(0xa8f0ff, 0x4a2a44, 1.35));
   const key = new THREE.DirectionalLight(0xfff0e6, 1.25);
@@ -125,6 +159,10 @@ export function buildLab() {
     group: g,
     bounds: { x0: 0.45, x1: 47.55, z0: -4.55, z1: 4.6 },
     solids, hazards, glass, doors, partSpots, alarm,
+    crateHomes: [new THREE.Vector3(4.4, 0, 2.6), new THREE.Vector3(34.6, 0, 3.2)],
+    plate: { at: plateAt, top: plateTop, ring: plateRing },
+    beam2: { from: emitter2, dir: [0, 1], plug: plugAt, lens: plugLens, cable, clamp },
+    trip: { from: trip, dir: [1, 0] },
     starts: [new THREE.Vector3(2, 0, 0), new THREE.Vector3(17.6, 0, 0), new THREE.Vector3(34, 0, 0)], // each start is out of every guard's sight
     update(time, focusX) {
       key.position.set(focusX - 2.5, 14, 4.5);

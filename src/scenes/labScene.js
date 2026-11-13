@@ -6,7 +6,7 @@ import audio from '../engine/audio.js';
 import flags from '../systems/flags.js';
 import { tween, wait, ease } from '../engine/tween.js';
 import { say, closeDialogue, converse } from '../ui/dialogue.js';
-import { ball, box, cyl, glow } from '../engine/toon.js';
+import { ball, box, cyl, glow, toon } from '../engine/toon.js';
 import { buildLab } from '../areas/lab.js';
 import { Guard } from '../objects/guard.js';
 import { Portal } from '../objects/portal.js';
@@ -21,6 +21,10 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const FLAGS = ['hasCrystal', 'hasCanister', 'jammerOff'];
 const PART_FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
 const inRect = (x, z, r, pad = 0) => x > r.x0 - pad && x < r.x1 + pad && z > r.z0 - pad && z < r.z1 + pad;
+const CRATE = 0.45;     // half the width of a crate
+const PUSH = 2.4;       // how fast Morty pushes one, units per second
+const MORTY_R = 0.34;   // Morty's footprint (same as player.js)
+const BEAM_Y = 1.1;
 
 // Everything that happens in Shrimp Rick's lab: the portal gun, guards, gun parts, doors, and the ending.
 // api (from main.js): { setState(name), startPlay(), toBoss() }
@@ -35,8 +39,8 @@ export function createLab({ scene, morty, api }) {
     new Guard([V(39.5, 0, -3.7), V(39.5, 0, 3.7)], { x0: 38, x1: 41 }, 2.6),
   ];
   const prawn = new Character(buildShrimp('rebel'));
-  prawn.position.set(18.2, 0, -3.3);
-  prawn.group.rotation.y = 0.5;
+  prawn.position.set(18.0, 0, 3.4); // front corner, away from the beam emitter on the back wall
+  prawn.group.rotation.y = 2.5;
   const shrimpRick = new Character(buildShrimp('rick'));
   shrimpRick.group.visible = false;
   lab.group.add(prawn.group, shrimpRick.group, ...guards.map((g) => g.model.group));
@@ -63,7 +67,7 @@ export function createLab({ scene, morty, api }) {
   lab.group.add(bossPortal.group);
   const shot = ball(0.16, glow(0x8dff5a, 1.8), { parent: lab.group, line: 0 });
   shot.visible = false;
-  let next = 0, firing = false, hop = 0, cooldown = 0, alarmOn = false;
+  let next = 0, firing = false, hop = 0, cooldown = 0, alarmOn = false, clampToast = 0;
 
   // The gun in Morty's hand
   const held = buildGun().root;
@@ -73,18 +77,176 @@ export function createLab({ scene, morty, api }) {
   held.visible = false;
   morty.parts.arms[1].add(held);
 
+  // ---- Crates: Morty pushes them (no pulling). They go through portals, sink in goo, and block beams and shots. ----
+  const makeCrate = () => {
+    const c = new THREE.Group();
+    box(0.9, 0.9, 0.9, 0x4f7f8a, { parent: c, line: 0.035 });
+    for (const y of [-0.3, 0.3]) box(0.94, 0.1, 0.94, 0xffb03a, { parent: c, y, line: 0 });
+    box(0.5, 0.3, 0.02, 0x2c4a55, { parent: c, z: 0.47, line: 0 });
+    lab.group.add(c);
+    return c;
+  };
+  const crates = lab.crateHomes.map((home) => ({ mesh: makeCrate(), home, rect: { x0: 0, x1: 0, z0: 0, z1: 0 }, busy: false, hop: 0 }));
+  function placeCrate(c, x, z) {
+    c.mesh.position.set(x, CRATE, z);
+    Object.assign(c.rect, { x0: x - CRATE, x1: x + CRATE, z0: z - CRATE, z1: z + CRATE });
+  }
+  const liveCrates = () => crates.filter((c) => c.mesh.visible && !c.busy);
+  const boxesOverlap = (a, b) => a.x0 < b.x1 - 0.01 && a.x1 > b.x0 + 0.01 && a.z0 < b.z1 - 0.01 && a.z1 > b.z0 + 0.01;
+  // Can a crate stand here? avoidGoo: also refuse goo (used when picking where a crate leaves a portal)
+  function crateFree(x, z, self, avoidGoo = false) {
+    if (x < 0.5 || x > 47.5 || z < -4.5 || z > 4.5) return false;
+    const r = { x0: x - CRATE, x1: x + CRATE, z0: z - CRATE, z1: z + CRATE };
+    if ([...lab.solids, ...lab.glass, ...lab.doors.map((d) => d.rect)].some((o) => boxesOverlap(r, o))) return false;
+    // Keep a step of floor between it and the goo, or Morty could never get behind it to push it away
+    if (avoidGoo && lab.hazards.some((o) => boxesOverlap({ x0: r.x0 - 0.8, x1: r.x1 + 0.8, z0: r.z0, z1: r.z1 }, o))) return false;
+    if (liveCrates().some((o) => o !== self && boxesOverlap(r, o.rect))) return false;
+    const m = morty.position;
+    const cx = Math.max(r.x0, Math.min(m.x, r.x1)), cz = Math.max(r.z0, Math.min(m.z, r.z1));
+    return Math.hypot(m.x - cx, m.z - cz) >= MORTY_R - 0.02;
+  }
+  // Nothing solid between two points (so a crate never pops out of a portal on the far side of a wall or the glass)
+  function clearPath(ax, az, bx, bz) {
+    const n = Math.ceil(Math.hypot(bx - ax, bz - az) / 0.15);
+    for (let k = 1; k <= n; k++) {
+      const x = ax + (bx - ax) * k / n, z = az + (bz - az) * k / n;
+      if ([...lab.solids, ...lab.glass, ...lab.doors.map((d) => d.rect)].some((o) => inRect(x, z, o))) return false;
+    }
+    return true;
+  }
+  const crateForRoom = (room) => crates.find((c) => roomOf(c.home.x) === room);
+
+  // A crate in the goo sinks, and a fresh one drops in at its spot. R does the same on purpose (for a crate stuck in a corner).
+  async function respawnCrate(c, sank) {
+    if (c.busy) return;
+    c.busy = true;
+    refreshColliders();
+    if (sank) {
+      audio.sfx('menu_move.mp3');
+      hud.toast('The crate sank in the goo. A fresh one drops in.');
+      const y0 = c.mesh.position.y;
+      await tween(0.7, (t) => { c.mesh.position.y = y0 - t * 1.0; c.mesh.rotation.z = t * 0.4; }, ease.in);
+    } else {
+      await tween(0.2, (t) => c.mesh.scale.setScalar(Math.max(1 - t, 0.001)), ease.in);
+    }
+    c.mesh.visible = false;
+    await wait(0.4);
+    while (Math.hypot(morty.position.x - c.home.x, morty.position.z - c.home.z) < 1.0) await wait(0.1); // never drop it on Morty
+    c.mesh.rotation.set(0, 0, 0);
+    c.mesh.scale.setScalar(1);
+    placeCrate(c, c.home.x, c.home.z);
+    c.mesh.position.y = 2.5;
+    c.mesh.visible = true;
+    await tween(0.35, (t) => { c.mesh.position.y = 2.5 - (2.5 - CRATE) * t; }, ease.in);
+    audio.sfx('blip.mp3', 0.5);
+    c.busy = false;
+    refreshColliders();
+  }
+
+  function crateThroughPortal(c) {
+    if (c.hop > 0 || !portals[0].isOpen || !portals[1].isOpen) return;
+    const p = c.mesh.position;
+    for (let i = 0; i < 2; i++) {
+      const pt = portals[i], out = portals[1 - i];
+      if (Math.hypot(p.x - pt.position.x, p.z - pt.position.z) > 0.7) continue;
+      // Out on the side the shot came from, a bit further than Morty steps, so he never lands on it. Else the other side.
+      const o = out.position;
+      const k = [1.9, -1.9].find((k) => {
+        const x = o.x + out.exit.x * k, z = o.z + out.exit.z * k;
+        return roomOf(x) === roomOf(o.x) && clearPath(o.x, o.z, x, z) && crateFree(x, z, c, true);
+      });
+      if (k === undefined) return;
+      placeCrate(c, o.x + out.exit.x * k, o.z + out.exit.z * k);
+      c.hop = 0.8;
+      audio.sfx('portal.mp3', 0.7);
+      tween(0.3, (t) => c.mesh.scale.setScalar(0.3 + 0.7 * t), ease.outBack);
+      return;
+    }
+  }
+
+  // ---- Beams: straight lines of light that go through glass and through linked portals.
+  // They stop at walls, doors, crates, guards and Morty. The cyan one powers the clamp plug in room 2;
+  // the red one in room 3 is a tripwire. ----
+  const segGeo = new THREE.BoxGeometry(1, 1, 1);
+  const beams = [
+    { def: lab.beam2, color: 0x5affff, trip: false, on: () => true },
+    { def: lab.trip, color: 0xff3030, trip: true, on: () => !flags.get('jammerOff') },
+  ].map((b) => {
+    const mat = glow(b.color, 2.2);
+    b.meshes = Array.from({ length: 6 }, () => { const m = new THREE.Mesh(segGeo, mat); m.visible = false; lab.group.add(m); return m; });
+    b.flare = ball(0.1, mat, { parent: lab.group, line: 0 });
+    b.segs = []; b.hitPlug = false; b.hitMorty = false;
+    return b;
+  });
+
+  function trace(b) {
+    const segs = [];
+    let [dx, dz] = b.def.dir;
+    let x = b.def.from.x, z = b.def.from.z, sx = x, sz = z, ignore = -1, since = 0, jumps = 0;
+    b.hitPlug = false; b.hitMorty = false;
+    const linked = portals[0].isOpen && portals[1].isOpen;
+    for (let n = 0; n < 800; n++) {
+      x += dx * 0.08; z += dz * 0.08; since += 0.08;
+      if (since > 0.6) ignore = -1;
+      const enter = linked ? portals.findIndex((p, i) => i !== ignore && Math.hypot(x - p.position.x, z - p.position.z) < 0.5) : -1;
+      if (enter >= 0 && jumps < 4) {
+        const into = portals[enter].position, out = portals[1 - enter];
+        segs.push([sx, sz, into.x, into.z]);
+        x = sx = out.position.x; z = sz = out.position.z;
+        const len = Math.hypot(out.exit.x, out.exit.z) || 1;
+        dx = out.exit.x / len; dz = out.exit.z / len;
+        ignore = 1 - enter; since = 0; jumps++;
+        continue;
+      }
+      if (x < 0.05 || x > 47.95 || z < -4.95 || z > 4.95) break;
+      if (lab.solids.some((r) => inRect(x, z, r)) || lab.doors.some((d) => inRect(x, z, d.rect))) break;
+      if (liveCrates().some((c) => inRect(x, z, c.rect))) break;
+      if (guards.some((g) => Math.hypot(g.position.x - x, g.position.z - z) < 0.4)) break;
+      if (lab.group.visible && Math.hypot(morty.position.x - x, morty.position.z - z) < MORTY_R - 0.04) { b.hitMorty = true; break; }
+      if (b.def.plug && Math.hypot(b.def.plug.x - x, b.def.plug.z - z) < 0.6) { b.hitPlug = true; break; }
+    }
+    segs.push([sx, sz, x, z]);
+    return segs;
+  }
+
+  function drawBeam(b, time) {
+    const on = lab.group.visible && b.on();
+    b.segs = on ? trace(b) : [];
+    b.meshes.forEach((m, i) => {
+      const s = b.segs[i];
+      m.visible = Boolean(s);
+      if (!s) return;
+      const len = Math.hypot(s[2] - s[0], s[3] - s[1]);
+      const w = 0.06 + Math.sin(time * 30 + i) * 0.01;
+      m.position.set((s[0] + s[2]) / 2, BEAM_Y, (s[1] + s[3]) / 2);
+      m.scale.set(w, w, Math.max(len, 0.01));
+      m.rotation.set(0, Math.atan2(s[2] - s[0], s[3] - s[1]), 0);
+    });
+    const last = b.segs[b.segs.length - 1];
+    b.flare.visible = Boolean(last);
+    if (last) { b.flare.position.set(last[2], BEAM_Y, last[3]); b.flare.scale.setScalar(1 + Math.sin(time * 20) * 0.3); }
+  }
+
+  // Is this point on the red tripwire? Shots fizzle in it.
+  const onTripwire = (x, z) => beams[1].segs.some(([ax, az, bx, bz]) => {
+    const vx = bx - ax, vz = bz - az, l2 = vx * vx + vz * vz || 1;
+    const t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / l2));
+    return Math.hypot(x - (ax + vx * t), z - (az + vz * t)) < 0.25;
+  });
+
   const range = () => (flags.get('hasCanister') ? 14 : flags.get('hasCrystal') ? 7 : 6);
 
   // What Morty bumps into right now: walls, goo, glass, closed doors
   const world = { bounds: lab.bounds, colliders: [] };
   function refreshColliders() {
-    world.colliders = [...lab.solids, ...lab.hazards, ...lab.glass, ...lab.doors.filter((d) => !d.open).map((d) => d.rect)];
+    world.colliders = [...lab.solids, ...lab.hazards, ...lab.glass, ...lab.doors.filter((d) => !d.open).map((d) => d.rect), ...liveCrates().map((c) => c.rect)];
   }
   const blocksShot = (x, z) => {
     const b = lab.bounds;
     if (x < b.x0 || x > b.x1 || z < b.z0 || z > b.z1) return true;
     if (lab.solids.some((r) => inRect(x, z, r))) return true;
     if (lab.doors.some((d) => inRect(x, z, d.rect))) return true; // doorways have a field that stops the beam, open or not
+    if (liveCrates().some((c) => inRect(x, z, c.rect))) return true;
     return !flags.get('hasCrystal') && lab.glass.some((r) => inRect(x, z, r)); // the crystal lets the beam through glass
   };
 
@@ -97,11 +259,12 @@ export function createLab({ scene, morty, api }) {
     morty.group.rotation.y = a;
     const dx = Math.sin(a), dz = Math.cos(a);
     const from = morty.position;
-    let d = 0.6, hitGuard = null;
+    let d = 0.6, hitGuard = null, inLaser = false;
     for (; d < range(); d += 0.15) {
       const x = from.x + dx * d, z = from.z + dz * d;
       hitGuard = guards.find((g) => Math.hypot(g.position.x - x, g.position.z - z) < 0.55);
-      if (hitGuard || blocksShot(x, z)) break;
+      inLaser = onTripwire(x, z);
+      if (hitGuard || inLaser || blocksShot(x, z)) break;
     }
     if (!hitGuard && d < range()) d -= 0.55; // hit a wall: step back so the portal stands in front of it
     const end = V(from.x + dx * d, 0, from.z + dz * d);
@@ -115,8 +278,8 @@ export function createLab({ scene, morty, api }) {
     if (hitGuard) { firing = false; return caught(hitGuard, text.shotGuard[0]); }
     const inGoo = lab.hazards.some((r) => inRect(end.x, end.z, r, 0.3));
     const onGlass = lab.glass.some((r) => inRect(end.x, end.z, r, 0.4));
-    if (d < 1.1 || inGoo || onGlass) {
-      hud.toast(d < 1.1 ? 'Too close. Back up and fire again.' : inGoo ? 'The shot fizzles in the goo.' : 'The shot fizzles on the glass.');
+    if (d < 1.1 || inGoo || onGlass || inLaser) {
+      hud.toast(inLaser ? 'The shot fizzles in the laser.' : d < 1.1 ? 'Too close. Back up and fire again.' : inGoo ? 'The shot fizzles in the goo.' : 'The shot fizzles on the glass.');
       audio.sfx('menu_move.mp3');
     } else {
       const p = portals[next];
@@ -154,16 +317,26 @@ export function createLab({ scene, morty, api }) {
   async function caught(guard, line) {
     api.setState('cutscene');
     hud.cinema(true); hud.prompt('');
-    guard.model.faceToward(morty.position);
     audio.sfx('caught.mp3');
     rig.shake(0.5);
-    rig.cut(shotOn(guard.position, morty.position, 1.1));
+    if (guard) {
+      guard.model.faceToward(morty.position);
+      rig.cut(shotOn(guard.position, morty.position, 1.1));
+    } else {
+      // The tripwire: no guard in sight, Krillson yells over the speakers
+      const p = morty.position;
+      alarmOn = true;
+      rig.cut({ pos: V(p.x - 1.2, 2.3, p.z + 3.6), look: V(p.x, 1, p.z), fov: 38 });
+    }
     rig.pushIn(0.1, 5);
     await say(line ?? text.caught[Math.floor(Math.random() * text.caught.length)]);
     closeDialogue();
     await hud.fade(1, 0.35);
-    morty.position.copy(lab.starts[roomOf(morty.position.x)]);
+    alarmOn = false;
+    const start = lab.starts[roomOf(morty.position.x)];
+    morty.position.copy(start);
     morty.group.rotation.y = Math.PI / 2;
+    crates.forEach((c) => { if (!c.busy && Math.hypot(c.mesh.position.x - start.x, c.mesh.position.z - start.z) < 1.0) respawnCrate(c); });
     closePortals();
     guards.forEach((g) => g.reset());
     api.startPlay();
@@ -192,24 +365,77 @@ export function createLab({ scene, morty, api }) {
     closeDialogue();
     hud.parts(PART_FLAGS.map((f) => flags.get(f)));
 
-    const door = lab.doors[i];
-    if (door) {
-      // Show the door to the next room sliding open
-      rig.cut({ pos: V(door.x - 5, 3.2, 6.5), look: V(door.x, 1, 0), fov: 34 });
-      audio.sfx('door.mp3');
-      await tween(0.8, (t) => { door.mesh.position.y = 1.1 - t * 2.4; }, ease.inOut);
-      door.open = true;
-      refreshColliders();
-      await wait(0.3);
-      api.startPlay();
-    } else {
-      await finale();
-    }
+    if (i === 1) await openDoor(lab.doors[1]);
+    else await finale();
+  }
+
+  // Show the door to the next room sliding open
+  async function openDoor(door) {
+    rig.cut({ pos: V(door.x - 5, 3.2, 6.5), look: V(door.x, 1, 0), fov: 34 });
+    audio.sfx('door.mp3');
+    await tween(0.8, (t) => { door.mesh.position.y = 1.1 - t * 2.4; }, ease.inOut);
+    door.open = true;
+    refreshColliders();
+    await wait(0.3);
+    api.startPlay();
+  }
+
+  // Room 1: a crate on the pressure plate. The plate goes green and the door to room 2 opens for good.
+  async function pressPlate() {
+    api.setState('cutscene');
+    hud.cinema(true); hud.prompt('');
+    flags.set('labPlate');
+    showPlate(true);
+    audio.sfx('pickup.mp3', 0.7);
+    rig.cut({ pos: V(10.5, 3.0, 7.5), look: V(13.4, 0.6, 2.2), fov: 36 });
+    await wait(0.6);
+    await openDoor(lab.doors[0]);
+  }
+  function showPlate(on) {
+    lab.plate.top.material = toon(on ? 0x5aff8a : 0xff5a4a);
+    lab.plate.top.position.y = on ? 0.07 : 0.11;
+    lab.plate.ring.material.color.set(on ? 0x5aff8a : 0xff5a4a);
+  }
+
+  // Room 2: the beam hits the plug. The clamp around the canister sinks into the floor.
+  async function powerOn() {
+    api.setState('cutscene');
+    hud.cinema(true); hud.prompt('');
+    flags.set('labPower');
+    showPower(true);
+    audio.sfx('pickup.mp3', 0.7);
+    hud.flash(0.3, 0.2);
+    rig.cut({ pos: V(26.2, 2.5, 5.2), look: V(29.9, 1.0, -1.0), fov: 40 });
+    await wait(0.3);
+    audio.sfx('door.mp3');
+    await tween(0.9, (t) => { lab.beam2.clamp.position.y = -2.1 * t; }, ease.inOut);
+    for (const line of text.rooms.power) await say(line);
+    closeDialogue();
+    api.startPlay();
+  }
+  function showPower(on) {
+    lab.beam2.lens.material = glow(on ? 0x5aff8a : 0xff5a4a, on ? 1.8 : 1.4);
+    lab.beam2.cable.material = on ? glow(0x5affff, 1.1) : toon(0x24404a);
+    lab.beam2.clamp.position.y = on ? -2.1 : 0;
+  }
+
+  // The first time Morty walks into room 2 or 3: a wide look at the new puzzle, and one or two lines
+  async function firstLook(key, shot) {
+    flags.set(key);
+    api.setState('dialogue');
+    hud.cinema(true); hud.prompt('');
+    morty.animate(0.016, 0);
+    rig.cut(shot);
+    for (const line of text.rooms[key]) await say(line);
+    closeDialogue();
+    api.startPlay();
   }
 
   // ---- All three parts: the alarm goes off and Shrimp Rick steps out of a portal ----
   async function finale() {
     closePortals();
+    crates.forEach((c) => { c.mesh.visible = false; });
+    refreshColliders();
     guards.forEach((g) => { g.cone.visible = false; });
     hud.caption('ALARM. ALARM. GLORY TO THE TANK.');
     alarmOn = true;
@@ -281,16 +507,24 @@ export function createLab({ scene, morty, api }) {
   return {
     world,
     goal() {
-      const n = FLAGS.filter((f) => flags.get(f)).length;
-      return ['Cross the goo. Get the Focus Crystal.', 'Cross the goo. Get the Fluid Canister from behind the glass.', "Sneak past the last patrol. Switch off Shrimp Rick's portal jammer.", 'Get out.'][n];
+      if (flags.get('jammerOff')) return 'Get out.';
+      if (flags.get('hasCanister')) return "Sneak past the patrol. Block the laser with a crate. Switch off Shrimp Rick's portal jammer.";
+      if (flags.get('labPower')) return 'Get the Fluid Canister from behind the glass.';
+      if (flags.get('labPlate')) return 'Bend the beam into the plug behind the glass. That frees the canister.';
+      return 'Get the crate across the goo and onto the pressure plate.';
     },
 
     // Arrive in the lab with the Focus Crystal already in the gun. room: 0, 1 or 2 (rooms after 0 are for testing with ?lab=2 or ?lab=3).
     async enter(room = 0) {
       flags.set('hasCrystal'); // Morty won it at Blips and Chitz: it is what powers the gun here
-      FLAGS.forEach((f, i) => { if (i < room) flags.set(f); });
+      if (room > 0) flags.set('labPlate');
+      if (room > 1) flags.setMany({ labPower: true, hasCanister: true });
       parts.forEach((m, i) => { m.visible = !flags.get(FLAGS[i]); m.scale.setScalar(1); m.position.copy(lab.partSpots[i]).setY(1); });
       lab.doors.forEach((d) => { d.open = Boolean(flags.get(d.flag)); d.mesh.position.y = d.open ? -1.3 : 1.1; });
+      crates.forEach((c) => { c.busy = false; c.hop = 0; c.mesh.visible = true; c.mesh.scale.setScalar(1); c.mesh.rotation.set(0, 0, 0); placeCrate(c, c.home.x, c.home.z); });
+      if (flags.get('labPlate')) placeCrate(crates[0], lab.plate.at.x, lab.plate.at.z); // it is still sitting on the plate
+      showPlate(Boolean(flags.get('labPlate')));
+      showPower(Boolean(flags.get('labPower')));
       refreshColliders();
       guards.forEach((g) => { g.reset(); g.cone.visible = true; });
       alarmOn = false;
@@ -298,10 +532,10 @@ export function createLab({ scene, morty, api }) {
       held.visible = true;
       morty.position.copy(lab.starts[room]);
       morty.group.rotation.y = Math.PI / 2;
-      rig.setLimits({ x0: 6, x1: 42, z0: -1.2, z1: 0.6 });
+      rig.setLimits({ x0: 6, x1: 45, z0: -1.2, z1: 0.6 }); // x1 45: the camera can look past the barrier at the tripwire
       audio.music('shrimp_dimension.m4a');
       hud.parts(PART_FLAGS.map((f) => flags.get(f)));
-      hud.hint('SPACE: fire a portal the way Morty faces. Two portals link.');
+      hud.hint('SPACE: fire a portal the way Morty faces. Two portals link. Crates and beams go through too. Walk into a crate to push it. R: fresh crate.');
 
       // Arrival: wide shot gliding along the lab, then Morty's first reaction
       hud.cinema(true);
@@ -312,13 +546,18 @@ export function createLab({ scene, morty, api }) {
       await hud.fade(0, 0.8);
       await wait(1.4);
       hud.caption('');
-      if (room === 0) { for (const line of text.intro) await say(line); closeDialogue(); }
+      if (room === 0) {
+        for (const line of text.intro) await say(line);
+        rig.cut({ pos: V(9.0, 3.4, 8.0), look: V(10.5, 0.6, 1.2), fov: 44 }); // the crate, the goo, the plate
+        for (const line of text.rooms.plate) await say(line);
+        closeDialogue();
+      }
       api.startPlay();
     },
 
     // Runs every frame while Morty is free to move in the lab
     tick(dt) {
-      cooldown -= dt; hop -= dt;
+      cooldown -= dt; hop -= dt; clampToast -= dt;
       const m = morty.position;
 
       // Prawnsworth is the only one to talk to; otherwise SPACE fires the gun
@@ -333,12 +572,59 @@ export function createLab({ scene, morty, api }) {
       }
 
       tryHop();
+      if (input.pressed('KeyR')) { const c = crateForRoom(roomOf(m.x)); if (c) respawnCrate(c); }
+      for (const c of liveCrates()) {
+        c.hop -= dt;
+        if (lab.hazards.some((r) => inRect(c.mesh.position.x, c.mesh.position.z, r))) respawnCrate(c, true);
+        else crateThroughPortal(c);
+      }
+      refreshColliders();
       parts.forEach((mesh, i) => {
-        if (mesh.visible && Math.hypot(mesh.position.x - m.x, mesh.position.z - m.z) < 0.95) collect(i);
+        if (!mesh.visible || Math.hypot(mesh.position.x - m.x, mesh.position.z - m.z) > 0.95) return;
+        if (i === 1 && !flags.get('labPower')) {
+          if (clampToast <= 0) { hud.toast("It's locked in a clamp. The clamp has a plug on the far wall."); clampToast = 2; }
+          return;
+        }
+        collect(i);
       });
+      if (api.state() !== 'play') return;
+
+      // The puzzle triggers: plate, plug, tripwire, and the first look at rooms 2 and 3
+      if (!flags.get('labPlate') && crates.some((c) => !c.busy && c.mesh.visible && Math.abs(c.mesh.position.x - lab.plate.at.x) < 0.6 && Math.abs(c.mesh.position.z - lab.plate.at.z) < 0.6)) return pressPlate();
+      trace(beams[0]); trace(beams[1]);
+      if (!flags.get('labPower') && beams[0].hitPlug) return powerOn();
+      if (beams[1].on() && beams[1].hitMorty) return caught(null, text.tripwire[0]);
+      const room = roomOf(m.x);
+      if (room === 1 && m.x > 17.2 && !flags.get('labSaw2')) return firstLook('labSaw2', { pos: V(25.5, 5.0, 10.5), look: V(25.0, 0.8, -1.5), fov: 48 });
+      if (room === 2 && m.x > 33.4 && !flags.get('labSaw3')) return firstLook('labSaw3', { pos: V(44.0, 3.4, 7.5), look: V(46.0, 0.9, 1.0), fov: 42 });
+
       const seenBy = guards.find((g) => g.cone.visible && g.sees(m));
-      if (seenBy && api.state() === 'play') caught(seenBy);
+      if (seenBy) caught(seenBy);
     },
+
+    // Runs before Morty moves: if he walks straight into a crate face, the crate slides ahead of him.
+    // His speed that way is capped at the crate's, so he walks right behind it instead of bumping.
+    push(dt) {
+      const a = input.axis();
+      if (!a.x && !a.z) return;
+      const horiz = Math.abs(a.x) >= Math.abs(a.z) && a.x !== 0;
+      const sx = horiz ? Math.sign(a.x) : 0, sz = horiz ? 0 : Math.sign(a.z);
+      const m = morty.position;
+      for (const c of liveCrates()) {
+        const p = c.mesh.position;
+        const along = sx ? (p.x - m.x) * sx : (p.z - m.z) * sz;
+        const side = sx ? Math.abs(p.z - m.z) : Math.abs(p.x - m.x);
+        if (along <= 0 || along > CRATE + MORTY_R + 0.1 || side > CRATE + 0.12) continue;
+        const nx = p.x + sx * PUSH * dt, nz = p.z + sz * PUSH * dt;
+        if (!crateFree(nx, nz, c)) continue;
+        placeCrate(c, nx, nz);
+        if (sx) morty.vx = sx * Math.min(Math.abs(morty.vx), PUSH); else morty.vz = sz * Math.min(Math.abs(morty.vz), PUSH);
+        if (sx) morty.vz = 0; else morty.vx = 0;
+      }
+    },
+
+    // Which room Continue should start in
+    savedRoom() { return flags.get('hasCanister') ? 2 : flags.get('labPlate') ? 1 : 0; },
 
     // Runs every frame while the lab is on screen, even in cutscenes
     update(dt, time) {
@@ -351,11 +637,12 @@ export function createLab({ scene, morty, api }) {
       shrimpRick.update();
       parts.forEach((mesh, i) => { if (mesh.visible && api.state() === 'play') { mesh.position.y = 1 + Math.sin(time * 2.5 + i) * 0.12; mesh.rotation.y = time * 1.5; } });
       [...portals, bossPortal].forEach((p) => p.update(time));
+      beams.forEach((b) => drawBeam(b, time));
     },
 
     setCooldown(s) { cooldown = s; },
     held, // the gun in Morty's hand, so the boss fight can show and aim it
-    debug: { guards, portals },
+    debug: { guards, portals, crates, beams, placeCrate },
   };
 
   async function talkToPrawn() {

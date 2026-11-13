@@ -28,7 +28,6 @@ const params = new URLSearchParams(location.search);
 const GARAGE_LIMITS = { x0: -4, x1: 4, z0: -3, z1: 2.5 };
 // Test links start mid-episode with made-up flags, so they neither load nor overwrite the real save
 const TEST_LINK = ['skip', 'garage', 'lab', 'boss', 'arcade', 'citadel'].some((k) => params.has(k));
-const PART_FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
 const SAVED_WHERE = { house: 'the Smith house', garage: 'the garage', lab: "Shrimp Rick's lab", boss: 'the boss fight', arcade: 'Blips and Chitz', citadel: 'the Citadel' };
 
 // ---- Garage world ----
@@ -299,7 +298,7 @@ async function continueFrom(saved) {
   }
   if (saved.area === 'lab') {
     gun.group.visible = false;
-    return toLab(Math.min(2, PART_FLAGS.filter((f) => flags.get(f)).length));
+    return toLab(lab.savedRoom());
   }
   if (saved.area === 'arcade') return toArcade();
   if (saved.area === 'citadel') { gun.group.visible = false; return toCitadel(); }
@@ -357,6 +356,7 @@ function tick(dt) {
   const time = clock.time;
 
   if (state === 'play') {
+    if (area === 'lab') lab.push(dt); // crates move before Morty, so he walks behind them smoothly
     morty.move(dt, worlds[area], true);
     cooldown -= dt;
     if (area === 'garage') garageTick(); else if (area === 'house') house.tick(dt); else if (area === 'arcade') arcade.tick(dt); else if (area === 'citadel') citadel.tick(dt); else lab.tick(dt);
@@ -404,7 +404,7 @@ function tick(dt) {
 requestAnimationFrame(frame);
 
 // Dev builds only: lets a test script run the game forward by hand, for example __game.step(120) = 2 seconds
-if (import.meta.env.DEV) window.__game = { G, flags, save, lab, boss, house, arcade, citadel, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
+if (import.meta.env.DEV) window.__game = { G, morty, flags, save, lab, boss, house, arcade, citadel, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
 
 // ---- Boot: start card, cold open (garage, then the house), then play in the house. ?skip jumps past the cold open,
 // ?garage starts in the garage with Beth's errand done, ?lab=1, 2 or 3 starts in that lab room,
