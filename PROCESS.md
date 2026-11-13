@@ -194,6 +194,43 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Chat link: Claude Code session "Read CLAUDE.md and PROCESS.md" (desktop app link claude://claude.ai/epitaxy/local_2e48fca3-329a-4553-91a4-edb650ea1502)
 - Why:
 
+### Session 6, 2026-11-12
+(Written on Nov 13, during Session 9's follow-up, from the commits and the chat transcript. Rodrigo asked to skip the log during the session itself.)
+- Goal: Build roadmap item 6: Blips and Chitz. An arcade set, Gorbi and Glorp, one arcade challenge that is fun in 3D, and the arcade soda as its reward, with a flag the boss fight reads.
+- AI types and tools: code AI (Claude Code, Claude Opus 5.5) for design, code and testing. No image or audio AI. Gorbi's and Glorp's portraits and the sound effects already existed from the 2D game.
+- Key prompts (word for word):
+  - "run whats next, skip log for prev session"
+  - "commit"
+  - "the game goes straight to shrimp lab and boss fight, storyline has to be adjusted"
+  - "fix story"
+  - "the ticket tumble is too difficult"
+- What was built:
+  - The arcade set (src/areas/arcade.js): Blips and Chitz at two in the morning. Dark carpet with neon squiggles, rows of cabinets with glowing screens, Gorbi's prize counter with the prizes on a lit top shelf, a claw machine, Glorp's machine, and the Ticket Tumble floor, a grid of light-up tiles.
+  - Two new low-poly characters (src/objects/aliens.js), both original characters from STORY.md: Gorbi, the bored green alien teen at the prize counter (antennae, heavy eyelids, purple work polo), and Glorp, the round orange regular who has played the same machine for twelve years (huge eyes that never blink).
+  - Ticket Tumble in 3D (src/scenes/arcadeScene.js): Morty runs around the light-up floor grabbing falling tickets. Each ticket's shadow shows where it will land. Bombs land on a red ring and blow after a short fuse. After Glorp's tip, a golden ticket worth 1000 drops each round and runs away from Morty. 5000 tickets buys Gorbi's prizes. All tuning sits in one TUMBLE table.
+  - The arcade soda became an earned boss item: the boss fight offers it only with the hasSoda flag (src/data/items.json). New test links: ?arcade, ?arcade=tip (Glorp's tip already heard) and ?boss&nosoda.
+  - Saves and Continue work in the arcade. Jerry is there too, and Summer's phone has arcade tasks.
+  - Story fix (same chat, commit 1ff4e23): the gun's last charge now opens a portal to Blips and Chitz, where the Focus Crystal fell after Rick's bender. Gorbi throws the crystal and the soda over the counter. The crystal clicks into the gun, and the gun opens a portal to Shrimp Rick's lab. The arcade went from a side trip to the main path.
+  - Easier Ticket Tumble (same chat, commit 788bde4): tickets carry over between rounds like a real arcade (5000 in total, kept in the save). More tickets, which stay longer (2.2 s instead of 1.4) and are easier to grab. Fewer and softer bombs (200 instead of 300). The golden ticket drops earlier and runs slower.
+- Key decisions:
+  - Ticket Tumble became a floor game where Morty runs around. In the 2D game (STORY.md) Morty only moves left and right. In 3D he can run anywhere on the floor, so the fun is moving: dodging bomb rings and chasing the golden ticket.
+  - Glorp's tip is optional but matters: the golden ticket makes the 5000 goal much faster.
+  - Story order (Rodrigo picked option (a) of three): garage, Blips and Chitz, lab, then the Citadel, one gun part per area, as in STORY.md. This undid the earlier "all 3 parts in the lab" change.
+- What went wrong or looked weak, and the revision:
+  - The portal home stood between Morty and the camera and hid him. Moved it further back.
+  - First tuning was far too easy: a test bot playing like a human won in 22 seconds, because a round dropped about 11,000 points of tickets. Cut the ticket rate and added bombs. The bot then won in about 33 seconds.
+  - That was then too hard for a real person. Rodrigo: "the ticket tumble is too difficult." Fix: tickets carry over between rounds, and the numbers got gentler. Even a sloppy bot that ignores bombs now wins in about 24 seconds.
+  - The arcade was built as a side trip off Rick's portal vial, so the live game still went straight from the garage to the lab and the boss. Rodrigo caught it on the live site. The story fix made the arcade required and removed the vial.
+  - The hidden preview pane slowed the test script's timers to a crawl. The test switched to faster yields.
+- Rejected, and why:
+  - Keeping the arcade optional (the first build): the roadmap wants it to matter, and nobody would find the soda.
+  - Option (b), arcade then lab with all 3 parts in the lab: it leaves the Citadel without a reason to go.
+  - Lowering the 5000 goal: carrying tickets over fixed the difficulty and keeps the number from the 2D game.
+- Result: Tested with a script in the browser: the portal there and back, Gorbi, Glorp's tip and Jerry, a full won round, Gorbi's handover with the flag set, the boss item menu with and without the soda, and (after the story fix) garage, arcade, lab in order. After the tuning pass, a lost round with 2100 tickets starts the next round at 2100. Pushed and deployed after the story fix and again after the tuning pass. Session 9's bot later also covered a lost round and Continue from saves. Not checked as a real player except by Rodrigo, who found it too hard before the tuning pass.
+- Evidence files: none saved during this session. The commits are the record: 4de72a6 (the build), 1ff4e23 (story fix), 788bde4 (easier Ticket Tumble).
+- Chat link: Claude Code session "run whats next, skip log for prev session" (transcript 2946bace-b2e0-4b92-a16d-ff1f0d42ef76)
+- Why:
+
 ### Session 7, 2026-11-12
 - Goal: Build roadmap item 7: the Citadel of Ricks. A queue of bureaucrat Ricks and the Take a Number dialogue puzzle. Reachable, beatable, worth the trip.
 - AI types and tools: code AI (Claude Code, Claude Opus 5.5) for design, code and testing. No image or audio AI. The Citadel portraits and the citadel.m4a track already existed from the 2D game.
