@@ -271,7 +271,7 @@ body.play #hint.on { opacity: 1; }
 #phone-note::after { content: ' - S'; font-weight: bold; font-style: normal; }
 #phone-close { margin-top: 1vh; text-align: center; font-size: 1.8vh; font-weight: bold; color: var(--ink); }
 
-/* Ticket Tumble (Blips and Chitz): score and timer up top, a progress bar to 5000, big countdown, +100 pops */
+/* Ticket Tumble (Blips and Chitz): score and timer up top, a progress bar to 2500, big countdown, +100 pops */
 #tumble {
   position: fixed; top: 16px; left: 50%; transform: translate(-50%, -20px); width: min(460px, 80vw); padding: 8px 14px 10px;
   background: rgba(21, 16, 28, 0.82); border: 3px solid var(--ink); border-top: 5px solid #ff5fa2; border-radius: 8px;

@@ -1,5 +1,5 @@
 {
-  "_note": "Blips and Chitz: where the cracked gun's last charge goes. Rick's bender was here; the Focus Crystal fell back through his portal onto the prize counter; 5000 Ticket Tumble tickets buy it back (plus a soda), and the crystal powers one more portal, to Shrimp Rick's lab.",
+  "_note": "Blips and Chitz: where the cracked gun's last charge goes. Rick's bender was here; the Focus Crystal fell back through his portal onto the prize counter; 2500 Ticket Tumble tickets buy it back (plus a soda), and the crystal powers one more portal, to Shrimp Rick's lab.",
   "arrive": [
     {
       "speaker": "Morty",
@@ -9,8 +9,8 @@
   ],
   "goals": {
     "start": "The Focus Crystal is here. Ask at the prize counter.",
-    "play": "Win 5000 tickets on the Ticket Tumble floor.",
-    "prize": "5000 tickets! Cash them in with Gorbi.",
+    "play": "Win 2500 tickets on the Ticket Tumble floor.",
+    "prize": "2500 tickets! Cash them in with Gorbi.",
     "done": "Step into the portal to Shrimp Rick's lab."
   },
   "got": {
@@ -19,7 +19,7 @@
   },
   "hint": "SPACE: talk or play.",
   "tumbleHint": "Arrows or WASD: run. Grab tickets. Get off a red ring before it blows.",
-  "win": "5000 TICKETS. GO SEE GORBI.",
+  "win": "2500 TICKETS. GO SEE GORBI.",
   "gorbi": {
     "entry": [
       {
@@ -57,7 +57,7 @@
           {
             "speaker": "Gorbi",
             "mood": "neutral",
-            "text": "Five thousand tickets. I don't make the prices. I just make you sad."
+            "text": "Twenty-five hundred tickets. I don't make the prices. I just make you sad."
           }
         ],
         "choices": [
@@ -101,7 +101,7 @@
           {
             "speaker": "Gorbi",
             "mood": "neutral",
-            "text": "Cool. Still five thousand."
+            "text": "Cool. Still twenty-five hundred."
           }
         ],
         "goto": "how"
@@ -120,7 +120,7 @@
           {
             "speaker": "Gorbi",
             "mood": "neutral",
-            "text": "Five thousand tickets. The number didn't get smaller while you were gone."
+            "text": "Twenty-five hundred tickets. The number didn't get smaller while you were gone."
           }
         ]
       },
@@ -132,7 +132,7 @@
           {
             "speaker": "Gorbi",
             "mood": "neutral",
-            "text": "Five thousand. Huh. Nobody's ever done that."
+            "text": "Twenty-five hundred. Huh. Nobody's ever done that."
           },
           {
             "speaker": "Gorbi",
@@ -359,7 +359,7 @@
           {
             "speaker": "Ticket Tumble",
             "mood": "happy",
-            "text": "TICKET TUMBLE! Collect 5000 tickets! Tickets 100! Bombs minus 200! Your tickets stay with you between rounds! Gold tickets: a MYSTERY!"
+            "text": "TICKET TUMBLE! Collect 2500 tickets! Tickets 100! Bombs minus 200! Your tickets stay with you between rounds! Gold tickets: a MYSTERY!"
           },
           {
             "speaker": "Morty",

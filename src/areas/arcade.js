@@ -119,7 +119,7 @@ export function buildArcade() {
   spot.position.set(px, 4.6, -4.4);
   spot.target.position.set(px, 3.4, -5.6);
   g.add(spot, spot.target);
-  sign('5000', 0.8, 0.26, '#ffd84c', add({ x: px, y: 2.88, z: -5.44 }));
+  sign('2500', 0.8, 0.26, '#ffd84c', add({ x: px, y: 2.88, z: -5.44 }));
 
   // ---- Back wall, middle: the claw machine ----
   const cx = -1.4;

@@ -21,10 +21,10 @@ const $ = (id) => document.getElementById(id);
 // Ticket Tumble, the 3D version: Morty runs around a light-up floor. Tickets rain down (their shadow shows where),
 // lie on the floor for a moment, and he grabs them by running over them. Bombs land on a red ring and blow after
 // a short fuse. After Glorp's tip, one golden ticket per round lands and runs away from him.
-// Tickets carry over between rounds, like a real arcade: the goal is 5000 in total, banked in the 'tickets' flag.
+// Tickets carry over between rounds, like a real arcade: the goal is 2500 in total, banked in the 'tickets' flag.
 // All tuning lives here. Change one value at a time.
 export const TUMBLE = {
-  GOAL: 5000,
+  GOAL: 2500,
   TIME: 45,              // seconds per round
   TICKET: 100,
   GOLD: 1000,
