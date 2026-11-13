@@ -6,7 +6,7 @@ import audio from '../engine/audio.js';
 import flags from '../systems/flags.js';
 import { tween, wait, ease } from '../engine/tween.js';
 import { say, closeDialogue, converse } from '../ui/dialogue.js';
-import { ball, glow } from '../engine/toon.js';
+import { ball, box, cyl, glow } from '../engine/toon.js';
 import { buildLab } from '../areas/lab.js';
 import { Guard } from '../objects/guard.js';
 import { Portal } from '../objects/portal.js';
@@ -16,7 +16,10 @@ import { blocked } from '../objects/player.js';
 import text from '../data/dialogue/lab.json';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
-const FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
+// What sits on each room's ring: the crystal (already won at the arcade), the canister, and Shrimp Rick's portal jammer.
+// The jammer is why nobody portals out of this lab. Switching it off is the way out, to the Citadel.
+const FLAGS = ['hasCrystal', 'hasCanister', 'jammerOff'];
+const PART_FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
 const inRect = (x, z, r, pad = 0) => x > r.x0 - pad && x < r.x1 + pad && z > r.z0 - pad && z < r.z1 + pad;
 
 // Everything that happens in Shrimp Rick's lab: the portal gun, guards, gun parts, doors, and the ending.
@@ -39,8 +42,16 @@ export function createLab({ scene, morty, api }) {
   lab.group.add(prawn.group, shrimpRick.group, ...guards.map((g) => g.model.group));
 
   // ---- Gun parts floating over their rings ----
+  const makeJammer = () => {
+    const g = new THREE.Group();
+    box(0.5, 0.5, 0.36, 0x3a3d48, { parent: g, y: -0.1, line: 0.03 });
+    cyl(0.14, 0.1, glow(0xff3a2a, 1.6), { parent: g, y: 0.2, line: 0.02 });
+    box(0.36, 0.12, 0.04, glow(0xffb03a, 1.2), { parent: g, y: -0.05, z: 0.19, line: 0 });
+    lab.group.add(g);
+    return g;
+  };
   const parts = PARTS.map((p, i) => {
-    const mesh = p.make({ parent: lab.group });
+    const mesh = i === 2 ? makeJammer() : p.make({ parent: lab.group });
     mesh.position.copy(lab.partSpots[i]).setY(1);
     return mesh;
   });
@@ -177,9 +188,9 @@ export function createLab({ scene, morty, api }) {
     }, ease.out);
     mesh.visible = false;
     closePortals(); // fresh pair for the next room
-    for (const line of text.pickups[PARTS[i].id]) await say(line);
+    for (const line of text.pickups[['crystal', 'canister', 'jammer'][i]]) await say(line);
     closeDialogue();
-    hud.parts(FLAGS.map((f) => flags.get(f)));
+    hud.parts(PART_FLAGS.map((f) => flags.get(f)));
 
     const door = lab.doors[i];
     if (door) {
@@ -230,10 +241,29 @@ export function createLab({ scene, morty, api }) {
       await say(line);
     }
     closeDialogue();
-    await hud.fade(1, 0.6);
+
+    // With the jammer off and the canister in, the gun can reach the Citadel, where the chip fell. Morty jumps.
+    const out = portals[0];
+    out.position.set(47.4, 0, 0.6);
+    out.group.rotation.y = -0.4;
+    morty.faceToward(out.position);
+    morty.animate(0.016, 0);
+    rig.cut({ pos: V(45.6, 1.9, 4.6), look: V(46.8, 1.1, 0.6), fov: 38 });
+    hud.flash(0.5);
+    await out.open();
+    const from = morty.position.clone();
+    audio.sfx('portal.mp3');
+    await tween(0.6, (t) => {
+      morty.position.lerpVectors(from, out.position, t);
+      morty.mesh.position.y = t * 0.5;
+      morty.mesh.rotation.z = t * 5;
+      morty.scale = 1 - t * 0.85;
+    }, ease.in);
+    hud.flash(1, 0.5);
+    await hud.fade(1, 0.5);
     alarmOn = false;
     leave();
-    api.toBoss(); // Morty runs home through a portal and Shrimp Rick follows: the boss fight, in the garage
+    api.toCitadel();
   }
 
   function leave() {
@@ -242,6 +272,8 @@ export function createLab({ scene, morty, api }) {
     held.visible = false;
     hud.parts(null); hud.hint('');
     closePortals();
+    Object.assign(morty, { scale: 1, squash: 1 });
+    morty.mesh.rotation.z = 0; morty.mesh.position.y = 0;
     bossPortal.group.visible = false;
     shrimpRick.group.visible = false;
   }
@@ -250,7 +282,7 @@ export function createLab({ scene, morty, api }) {
     world,
     goal() {
       const n = FLAGS.filter((f) => flags.get(f)).length;
-      return ['Cross the goo. Get the Focus Crystal.', 'Cross the goo. Get the Fluid Canister from behind the glass.', 'Get the Coordinate Chip past the last patrol.', 'Get out.'][n];
+      return ['Cross the goo. Get the Focus Crystal.', 'Cross the goo. Get the Fluid Canister from behind the glass.', "Sneak past the last patrol. Switch off Shrimp Rick's portal jammer.", 'Get out.'][n];
     },
 
     // Arrive in the lab with the Focus Crystal already in the gun. room: 0, 1 or 2 (rooms after 0 are for testing with ?lab=2 or ?lab=3).
@@ -268,7 +300,7 @@ export function createLab({ scene, morty, api }) {
       morty.group.rotation.y = Math.PI / 2;
       rig.setLimits({ x0: 6, x1: 42, z0: -1.2, z1: 0.6 });
       audio.music('shrimp_dimension.m4a');
-      hud.parts(FLAGS.map((f) => flags.get(f)));
+      hud.parts(PART_FLAGS.map((f) => flags.get(f)));
       hud.hint('SPACE: fire a portal the way Morty faces. Two portals link.');
 
       // Arrival: wide shot gliding along the lab, then Morty's first reaction

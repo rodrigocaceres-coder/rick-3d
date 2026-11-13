@@ -193,3 +193,33 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Evidence files: process/screenshots/2026-11-12_s5_continue-card-v1-options-run-together.jpg (before), _continue-card-v2-two-lines.png (after)
 - Chat link: Claude Code session "Read CLAUDE.md and PROCESS.md" (desktop app link claude://claude.ai/epitaxy/local_2e48fca3-329a-4553-91a4-edb650ea1502)
 - Why:
+
+### Session 7, 2026-11-12
+- Goal: Build roadmap item 7: the Citadel of Ricks. A queue of bureaucrat Ricks and the Take a Number dialogue puzzle. Reachable, beatable, worth the trip.
+- AI types and tools: code AI (Claude Code, Claude Opus 5.5) for design, code and testing. No image or audio AI. The Citadel portraits and the citadel.m4a track already existed from the 2D game.
+- Key prompts (word for word):
+  - "run whats next"
+- What was built:
+  - The Citadel set (src/areas/citadel.js): Rick ID Services and Lost and Found. Pale tiled floor, white-blue wall panels, a round window onto space, a red NOW SERVING 4,000,112 board. Left to right: the public hall (number machine, a velvet-rope line of five Ricks and Jerry), Desk Rick's counter with a swing gate, a waiting pen (sold-out vending machine, Bored Rick on a bench), Guard Rick's force field, and the lost and found cage with the chip glowing in a bin.
+  - Ten new low-poly characters (src/objects/ricks.js), all built from the one Rick model with new colors and one prop each: Desk Rick (green visor, tie), Guard Rick (helmet, armor, baton), Cop Rick (cap, shades, badge), Janitor Rick (mop), Bored Rick (sitting, coffee), Gossip Rick, five Queue Ricks (beard, hat, sunglasses, different hair), and Clerk Morty holding lab coats like a coat rack. buildRick() now takes optional colors.
+  - Take a Number (STORY.md): take a number from the machine, then three Ricks each ask one question with three or four answers. Desk Rick wants Form 22-B (clue: a Queue Rick; another Queue Rick warns not to say "emergency"). Guard Rick's password is whatever he is mad at today (clues: Gossip Rick, and "YOU ATE MY FLURBOS - G.R." scratched on the vending machine). Cop Rick takes an arcade prize as "evidence" (clue: Janitor Rick). Any wrong answer: the camera looks down the whole unmoving line, "NOW SERVING: 4,000,112", Morty is at the back and his number is void. Checkpoints already passed stay passed. His number goes up by one each time.
+  - A real trade-off at Cop Rick: Gorbi now also hands over a plastic arcade ring, and Cop Rick takes the ring or the arcade soda. Give him the soda and it is gone from the boss fight.
+  - The chip flies into the gun (part 3 of 3). Story beat: Shrimp Rick rips a portal into the Citadel, the number machine prints him ticket 10,000,000,000, Desk Rick and Cop Rick tell him to get in line, and Morty portals home. The boss fight's opening line now pays it off: "Then the Citadel made me take a number."
+  - Lab room 3 now holds Shrimp Rick's portal jammer instead of the chip (the chip lives at the Citadel now). Switching it off sets off the alarm; Shrimp Rick confronts Morty, and Morty jumps through a portal to the Citadel instead of straight home.
+  - Rick's garage line, Summer's phone (new tasks, a Citadel note, the ring and a useless Citadel number in pockets), saves (Continue in the Citadel), and the ?citadel and ?citadel=cop test links.
+- Key decisions:
+  - The boss fight stays in the garage. STORY.md has it at the Citadel, but the garage fight is built, staged and tested; the Citadel ending ends with Shrimp Rick stuck in line instead, which keeps the "take a number" running joke going into the fight.
+  - Wrong answers keep passed checkpoints. Sending Morty back past all three Ricks for one wrong answer would be a lot of walking for a dialogue puzzle.
+  - The correct answers are always on screen (no hidden options). The puzzle is picking the right one; the clues tell you which.
+  - Reused the 2D game's Citadel dialogue where it fit (Form 22-B, the vending machine, the coat rack Morty) and wrote new lines for Jerry, the ending, and the soda bribe.
+- What went wrong or looked weak, and the revision:
+  - Ending v1 used automatic dialogue shots. In the cage corner they ended up behind things: Cop Rick's shot was picked before he finished walking and showed a portal and bars, Shrimp Rick's looked out past the side wall, Morty's was covered by Shrimp Rick. v2 uses fixed camera spots for each speaker, and Shrimp Rick's portal closes behind him.
+  - Back-of-the-line shot v1 sat behind the number machine, so the screen was a red wall. v2 looks down the line from the other side.
+  - The jump-home shot had Shrimp Rick's back in front of Morty. Moved the camera to the cage side.
+- Rejected, and why:
+  - Moving the boss fight to the Citadel: a new arena, new camera shots and new tests for a fight that already works, one day before the cut line.
+  - Hiding the right answer until you hear the clue: it turns a dialogue puzzle into a hunt for the right NPC.
+- Result: Tested with a script in the browser: arrival, number machine, wrong answer (back of the line, number void, new number), Form 22-B and the gate, Guard Rick and the field, Cop Rick with the ring and with the soda (soda gone after), the chip, the ending, and on into the boss fight with three parts. Lab room 3 jammer to the Citadel. Continue from a Citadel save restores the gate and the field. ?boss=fight, ?garage, ?arcade, ?lab=1 and ?skip still start with no errors. The arcade prize now gives the ring. Production build passes. The Citadel renders in about 4.5 ms a frame on this MacBook. Not checked on Rodrigo's machine yet.
+- Evidence files: process/screenshots/2026-11-12_s7_citadel-hall.jpg, _lab-room3-jammer.jpg, _back-of-line-v1-machine-blocks.jpg and _ending-v1-cop-shot-blocked.jpg, _ending-v1-shrimp-shot-off-set.jpg (befores), _back-of-line-v2.jpg, _ending-v2-shrimp-rick.jpg, _ending-v2-desk-rick.jpg, _ending-v2-cop-rick.jpg, _ending-v2-morty.jpg
+- Chat link: Claude Code session "run whats next" (desktop app link claude://claude.ai/epitaxy/local_2cb56cf5-7ad7-443b-abd0-79e59c00de8d)
+- Why:

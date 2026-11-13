@@ -11,8 +11,9 @@
       { "speaker": "Morty", "mood": "happy", "text": "Shrimp Rick's Fluid Canister. Full charge. This thing could hit the far wall now." },
       { "speaker": "Morty", "mood": "neutral", "text": "It's humming. Mom said not to touch anything that hums. Sorry, Mom." }
     ],
-    "chip": [
-      { "speaker": "Morty", "mood": "happy", "text": "The Coordinate Chip. That's all three! Okay. Home. Home, home, home." }
+    "jammer": [
+      { "speaker": "Morty", "mood": "neutral", "text": "A big red button that says PORTAL JAMMER. That's why nobody portals out of here." },
+      { "speaker": "Morty", "mood": "happy", "text": "The gun says the chip is at... the Citadel? Okay. Jammer off. Sorry, jammer." }
     ]
   },
   "caught": [
@@ -28,7 +29,8 @@
     { "speaker": "Morty", "mood": "neutral", "text": "It's Rick's! He dropped it! ...Technically." },
     { "speaker": "Shrimp Rick", "mood": "happy", "text": "I am the smartest shrimp in any ocean, Morty." },
     { "speaker": "Morty", "mood": "angry", "text": "Why is it always shrimp? Why is it never something normal?" },
-    { "speaker": "Shrimp Rick", "mood": "angry", "text": "Fine. You want a fight? I'll bring the sauce." }
+    { "speaker": "Shrimp Rick", "mood": "angry", "text": "Fine. You want a fight? I'll bring the sauce." },
+    { "speaker": "Morty", "mood": "neutral", "text": "Nope! No fight! Jammer's off! Bye!" }
   ],
   "prawnsworth": {
     "entry": [

@@ -61,9 +61,10 @@ export function buildMorty() {
   return { root, parts, height: 1.6, blob: 0.34 };
 }
 
-export function buildRick() {
+// look: optional colors, so the Citadel can have a whole hall of different Ricks from the same model
+export function buildRick(look = {}) {
   const root = new THREE.Group();
-  const SKIN = C(0xdcd3c6), COAT = C(0xf3f3ee), SHIRT = C(0x9fd8e8), PANTS = C(0x8a6a4a), HAIR = C(0xaedff0), SHOE = C(0x2b2733);
+  const SKIN = C(look.skin ?? 0xdcd3c6), COAT = C(look.coat ?? 0xf3f3ee), SHIRT = C(look.shirt ?? 0x9fd8e8), PANTS = C(look.pants ?? 0x8a6a4a), HAIR = C(look.hair ?? 0xaedff0), SHOE = C(look.shoe ?? 0x2b2733);
   const parts = { root };
 
   parts.legs = [-1, 1].map((s) => {
@@ -97,11 +98,11 @@ export function buildRick() {
     cone(0.13, 0.32, HAIR, { parent: head, x: Math.sin(a) * 0.2, y: 0.08 + Math.cos(a) * 0.29, z: -0.22, rz: -a, rx: -0.55, sides: 4 });
   }
   eyes(head, 0.1, 0.05, 0.19, 0.095, SKIN);
-  box(0.4, 0.05, 0.05, C(0x86bfd4), { parent: head, y: 0.175, z: 0.235, line: 0.012 });
+  box(0.4, 0.05, 0.05, C(look.brow ?? 0x86bfd4), { parent: head, y: 0.175, z: 0.235, line: 0.012 });
   for (const s of [-1, 1]) box(0.11, 0.014, 0.02, C(0x9a8f86), { parent: head, x: s * 0.1, y: -0.065, z: 0.25, rz: s * -0.15, line: 0 });
   box(0.055, 0.17, 0.09, SKIN, { parent: head, y: -0.07, z: 0.27, line: 0.018 });
   box(0.17, 0.02, 0.03, C(0x5b3a35), { parent: head, y: -0.225, z: 0.235, line: 0 });
-  ball(0.022, C(0xb7e86a), { parent: head, x: 0.06, y: -0.26, z: 0.24, line: 0, detail: 0 });
+  if (look.drool !== false) ball(0.022, C(0xb7e86a), { parent: head, x: 0.06, y: -0.26, z: 0.24, line: 0, detail: 0 });
 
   return { root, parts, height: 1.98, blob: 0.4 };
 }

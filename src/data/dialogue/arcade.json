@@ -147,6 +147,7 @@
       },
       "prize2": {
         "set": {
+          "hasRing": true,
           "hasSoda": true
         },
         "lines": [
@@ -159,6 +160,11 @@
             "speaker": "Gorbi",
             "mood": "neutral",
             "text": "Also take this soda. Your grandpa left it. It's been fizzing at me all night."
+          },
+          {
+            "speaker": "Gorbi",
+            "mood": "neutral",
+            "text": "And this plastic ring. You had leftover tickets. It's shiny. Nobody wants it. Now you have it."
           }
         ],
         "do": {

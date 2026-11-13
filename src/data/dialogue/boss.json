@@ -5,7 +5,7 @@
     ],
     "faceOff": [
       { "speaker": "Shrimp Rick", "mood": "happy", "text": "Nice garage. Bit dry." },
-      { "speaker": "Shrimp Rick", "mood": "angry", "text": "You took my crystal, my chip and my fluid. So I'm taking your garage." },
+      { "speaker": "Shrimp Rick", "mood": "angry", "text": "You took my fluid. Then the Citadel made me take a number. A NUMBER. So I'm taking your garage." },
       { "speaker": "Morty", "mood": "neutral", "text": "Rick! Rick, wake up! There's a shrimp you in the garage!" },
       { "speaker": "Rick", "mood": "neutral", "text": "Zzzz... tell him... we gave at the office... zzzz." },
       { "speaker": "Morty", "mood": "angry", "text": "Okay. Okay. I can do this. I can probably do this." }

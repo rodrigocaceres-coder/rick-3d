@@ -9,7 +9,8 @@
     { "text": "Touch the humming gun. Mom said don't.", "show": "rickExplained", "done": "portalOpen" },
     { "text": "Win the Focus Crystal back at Blips and Chitz", "show": "portalOpen", "done": "hasCrystal" },
     { "text": "Get the Fluid Canister back", "show": "hasCrystal", "done": "hasCanister" },
-    { "text": "Get the Coordinate Chip back", "show": "hasCanister", "done": "hasChip" },
+    { "text": "Get out of the shrimp lab", "show": "hasCanister", "done": "jammerOff" },
+    { "text": "Get the Coordinate Chip from the Citadel lost and found", "show": "jammerOff", "done": "hasChip" },
     { "text": "Survive Shrimp Rick", "show": "hasChip", "done": "bossBeaten" }
   ],
   "partsLabel": "gun parts",
@@ -23,11 +24,14 @@
   "pockets": [
     { "name": "Mom's sandwich", "flag": "hasSandwich", "gone": "bossBeaten" },
     { "name": "Rick's portal gun", "flag": "portalOpen" },
-    { "name": "Arcade soda", "flag": "hasSoda", "gone": "bossBeaten" }
+    { "name": "Arcade soda", "flag": "hasSoda", "gone": "bossBeaten" },
+    { "name": "Plastic arcade ring", "flag": "hasRing" },
+    { "name": "Citadel number (useless)", "flag": "hasNumber", "gone": "hasChip" }
   ],
   "notes": [
     { "if": "bossBeaten", "text": "you used 96% of my battery. the shrimp pic has 400 likes so you may live." },
     { "if": "hasChip", "text": "why is my phone in ANOTHER DIMENSION. roaming charges are yours." },
+    { "if": "sawCitadel", "text": "a space station full of grandpas?? do NOT bring one home. we have enough." },
     { "if": "sawArcade", "text": "you went to an ARCADE. during a family emergency. bring me a prize." },
     { "if": "portalOpen", "text": "shrimp? like the food? gross. bring me a picture." },
     { "if": "rickExplained", "text": "grandpa said \"delegating\". that means you. lol" },

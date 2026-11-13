@@ -19,6 +19,7 @@ import houseText from './data/dialogue/house.json';
 import { createLab } from './scenes/labScene.js';
 import { createBoss } from './scenes/bossScene.js';
 import { createArcade } from './scenes/arcadeScene.js';
+import { createCitadel } from './scenes/citadelScene.js';
 import { shotOn } from './scenes/shots.js';
 import dialogue from './data/dialogue/garage.json';
 
@@ -26,9 +27,9 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const params = new URLSearchParams(location.search);
 const GARAGE_LIMITS = { x0: -4, x1: 4, z0: -3, z1: 2.5 };
 // Test links start mid-episode with made-up flags, so they neither load nor overwrite the real save
-const TEST_LINK = ['skip', 'garage', 'lab', 'boss', 'arcade'].some((k) => params.has(k));
+const TEST_LINK = ['skip', 'garage', 'lab', 'boss', 'arcade', 'citadel'].some((k) => params.has(k));
 const PART_FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
-const SAVED_WHERE = { house: 'the Smith house', garage: 'the garage', lab: "Shrimp Rick's lab", boss: 'the boss fight', arcade: 'Blips and Chitz' };
+const SAVED_WHERE = { house: 'the Smith house', garage: 'the garage', lab: "Shrimp Rick's lab", boss: 'the boss fight', arcade: 'Blips and Chitz', citadel: 'the Citadel' };
 
 // ---- Garage world ----
 const garage = buildGarage();
@@ -60,12 +61,18 @@ const zzz = [0, 1, 2].map(() => {
 // G is the shared game state that cutscenes read and change
 const G = { scene: garage.group, garage, morty, rick, gun, portal, introPortal, gunLight, rickAsleep: false, rickAwake: false };
 let state = 'boot';     // boot, cutscene, play, dialogue, battle, phone, minigame
-let area = 'garage';    // house, garage, lab or arcade
+let area = 'garage';    // house, garage, lab, arcade or citadel
 let cooldown = 0;       // short pause after dialogue so the same key press does not start it again
 
 // ---- Shrimp Rick's lab ----
 const lab = createLab({
   scene, morty,
+  api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toBoss, toCitadel },
+});
+
+// ---- The Citadel of Ricks: the chip is in the lost and found, behind the Take a Number puzzle ----
+const citadel = createCitadel({
+  scene, morty, held: lab.held,
   api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toBoss },
 });
 
@@ -227,7 +234,14 @@ async function toLab(room) {
   await lab.enter(room);
 }
 
-// Out of the lab with all three parts: the boss fight starts in the garage
+async function toCitadel() {
+  resetMortyPose();
+  garage.group.visible = false;
+  area = 'citadel';
+  await citadel.enter();
+}
+
+// Out of the Citadel with all three parts: the boss fight starts in the garage
 function toBoss(opts) {
   resetMortyPose();
   area = 'garage';
@@ -253,13 +267,15 @@ async function toGarage() {
 function startPlay() {
   hud.cinema(false);
   rig.follow(morty);
-  hud.goal(area === 'garage' ? garageGoal() : area === 'house' ? house.goal() : area === 'arcade' ? arcade.goal() : lab.goal());
+  hud.goal({ garage: garageGoal, house: house.goal, arcade: arcade.goal, citadel: citadel.goal, lab: lab.goal }[area]());
   if (area === 'arcade') hud.hint(arcade.hint());
+  else if (area === 'citadel') hud.hint(citadel.hint());
   else if (area !== 'lab') hud.hint(flags.get('hasPhone') ? houseText.hints.phone : '');
   cooldown = 0.3;
   lab.setCooldown(0.3);
   house.setCooldown(0.3);
   arcade.setCooldown(0.3);
+  citadel.setCooldown(0.3);
   state = 'play';
   checkpoint();
 }
@@ -286,6 +302,7 @@ async function continueFrom(saved) {
     return toLab(Math.min(2, PART_FLAGS.filter((f) => flags.get(f)).length));
   }
   if (saved.area === 'arcade') return toArcade();
+  if (saved.area === 'citadel') { gun.group.visible = false; return toCitadel(); }
   if (saved.area === 'house') {
     garage.group.visible = false;
     area = 'house';
@@ -326,7 +343,7 @@ function garageTick() {
 
 // ---- Main loop ----
 const tmp = new THREE.Vector3();
-const worlds = { garage, house: house.world, lab: lab.world, arcade: arcade.world };
+const worlds = { garage, house: house.world, lab: lab.world, arcade: arcade.world, citadel: citadel.world };
 let last = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
@@ -342,7 +359,7 @@ function tick(dt) {
   if (state === 'play') {
     morty.move(dt, worlds[area], true);
     cooldown -= dt;
-    if (area === 'garage') garageTick(); else if (area === 'house') house.tick(dt); else if (area === 'arcade') arcade.tick(dt); else lab.tick(dt);
+    if (area === 'garage') garageTick(); else if (area === 'house') house.tick(dt); else if (area === 'arcade') arcade.tick(dt); else if (area === 'citadel') citadel.tick(dt); else lab.tick(dt);
   } else if (state === 'phone') {
     morty.move(dt, worlds[area], false); // he slows to a stop while he reads
     if (input.pressed('Escape')) togglePhone();
@@ -379,6 +396,7 @@ function tick(dt) {
   morty.update();
   lab.update(dt, time);
   arcade.update(dt, time);
+  citadel.update(dt, time);
   rig.update(dt, time);
   render();
   input.endFrame();
@@ -386,13 +404,14 @@ function tick(dt) {
 requestAnimationFrame(frame);
 
 // Dev builds only: lets a test script run the game forward by hand, for example __game.step(120) = 2 seconds
-if (import.meta.env.DEV) window.__game = { G, flags, save, lab, boss, house, arcade, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
+if (import.meta.env.DEV) window.__game = { G, flags, save, lab, boss, house, arcade, citadel, state: () => state, area: () => area, step(frames = 60) { for (let i = 0; i < frames; i++) tick(1 / 60); } };
 
 // ---- Boot: start card, cold open (garage, then the house), then play in the house. ?skip jumps past the cold open,
 // ?garage starts in the garage with Beth's errand done, ?lab=1, 2 or 3 starts in that lab room,
 // ?boss starts at the boss fight (?boss=2 at the tank phase, ?boss=fight skips the fight's opening scene, &nosandwich
 // plays it without Beth's sandwich, &nosoda without the arcade soda), ?arcade starts at Blips and Chitz (?arcade=tip
-// with Glorp's golden ticket tip already heard). ----
+// with Glorp's golden ticket tip already heard), ?citadel starts at the Citadel (?citadel=cop with the desk and
+// the guard already passed). ----
 async function boot() {
   rig.cut({ pos: V(-7.2, 1.5, 5.6), look: V(1.5, 1.7, -3), fov: 38 });
   if (params.has('lab')) {
@@ -411,6 +430,14 @@ async function boot() {
     flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, portalOpen: true, hasSandwich: true, hasPhone: true, glorpTip: params.get('arcade') === 'tip' });
     gun.group.visible = false;
     return toArcade();
+  }
+  if (params.has('citadel')) {
+    afterColdOpen(G);
+    const cop = params.get('citadel') === 'cop';
+    flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, portalOpen: true, hasPhone: true, hasSandwich: true, hasSoda: true, hasRing: true,
+      sawArcade: true, wonTickets: true, hasCrystal: true, hasCanister: true, jammerOff: true, helpedResistance: true, hasNumber: cop, passedDesk: cop, passedGuard: cop });
+    gun.group.visible = false;
+    return toCitadel();
   }
   if (params.has('garage')) {
     afterColdOpen(G);

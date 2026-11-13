@@ -1,0 +1,330 @@
+{
+  "_note": "Citadel of Ricks, Rick ID Services and Lost and Found. The Coordinate Chip fell into the lost and found bin. Take a Number puzzle (STORY.md): Desk Rick wants the right form, Guard Rick's password is whatever he is mad at today, Cop Rick takes arcade prizes as 'evidence'. Clues come from the queue, Gossip Rick, the vending machine and Janitor Rick. A wrong answer sends Morty to the back of the line and his number is void. {number} is filled in with Morty's current number. do: back = back of the line, open = gate / field / cage, bribe = ring / soda (the soda is then gone from the boss fight).",
+  "arrive": [
+    { "speaker": "Morty", "mood": "neutral", "text": "The Citadel. A whole space station of Ricks. This is my actual nightmare." },
+    { "speaker": "Morty", "mood": "neutral", "text": "Okay. The chip's here somewhere. The gun's pointing at... the lost and found. Of course it is." }
+  ],
+  "goals": {
+    "number": "Take a number. The machine by the window.",
+    "desk": "Your number is up. Probably. Talk to Desk Rick.",
+    "guard": "Get past Guard Rick and his force field.",
+    "cop": "Get Cop Rick away from the lost and found cage.",
+    "chip": "Grab the Coordinate Chip from the bin."
+  },
+  "hint": "SPACE: talk or look. Ricks in the line know things.",
+  "backCaption": "NOW SERVING: 4,000,112",
+  "backToast": "Back of the line. Your number is void. Take a new one.",
+  "got": "GOT: THE COORDINATE CHIP. GUN PART 3 OF 3. FULL POWER.",
+
+  "machine": {
+    "entry": [
+      { "if": "hasNumber", "goto": "again" },
+      { "if": "numberTries", "goto": "retake" },
+      { "goto": "take" }
+    ],
+    "nodes": {
+      "take": {
+        "set": { "hasNumber": true },
+        "lines": [
+          { "speaker": "Number Machine", "mood": "neutral", "text": "TAKE A NUMBER. YOUR NUMBER IS: {number}." },
+          { "speaker": "Number Machine", "mood": "neutral", "text": "NOW SERVING: 4,000,112. ESTIMATED WAIT: HEAT DEATH OF THE UNIVERSE." },
+          { "speaker": "Morty", "mood": "neutral", "text": "Cool. Cool cool cool." }
+        ]
+      },
+      "retake": {
+        "set": { "hasNumber": true },
+        "lines": [
+          { "speaker": "Number Machine", "mood": "happy", "text": "WELCOME BACK. YOUR NEW NUMBER IS: {number}." },
+          { "speaker": "Number Machine", "mood": "neutral", "text": "YOUR OLD NUMBER HAS BEEN SHREDDED. IT FELT NOTHING." }
+        ]
+      },
+      "again": {
+        "lines": [
+          { "speaker": "Number Machine", "mood": "neutral", "text": "YOU ALREADY HAVE A NUMBER: {number}. HOLD ON TO IT. EMOTIONALLY." }
+        ]
+      }
+    }
+  },
+
+  "desk": {
+    "entry": [
+      { "if": "passedDesk", "goto": "after" },
+      { "if": "!hasNumber", "goto": "noNumber" },
+      { "goto": "ask" }
+    ],
+    "nodes": {
+      "noNumber": {
+        "lines": [
+          { "speaker": "Desk Rick", "mood": "angry", "text": "No number, no existence. The machine. By the window. I'll wait. I'm great at waiting." }
+        ]
+      },
+      "ask": {
+        "lines": [
+          { "speaker": "Desk Rick", "mood": "neutral", "text": "{number}... ugh, whatever, you're up. The line's a social construct anyway." },
+          { "speaker": "Desk Rick", "mood": "neutral", "text": "Lost and found requires the correct form. Which form, genius?" }
+        ],
+        "choices": [
+          { "text": "Form 22.", "goto": "wrong22" },
+          { "text": "Form 22-B.", "set": { "passedDesk": true }, "goto": "pass" },
+          { "text": "It's an emergency!", "goto": "wrongEmergency" }
+        ]
+      },
+      "pass": {
+        "lines": [
+          { "speaker": "Desk Rick", "mood": "happy", "text": "22-B. With the B. Do you know how rare that is?" },
+          { "speaker": "Desk Rick", "mood": "happy", "text": "I'm gonna stamp this so hard. Go. Before I start feeling something." }
+        ],
+        "do": { "open": "gate" }
+      },
+      "wrong22": {
+        "set": { "hasNumber": false },
+        "lines": [
+          { "speaker": "Desk Rick", "mood": "angry", "text": "22. Just 22. No B. You walked up to my desk and said a number without its letter." },
+          { "speaker": "Desk Rick", "mood": "angry", "text": "Back of the line. Think about what you did." }
+        ],
+        "do": { "back": true }
+      },
+      "wrongEmergency": {
+        "set": { "hasNumber": false },
+        "lines": [
+          { "speaker": "Desk Rick", "mood": "happy", "text": "An emergency! Wonderful. That's Form 1. It's nine hundred pages. Single-spaced." },
+          { "speaker": "Desk Rick", "mood": "angry", "text": "Fill it out at the back of the line." }
+        ],
+        "do": { "back": true }
+      },
+      "after": {
+        "lines": [
+          { "speaker": "Desk Rick", "mood": "neutral", "text": "You're processed. Stop being in front of my desk. It's unprocessing you." }
+        ]
+      }
+    }
+  },
+
+  "guard": {
+    "entry": [
+      { "if": "passedGuard", "goto": "after" },
+      { "if": "!passedDesk", "goto": "notYet" },
+      { "goto": "ask" }
+    ],
+    "nodes": {
+      "notYet": {
+        "lines": [
+          { "speaker": "Guard Rick", "mood": "angry", "text": "You're on the wrong side of the railing to even talk to me, kid." }
+        ]
+      },
+      "ask": {
+        "lines": [
+          { "speaker": "Guard Rick", "mood": "angry", "text": "Every Rick here thinks he's the smart one. I'm the smart one." },
+          { "speaker": "Guard Rick", "mood": "angry", "text": "Password. And it better not be something stupid like 'password'." }
+        ],
+        "choices": [
+          { "text": "The Council of Ricks.", "goto": "wrongCouncil" },
+          { "text": "That stupid vending machine.", "set": { "passedGuard": true }, "goto": "pass" },
+          { "text": "Password?", "goto": "wrongPassword" }
+        ]
+      },
+      "pass": {
+        "lines": [
+          { "speaker": "Guard Rick", "mood": "angry", "text": "...It ate four Flurbos, kid. Four. Do you know what that does to a man?" },
+          { "speaker": "Guard Rick", "mood": "happy", "text": "You get it. Go through. Kick it on your way out." }
+        ],
+        "do": { "open": "field" }
+      },
+      "wrongCouncil": {
+        "lines": [
+          { "speaker": "Guard Rick", "mood": "angry", "text": "The Council? I'm mad at them every day. That's not a password, that's a lifestyle." },
+          { "speaker": "Guard Rick", "mood": "angry", "text": "Back of the line." }
+        ],
+        "do": { "back": true }
+      },
+      "wrongPassword": {
+        "lines": [
+          { "speaker": "Guard Rick", "mood": "angry", "text": "I said not 'password'. You said 'password' with a question mark. That's worse." },
+          { "speaker": "Guard Rick", "mood": "angry", "text": "Back of the line." }
+        ],
+        "do": { "back": true }
+      },
+      "after": {
+        "lines": [
+          { "speaker": "Guard Rick", "mood": "neutral", "text": "Did you kick the machine? Kick the machine." }
+        ]
+      }
+    }
+  },
+
+  "cop": {
+    "entry": [
+      { "if": "passedCop", "goto": "after" },
+      { "goto": "ask" }
+    ],
+    "nodes": {
+      "ask": {
+        "lines": [
+          { "speaker": "Cop Rick", "mood": "angry", "text": "Lost and found is closed. Police business." },
+          { "speaker": "Cop Rick", "mood": "neutral", "text": "Unless you've got something for me. For the... investigation." }
+        ],
+        "choices": [
+          { "text": "Justice.", "goto": "wrongJustice" },
+          { "text": "Half of Mom's sandwich.", "if": "hasSandwich", "goto": "wrongSandwich" },
+          { "text": "A shiny plastic arcade ring.", "if": "hasRing", "set": { "passedCop": true, "hasRing": false }, "goto": "passRing" },
+          { "text": "An arcade soda. Still fizzing.", "if": "hasSoda", "set": { "passedCop": true, "hasSoda": false, "gaveSoda": true }, "goto": "passSoda" }
+        ]
+      },
+      "passRing": {
+        "lines": [
+          { "speaker": "Cop Rick", "mood": "happy", "text": "Ooh. Evidence. Very important evidence. Of a crime. Somewhere." },
+          { "speaker": "Cop Rick", "mood": "happy", "text": "I didn't see you. You didn't see me. Nobody saw the ring." }
+        ],
+        "do": { "open": "cage", "bribe": "ring" }
+      },
+      "passSoda": {
+        "lines": [
+          { "speaker": "Cop Rick", "mood": "happy", "text": "Blips and Chitz soda. This is evidence of a very good night." },
+          { "speaker": "Cop Rick", "mood": "happy", "text": "Confiscated. Go on. The cage is open. I'm busy. Drinking evidence." },
+          { "speaker": "Morty", "mood": "neutral", "text": "There goes my fight soda. Worth it. Probably." }
+        ],
+        "do": { "open": "cage", "bribe": "soda" }
+      },
+      "wrongJustice": {
+        "lines": [
+          { "speaker": "Cop Rick", "mood": "angry", "text": "Justice? Kid, I'm a cop at the Citadel. That's adorable. Back of the line." }
+        ],
+        "do": { "back": true }
+      },
+      "wrongSandwich": {
+        "lines": [
+          { "speaker": "Cop Rick", "mood": "angry", "text": "That's a sandwich. Half of one. That's not evidence, that's lunch. Back of the line." }
+        ],
+        "do": { "back": true }
+      },
+      "after": {
+        "lines": [
+          { "speaker": "Cop Rick", "mood": "happy", "text": "Move along. Nothing to see. Especially not the evidence." }
+        ]
+      }
+    }
+  },
+
+  "bin": {
+    "entry": [{ "goto": "grab" }],
+    "nodes": {
+      "grab": {
+        "set": { "hasChip": true },
+        "lines": [
+          { "speaker": "Morty", "mood": "happy", "text": "The Coordinate Chip! In a lost and found bin, next to forty identical lab coats." }
+        ],
+        "do": { "take": "chip" }
+      }
+    }
+  },
+
+  "queue": [
+    {
+      "entry": [{ "goto": "a" }],
+      "nodes": { "a": { "lines": [
+        { "speaker": "Queue Rick", "mood": "neutral", "text": "I've been next in line for three weeks. I can feel it. Any day now." }
+      ] } }
+    },
+    {
+      "entry": [{ "goto": "a" }],
+      "nodes": { "a": { "set": { "heardForm": true }, "lines": [
+        { "speaker": "Queue Rick", "mood": "neutral", "text": "Lost and found? You need a 22-B." },
+        { "speaker": "Queue Rick", "mood": "happy", "text": "Not a 22. A 22-B. Everyone forgets the B. Desk Rick lives for people who forget the B." }
+      ] } }
+    },
+    {
+      "entry": [{ "goto": "a" }],
+      "nodes": { "a": { "lines": [
+        { "speaker": "Queue Rick", "mood": "neutral", "text": "I came in to complain about the line." },
+        { "speaker": "Queue Rick", "mood": "neutral", "text": "Now I'm in the line. The system works. I hate that it works." }
+      ] } }
+    },
+    {
+      "entry": [{ "goto": "a" }],
+      "nodes": { "a": { "lines": [
+        { "speaker": "Queue Rick", "mood": "neutral", "text": "Pro tip: don't say 'emergency' to Desk Rick." },
+        { "speaker": "Queue Rick", "mood": "neutral", "text": "He has a form for emergencies. It's nine hundred pages. He gets so happy." }
+      ] } }
+    },
+    {
+      "entry": [{ "goto": "a" }],
+      "nodes": { "a": { "lines": [
+        { "speaker": "Queue Rick", "mood": "neutral", "text": "I'm here because I lost my Morty." },
+        { "speaker": "Queue Rick", "mood": "neutral", "text": "Well. He left. So technically I'm the lost item. I'm in the wrong line." }
+      ] } }
+    }
+  ],
+
+  "jerry": {
+    "entry": [
+      { "if": "metCitadelJerry", "goto": "again" },
+      { "goto": "intro" }
+    ],
+    "nodes": {
+      "intro": {
+        "set": { "metCitadelJerry": true },
+        "lines": [
+          { "speaker": "Jerry", "mood": "happy", "text": "Morty! Look at this. I'm number 4,000,113. They're serving 4,000,112. I'm NEXT." },
+          { "speaker": "Morty", "mood": "angry", "text": "Dad, how are you at the Citadel? You don't even have a portal gun!" },
+          { "speaker": "Jerry", "mood": "happy", "text": "I'm pitching. Do Ricks need life insurance? Asking for a pitch." },
+          { "speaker": "Jerry", "mood": "neutral", "text": "They keep saying 'there's infinite of me'. I think that's a no. I've been next for six hours." }
+        ]
+      },
+      "again": {
+        "lines": [
+          { "speaker": "Jerry", "mood": "happy", "text": "Still next! Any minute now." }
+        ]
+      }
+    }
+  },
+
+  "gossip": {
+    "entry": [{ "goto": "a" }],
+    "nodes": { "a": { "set": { "heardPassword": true }, "lines": [
+      { "speaker": "Gossip Rick", "mood": "neutral", "text": "Psst. Guard Rick's password? It's always whatever he's mad at today." },
+      { "speaker": "Gossip Rick", "mood": "happy", "text": "He changes it every day. He's mad at something new every day. Honestly impressive." },
+      { "speaker": "Gossip Rick", "mood": "neutral", "text": "Today he walked in here and stared at that vending machine for an hour." }
+    ] } }
+  },
+
+  "vending": {
+    "entry": [{ "goto": "a" }],
+    "nodes": { "a": { "lines": [
+      { "speaker": "Morty", "mood": "neutral", "text": "A vending machine. SOLD OUT of everything, including the sign that says SOLD OUT." },
+      { "speaker": "Morty", "mood": "neutral", "text": "Someone scratched into the side: 'YOU ATE MY FLURBOS. YOU ARE DEAD TO ME. - G.R.'" }
+    ] } }
+  },
+
+  "janitor": {
+    "entry": [{ "goto": "a" }],
+    "nodes": { "a": { "set": { "heardBribe": true }, "lines": [
+      { "speaker": "Janitor Rick", "mood": "neutral", "text": "Cop Rick? He confiscates anything shiny. Calls it 'evidence'." },
+      { "speaker": "Janitor Rick", "mood": "neutral", "text": "You should see his locker. It's all arcade prizes. Real evidence of a sad life." }
+    ] } }
+  },
+
+  "bored": {
+    "entry": [{ "goto": "a" }],
+    "nodes": { "a": { "lines": [
+      { "speaker": "Bored Rick", "mood": "neutral", "text": "I'm the Rick who waits for the Rick who relieves the Rick who guards the door." },
+      { "speaker": "Bored Rick", "mood": "neutral", "text": "It's a whole system. Built by Ricks. For nobody." }
+    ] } }
+  },
+
+  "clerk": {
+    "entry": [{ "goto": "a" }],
+    "nodes": { "a": { "lines": [
+      { "speaker": "Clerk Morty", "mood": "neutral", "text": "Shh. I'm a Morty who works here. The Ricks think I'm a coat rack." },
+      { "speaker": "Clerk Morty", "mood": "happy", "text": "Best job I ever had. Nobody talks to coat racks." }
+    ] } }
+  },
+
+  "ending": [
+    { "speaker": "Shrimp Rick", "mood": "angry", "text": "Found you, kid. Did you really think I couldn't follow a portal signal?" },
+    { "speaker": "Number Machine", "mood": "neutral", "text": "TAKE A NUMBER. YOUR NUMBER IS: 10,000,000,000." },
+    { "speaker": "Shrimp Rick", "mood": "angry", "text": "I don't take numbers. I am the smartest shrimp in any ocean!" },
+    { "speaker": "Desk Rick", "mood": "angry", "text": "Sir. Sir. Everyone takes a number. Even shrimp. ESPECIALLY shrimp." },
+    { "speaker": "Cop Rick", "mood": "angry", "text": "Back of the line, pal. Don't make me write you up." },
+    { "speaker": "Morty", "mood": "happy", "text": "Full power. Okay. Bye, Ricks! Good luck with the line!" }
+  ]
+}
