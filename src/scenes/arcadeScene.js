@@ -21,28 +21,29 @@ const $ = (id) => document.getElementById(id);
 // Ticket Tumble, the 3D version: Morty runs around a light-up floor. Tickets rain down (their shadow shows where),
 // lie on the floor for a moment, and he grabs them by running over them. Bombs land on a red ring and blow after
 // a short fuse. After Glorp's tip, one golden ticket per round lands and runs away from him.
+// Tickets carry over between rounds, like a real arcade: the goal is 5000 in total, banked in the 'tickets' flag.
 // All tuning lives here. Change one value at a time.
 export const TUMBLE = {
   GOAL: 5000,
   TIME: 45,              // seconds per round
   TICKET: 100,
   GOLD: 1000,
-  BOMB: -300,
-  TICKET_EVERY: [0.8, 0.45],  // seconds between tickets, at the start and at the end of the round (was 0.62 to 0.36: a test bot won in 22 s)
-  BOMB_EVERY: [2.0, 1.0],
-  BOMB_AIMED: 0.6,       // share of bombs dropped where Morty is standing
-  BURST_EVERY: 10,       // a cluster of tickets every this many seconds
-  BURST: 5,
+  BOMB: -200,       // was -300
+  TICKET_EVERY: [0.6, 0.38], // seconds between tickets, start and end of the round (was 0.8 to 0.45: too hard for people)
+  BOMB_EVERY: [2.8, 1.7],
+  BOMB_AIMED: 0.35,      // share of bombs dropped where Morty is standing
+  BURST_EVERY: 8,        // a cluster of tickets every this many seconds
+  BURST: 6,
   TOP: 7,                // height things drop from
   FALL: 1.15,            // seconds from the top to the floor
-  LINGER: 1.4,           // seconds a ticket lies on the floor before it vanishes
-  FUSE: 0.75,            // seconds a bomb sits on its ring before it blows
+  LINGER: 2.2,           // seconds a ticket lies on the floor before it vanishes
+  FUSE: 0.95,            // seconds a bomb sits on its ring before it blows
   BLAST: 1.25,           // bomb radius
   STUN: 0.6,             // seconds Morty can't steer after a blast
-  GRAB: 0.62,            // how close Morty has to be to grab a ticket
-  GOLD_AT: 16,           // seconds into the round when the golden ticket drops
-  GOLD_RUN: 6,           // seconds it runs around before it gives up
-  GOLD_SPEED: 3.6,       // Morty runs 5.2
+  GRAB: 0.8,            // how close Morty has to be to grab a ticket
+  GOLD_AT: 12,           // seconds into the round when the golden ticket drops
+  GOLD_RUN: 8,           // seconds it runs around before it gives up
+  GOLD_SPEED: 3.0,       // Morty runs 5.2
 };
 
 // Turn an angle toward another the short way round
@@ -376,7 +377,7 @@ export function createArcade({ scene, morty, api }) {
     morty.vx = morty.vz = 0;
     morty.animate(0.016, 0);
     rig.cut(padShot());
-    g = { on: false, time: 0, score: 0, items: [], nextTicket: 0.3, nextBomb: 2.5, nextBurst: TUMBLE.BURST_EVERY - 2, goldDone: false, stun: 0 };
+    g = { on: false, time: 0, score: flags.get('wonTickets') ? 0 : flags.get('tickets') ?? 0, items: [], nextTicket: 0.3, nextBomb: 2.5, nextBurst: TUMBLE.BURST_EVERY - 2, goldDone: false, stun: 0 };
     drawUi();
     ui.root.classList.add('on');
     lights = 'play';
@@ -423,6 +424,7 @@ export function createArcade({ scene, morty, api }) {
       rig.cut(shotOn(spots.podium, morty.position, 1.0));
       api.setState('dialogue');
       await hud.fade(0, 0.3);
+      flags.set('tickets', g.score); // banked for the next round
       const lost = JSON.parse(JSON.stringify(text.lost).replace('{score}', g.score));
       const todo = await converse(lost);
       if (todo.some((d) => d.play)) return playRound();

@@ -353,7 +353,7 @@
           {
             "speaker": "Ticket Tumble",
             "mood": "happy",
-            "text": "TICKET TUMBLE! 5000 tickets in 45 seconds! Tickets 100! Bombs minus 300! Gold tickets: a MYSTERY!"
+            "text": "TICKET TUMBLE! Collect 5000 tickets! Tickets 100! Bombs minus 200! Your tickets stay with you between rounds! Gold tickets: a MYSTERY!"
           },
           {
             "speaker": "Morty",
@@ -428,7 +428,7 @@
           {
             "speaker": "Ticket Tumble",
             "mood": "angry",
-            "text": "TIME! {score} tickets! So close! Or not! I can't do math!"
+            "text": "TIME! You have {score} tickets! I'll hold them for you! Play again to get the rest!"
           }
         ],
         "choices": [
