@@ -7,11 +7,11 @@
     { "text": "See why Mom is yelling", "done": "askedToCheckGarage" },
     { "text": "Find out what Grandpa broke", "show": "askedToCheckGarage", "done": "rickExplained" },
     { "text": "Touch the humming gun. Mom said don't.", "show": "rickExplained", "done": "portalOpen" },
-    { "text": "Win the Focus Crystal back at Blips and Chitz", "show": "portalOpen", "done": "hasCrystal" },
-    { "text": "Get the Fluid Canister back", "show": "hasCrystal", "done": "hasCanister" },
+    { "text": "Get the Fluid Canister back", "show": "portalOpen", "done": "hasCanister" },
     { "text": "Get out of the shrimp lab", "show": "hasCanister", "done": "jammerOff" },
     { "text": "Get the Coordinate Chip from the Citadel lost and found", "show": "jammerOff", "done": "hasChip" },
-    { "text": "Survive Shrimp Rick", "show": "hasChip", "done": "bossBeaten" }
+    { "text": "Survive Shrimp Rick", "show": "hasChip", "done": "bossBeaten" },
+    { "text": "Bonus: win the top prize at Blips and Chitz", "show": "bossBeaten", "done": "arcadePrize" }
   ],
   "partsLabel": "gun parts",
   "parts": [
@@ -24,6 +24,7 @@
   "pockets": [
     { "name": "Mom's sandwich", "flag": "hasSandwich", "gone": "bossBeaten" },
     { "name": "Rick's portal gun", "flag": "portalOpen" },
+    { "name": "Shrimp Police badge", "flag": "hasBadge" },
     { "name": "Arcade soda", "flag": "hasSoda", "gone": "bossBeaten" },
     { "name": "Plastic arcade ring", "flag": "hasRing" },
     { "name": "Citadel number (useless)", "flag": "hasNumber", "gone": "hasChip" }

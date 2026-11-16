@@ -52,7 +52,7 @@ function turnTo(now, want, k) {
   return now + d * Math.min(1, k);
 }
 
-// Everything that happens at Blips and Chitz. api (from main.js): { camera, state(), setState(name), startPlay(), toLab() }
+// Everything that happens at Blips and Chitz. api (from main.js): { camera, state(), setState(name), startPlay(), toGarage() }
 export function createArcade({ scene, morty, api }) {
   const set = buildArcade();
   set.group.visible = false;
@@ -86,11 +86,11 @@ export function createArcade({ scene, morty, api }) {
 
   function refresh() {
     set.soda.visible = !flags.get('hasSoda');
-    set.crystal.visible = !flags.get('hasCrystal');
+    set.crystal.visible = !flags.get('arcadePrize');
   }
 
   function goal() {
-    if (flags.get('hasCrystal')) return text.goals.done;
+    if (flags.get('arcadePrize')) return text.goals.done;
     if (flags.get('wonTickets')) return text.goals.prize;
     return flags.get('metGorbi') ? text.goals.play : text.goals.start;
   }
@@ -435,7 +435,7 @@ export function createArcade({ scene, morty, api }) {
     await hud.fade(0, 0.35);
   }
 
-  // ---- Leaving: walk into the portal to the lab ----
+  // ---- Leaving: walk into the portal home to the garage (it stays open: this is the bonus level) ----
   async function jumpToLab() {
     leaving = true;
     api.setState('cutscene');
@@ -452,7 +452,7 @@ export function createArcade({ scene, morty, api }) {
     hud.flash(1, 0.5);
     await hud.fade(1, 0.5);
     leaving = false;
-    api.toLab();
+    api.toGarage();
   }
 
   const tmp = new THREE.Vector3();
@@ -483,7 +483,6 @@ export function createArcade({ scene, morty, api }) {
       await tween(0.45, (t) => { morty.position.lerpVectors(spots.portal, a, t); morty.scale = 0.2 + 0.8 * t; morty.mesh.position.y = Math.sin(t * Math.PI) * 0.5; }, ease.out);
       morty.mesh.position.y = 0; morty.scale = 1;
       rig.shake(0.15);
-      if (!flags.get('hasCrystal')) portal.close(0.4); // the gun's last charge: no way back until Morty has the crystal
       await wait(1.2);
       hud.caption('');
       if (!flags.get('sawArcade')) {

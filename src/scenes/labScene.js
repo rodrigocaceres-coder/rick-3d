@@ -16,7 +16,7 @@ import { blocked } from '../objects/player.js';
 import text from '../data/dialogue/lab.json';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
-// What sits on each room's ring: the crystal (already won at the arcade), the canister, and Shrimp Rick's portal jammer.
+// What sits on each room's ring: the crystal (cracked but still in the gun, so it is never on a ring), the canister, and Shrimp Rick's portal jammer.
 // The jammer is why nobody portals out of this lab. Switching it off is the way out, to the Citadel.
 const FLAGS = ['hasCrystal', 'hasCanister', 'jammerOff'];
 const PART_FLAGS = ['hasCrystal', 'hasCanister', 'hasChip'];
@@ -385,6 +385,7 @@ export function createLab({ scene, morty, api }) {
     api.setState('cutscene');
     hud.cinema(true); hud.prompt('');
     flags.set(FLAGS[i]);
+    if (i === 2) flags.set('hasBadge'); // a Shrimp Police badge sits by the jammer: Cop Rick at the Citadel takes it as evidence
     morty.animate(0.016, 0);
     const mesh = parts[i], from = mesh.position.clone();
     rig.cut(shotOn(morty.position, from));
@@ -553,7 +554,7 @@ export function createLab({ scene, morty, api }) {
 
     // Arrive in the lab with the Focus Crystal already in the gun. room: 0, 1 or 2 (rooms after 0 are for testing with ?lab=2 or ?lab=3).
     async enter(room = 0) {
-      flags.set('hasCrystal'); // Morty won it at Blips and Chitz: it is what powers the gun here
+      flags.set('hasCrystal'); // cracked but still in the gun: it is what powers the gun here
       if (room > 0) flags.set('labPlate');
       if (room > 1) flags.setMany({ labPower: true, hasCanister: true });
       parts.forEach((m, i) => { m.visible = !flags.get(FLAGS[i]); m.scale.setScalar(1); m.position.copy(lab.partSpots[i]).setY(1); });

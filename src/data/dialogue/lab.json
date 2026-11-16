@@ -1,7 +1,7 @@
 {
   "intro": [
     { "speaker": "Morty", "mood": "neutral", "text": "It smells like a seafood buffet. And a police state." },
-    { "speaker": "Morty", "mood": "angry", "text": "Okay. The crystal clicked in and the gun works again. Point, shoot, walk through. I can probably do this." }
+    { "speaker": "Morty", "mood": "angry", "text": "Okay. Rick's last charge actually worked. Point, shoot, walk through. I can probably do this." }
   ],
   "pickups": {
     "crystal": [
@@ -13,6 +13,7 @@
     ],
     "jammer": [
       { "speaker": "Morty", "mood": "neutral", "text": "A big red button that says PORTAL JAMMER. That's why nobody portals out of here." },
+      { "speaker": "Morty", "mood": "neutral", "text": "Someone left a Shrimp Police badge on the console. It's shiny. Finders keepers." },
       { "speaker": "Morty", "mood": "happy", "text": "The gun says the chip is at... the Citadel? Okay. Jammer off. Sorry, jammer." }
     ]
   },

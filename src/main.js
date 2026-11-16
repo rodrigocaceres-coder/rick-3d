@@ -81,10 +81,10 @@ const house = createHouse({
   api: { camera, setState(s) { state = s; }, startPlay, toGarage: houseToGarage },
 });
 
-// ---- Blips and Chitz: where the gun's last charge goes. The Focus Crystal is the top prize. ----
+// ---- Blips and Chitz: the bonus level. Its portal opens in the garage after the episode ends. ----
 const arcade = createArcade({
   scene, morty,
-  api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toLab: arcadeToLab },
+  api: { camera, state: () => state, setState(s) { state = s; }, startPlay, toGarage: arcadeToGarage },
 });
 
 // ---- Boss fight vs Shrimp Rick, staged in the garage ----
@@ -120,7 +120,7 @@ const usable = [
 ];
 
 function garageGoal() {
-  if (flags.get('bossBeaten')) return 'Episode over. Nobody touch the gun.';
+  if (flags.get('bossBeaten')) return flags.get('arcadePrize') ? 'Episode over. The arcade portal is still open.' : 'Bonus level: step into the portal to Blips and Chitz.';
   return flags.get('portalOpen') ? 'Step into the portal.' : flags.get('rickExplained') ? 'Check the humming portal gun.' : 'Find out what broke. Talk to Rick.';
 }
 
@@ -139,7 +139,7 @@ async function firePortal() {
   await wait(0.4);
 }
 
-// Morty grabs the gun and jumps into the portal: on to Blips and Chitz
+// Morty grabs the gun and jumps into the portal: to Shrimp Rick's lab, or after the episode, to Blips and Chitz
 async function enterPortal() {
   state = 'cutscene';
   hud.cinema(true);
@@ -158,7 +158,8 @@ async function enterPortal() {
   hud.flash(1, 0.5);
   await hud.fade(1, 0.5);
   portal.close(0.1);
-  await toArcade();
+  if (flags.get('bossBeaten')) await toArcade();
+  else await toLab(0);
 }
 
 async function toArcade() {
@@ -168,10 +169,19 @@ async function toArcade() {
   await arcade.enter();
 }
 
-// The Focus Crystal fixes the gun enough for one more jump: from the arcade to Shrimp Rick's lab
-async function arcadeToLab() {
+// Back from the bonus level: Morty steps out of the garage portal
+async function arcadeToGarage() {
   arcade.leave();
-  await toLab(0);
+  resetMortyPose();
+  area = 'garage';
+  garage.group.visible = true;
+  rig.setLimits(GARAGE_LIMITS);
+  portal.open(0.1);
+  morty.position.set(portal.position.x, 0, portal.position.z + 1.6);
+  morty.group.rotation.y = 0;
+  audio.music('smith_house.m4a');
+  startPlay();
+  await hud.fade(0, 0.5);
 }
 
 // ---- The door between the house and the garage ----
@@ -259,8 +269,16 @@ async function toGarage() {
   morty.position.set(0.9, 0, -1.6);
   morty.group.rotation.y = 0;
   audio.music('smith_house.m4a');
+  gunLight.intensity = 0;
+  portal.open(0.1); // the bonus level: a portal to Blips and Chitz
   startPlay();
   await hud.fade(0, 0.6);
+  if (!flags.get('bonusShown')) {
+    flags.set('bonusShown');
+    hud.caption('BONUS LEVEL UNLOCKED: BLIPS AND CHITZ');
+    await wait(3);
+    hud.caption('');
+  }
 }
 
 function startPlay() {
@@ -290,7 +308,7 @@ async function continueFrom(saved) {
   flags.replace(saved.flags);
   afterColdOpen(G);
   gun.group.visible = !flags.get('bossBeaten');
-  if (flags.get('portalOpen') && !flags.get('bossBeaten')) { gunLight.intensity = 0; portal.open(); }
+  if (flags.get('portalOpen')) { gunLight.intensity = 0; portal.open(); } // after the episode it leads to Blips and Chitz
   await wait(0.3);
   if (saved.area === 'boss') {
     gun.group.visible = false;
@@ -410,7 +428,7 @@ if (import.meta.env.DEV) window.__game = { G, morty, usable, flags, save, lab, b
 // ---- Boot: start card, cold open (garage, then the house), then play in the house. ?skip jumps past the cold open,
 // ?garage starts in the garage with Beth's errand done, ?lab=1, 2 or 3 starts in that lab room,
 // ?boss starts at the boss fight (?boss=2 at the tank phase, ?boss=fight skips the fight's opening scene, &nosandwich
-// plays it without Beth's sandwich, &nosoda without the arcade soda), ?arcade starts at Blips and Chitz (?arcade=tip
+// plays it without Beth's sandwich), ?arcade starts at Blips and Chitz, the bonus level after the ending (?arcade=tip
 // with Glorp's golden ticket tip already heard), ?citadel starts at the Citadel (?citadel=cop with the desk and
 // the guard already passed). ----
 async function boot() {
@@ -422,21 +440,21 @@ async function boot() {
   }
   if (params.has('boss')) {
     afterColdOpen(G);
-    flags.setMany({ hasCrystal: true, hasCanister: true, hasChip: true, helpedResistance: !params.has('norebels'), hasSandwich: !params.has('nosandwich'), hasSoda: !params.has('nosoda'), askedToCheckGarage: true, sawGarage: true });
+    flags.setMany({ hasCrystal: true, hasCanister: true, hasChip: true, helpedResistance: !params.has('norebels'), hasSandwich: !params.has('nosandwich'), askedToCheckGarage: true, sawGarage: true });
     const v = params.get('boss');
     return toBoss({ phase: v === '2' ? 2 : 1, skipIntro: v === '2' || v === 'fight' });
   }
   if (params.has('arcade')) {
     afterColdOpen(G);
-    flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, portalOpen: true, hasSandwich: true, hasPhone: true, glorpTip: params.get('arcade') === 'tip' });
+    flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, portalOpen: true, hasSandwich: true, hasPhone: true, hasCrystal: true, hasCanister: true, hasChip: true, jammerOff: true, bossBeaten: true, bonusShown: true, glorpTip: params.get('arcade') === 'tip' });
     gun.group.visible = false;
     return toArcade();
   }
   if (params.has('citadel')) {
     afterColdOpen(G);
     const cop = params.get('citadel') === 'cop';
-    flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, portalOpen: true, hasPhone: true, hasSandwich: true, hasSoda: true, hasRing: true,
-      sawArcade: true, wonTickets: true, hasCrystal: true, hasCanister: true, jammerOff: true, helpedResistance: true, hasNumber: cop, passedDesk: cop, passedGuard: cop });
+    flags.setMany({ askedToCheckGarage: true, sawGarage: true, rickExplained: true, portalOpen: true, hasPhone: true, hasSandwich: true, hasBadge: true,
+      hasCrystal: true, hasCanister: true, jammerOff: true, helpedResistance: true, hasNumber: cop, passedDesk: cop, passedGuard: cop });
     gun.group.visible = false;
     return toCitadel();
   }

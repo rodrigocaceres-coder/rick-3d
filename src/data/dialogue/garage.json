@@ -44,7 +44,7 @@
           {
             "speaker": "Rick",
             "mood": "neutral",
-            "text": "Gun's busted. Three parts flew out. Crystal, canister, chip. Don't make me say it twice."
+            "text": "Gun's busted. Crystal's cracked. Canister and chip flew out. Don't make me say it twice."
           },
           {
             "speaker": "Rick",
@@ -68,12 +68,12 @@
           {
             "speaker": "Rick",
             "mood": "neutral",
-            "text": "That portal went back to Blips and Chitz. Where I was. Don't judge me. Crystal landed there."
+            "text": "Crystal's still in. Barely. Don't judge me, I was at Blips and Chitz."
           },
           {
             "speaker": "Rick",
             "mood": "neutral",
-            "text": "Canister bounced on to the shrimp place. Chip went to the Citadel. Lost and found. Zzzz."
+            "text": "Canister bounced to the shrimp place. Chip went to the Citadel. Lost and found. Zzzz."
           },
           {
             "speaker": "Morty",
@@ -87,7 +87,7 @@
           {
             "speaker": "Rick",
             "mood": "angry",
-            "text": "I'm doing it right now, Morty. I'm delegating. Start with the crystal. Blips and Chitz. Zzzz."
+            "text": "I'm doing it right now, Morty. I'm delegating. Start with the canister. Shrimp place. Zzzz."
           }
         ]
       },
@@ -105,7 +105,7 @@
           {
             "speaker": "Rick",
             "mood": "neutral",
-            "text": "Zzzz... crystal... arcade... don't touch the thing that hums... zzzz."
+            "text": "Zzzz... canister... shrimp... don't touch the thing that hums... zzzz."
           }
         ]
       }
@@ -145,7 +145,7 @@
           {
             "speaker": "Morty",
             "mood": "neutral",
-            "text": "One charge left. The screen says... \"BLIPS AND CHITZ\". Of course it does."
+            "text": "One charge left. The screen says... \"SHRIMP RICK'S LAB\". Of course it does."
           }
         ],
         "choices": [

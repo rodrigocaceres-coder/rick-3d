@@ -1,7 +1,7 @@
 {
-  "_note": "Boss fight items, from STORY.md. One use each per fight. flag: the story flag Morty needs to have it (sandwich from Beth, soda from the Blips and Chitz prize counter). heal: HP back. extraTurn: Morty acts again before Shrimp Rick.",
+  "_note": "Boss fight items, from STORY.md. One use each per fight. flag: the story flag Morty needs to have it (sandwich from Beth). The soda has no flag: Morty always has it, because Blips and Chitz is a bonus level after the ending. heal: HP back. extraTurn: Morty acts again before Shrimp Rick.",
   "items": [
     { "id": "sandwich", "flag": "hasSandwich", "name": "Mom's sandwich", "desc": "Heals 25 HP.", "heal": 25, "line": "Still warm. Thanks, Mom." },
-    { "id": "soda", "flag": "hasSoda", "name": "Arcade soda", "desc": "Heals 15 HP. Morty moves again right away.", "heal": 15, "extraTurn": true, "line": "SO MUCH SUGAR. Go go go go!" }
+    { "id": "soda", "name": "Arcade soda", "desc": "Heals 15 HP. Morty moves again right away.", "heal": 15, "extraTurn": true, "line": "SO MUCH SUGAR. Go go go go!" }
   ]
 }

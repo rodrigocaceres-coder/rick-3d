@@ -320,3 +320,29 @@ The 3D remake of the 2D RPG in ~/rick-platformer. One entry per session. The 2D 
 - Evidence files: process/screenshots/2026-11-13_s9_aim-guide-room2.jpg
 - Chat link: Claude Code session "next session" (desktop app)
 - Why:
+
+### Session 10, 2026-11-16
+- Goal: Make the episode shorter. Move Blips and Chitz off the main path and make it a bonus level after the ending, then finish the project.
+- AI types and tools: code AI (Claude Code, Claude Opus 5.5). No image or audio AI.
+- Key prompts (word for word):
+  - "lets finish this up, what is left to complete the project goal"
+  - "make blitz and chips an additional map after the game is completed i think it makes the playthrough too long and a little boring, then lets finish up this project"
+- What was built:
+  - The gun's last charge now opens a portal straight to Shrimp Rick's lab. Rick's lines changed: the crystal is cracked but still in the gun; only the canister and the chip flew out. The gun's screen now says "SHRIMP RICK'S LAB".
+  - Blips and Chitz is a bonus level. After the ending, the portal in the garage opens again with the caption "BONUS LEVEL UNLOCKED: BLIPS AND CHITZ". The top prize is now Rick's spare Focus Crystal (flag arcadePrize), plus his soda and the plastic ring. The portal home to the garage stays open the whole time.
+  - Cop Rick needed a new bribe, because the ring and soda came from the arcade. Morty now finds a Shrimp Police badge by the jammer in lab room 3, and Cop Rick takes it as "interdimensional evidence". The ring and soda answers still work if a player has them.
+  - The arcade soda no longer needs a flag in the boss fight: Morty always has it, as before Session 6.
+  - Summer's phone: the crystal task is gone, a "Bonus: win the top prize at Blips and Chitz" task shows after the ending, and the badge shows in pockets.
+  - Test links: ?arcade now starts as if the episode were finished. ?citadel gives the badge instead of the arcade prizes. &nosoda is gone.
+- Key decisions:
+  - The crystal stays one of the three parts (the boss fight counts parts), but it never leaves the gun. That is the smallest story change that keeps Rick's "three parts" setup and the lab's glass beam rule.
+  - The badge comes from room 3 because every player passes it, and it gives a reason the cop at the Citadel would want it.
+- What went wrong or looked weak, and the revision:
+  - The first edit rewrote three JSON files in a different layout and made the diff hard to read. Reverted those and made small text edits instead.
+- Rejected, and why:
+  - Deleting the arcade: it is finished and fun, and a bonus level gives players a reason to keep playing after the credits.
+  - Taking the soda out of the boss fight: Session 3's numbers were tuned with both items.
+- Result: Tested with a script in the browser: garage gun to the lab, Cop Rick shows the badge choice and opens the cage with it, the boss fight has 2 items with no arcade run, Continue from a finished save opens the bonus portal, the arcade prize and the portal home to the garage. No console errors, production build passes. Not tested here: the bonus caption right after a real boss win (the same function, called from the ending).
+- Evidence files: none.
+- Chat link: Claude Code session (desktop app), Nov 16
+- Why:

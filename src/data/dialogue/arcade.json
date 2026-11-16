@@ -1,21 +1,26 @@
 {
-  "_note": "Blips and Chitz: where the cracked gun's last charge goes. Rick's bender was here; the Focus Crystal fell back through his portal onto the prize counter; 2500 Ticket Tumble tickets buy it back (plus a soda), and the crystal powers one more portal, to Shrimp Rick's lab.",
+  "_note": "Blips and Chitz: the bonus level. Its portal opens in the garage after the episode ends. Rick's spare Focus Crystal fell out of his bender portal onto the prize shelf; 2500 Ticket Tumble tickets win it (plus his soda and a plastic ring). The portal home to the garage stays open the whole time.",
   "arrive": [
     {
       "speaker": "Morty",
       "mood": "neutral",
       "text": "Blips and Chitz. At two in the morning. Who is even here at two in the morning?"
+    },
+    {
+      "speaker": "Morty",
+      "mood": "happy",
+      "text": "No shrimp. No cops. Just tickets. Best night of my life."
     }
   ],
   "goals": {
-    "start": "The Focus Crystal is here. Ask at the prize counter.",
+    "start": "Bonus level. Ask at the prize counter. The portal home is behind you.",
     "play": "Win 2500 tickets on the Ticket Tumble floor.",
     "prize": "2500 tickets! Cash them in with Gorbi.",
-    "done": "Step into the portal to Shrimp Rick's lab."
+    "done": "Bonus level done. The portal home is open."
   },
   "got": {
-    "crystal": "GOT: THE FOCUS CRYSTAL. GUN PART 1 OF 3.",
-    "soda": "GOT: ARCADE SODA. IT HEALS AND MAKES YOU FAST IN A FIGHT."
+    "crystal": "GOT: RICK'S SPARE FOCUS CRYSTAL. NOW HE OWES YOU.",
+    "soda": "GOT: RICK'S ARCADE SODA. STILL FIZZING."
   },
   "hint": "SPACE: talk or play.",
   "tumbleHint": "Arrows or WASD: run. Grab tickets. Get off a red ring before it blows.",
@@ -23,7 +28,7 @@
   "gorbi": {
     "entry": [
       {
-        "if": "hasCrystal",
+        "if": "arcadePrize",
         "goto": "after"
       },
       {
@@ -126,7 +131,7 @@
       },
       "prize": {
         "set": {
-          "hasCrystal": true
+          "arcadePrize": true
         },
         "lines": [
           {
@@ -154,7 +159,7 @@
           {
             "speaker": "Gorbi",
             "mood": "happy",
-            "text": "One Focus Crystal. Please leave."
+            "text": "One glowing crystal. Please leave."
           },
           {
             "speaker": "Gorbi",
@@ -177,7 +182,7 @@
           {
             "speaker": "Gorbi",
             "mood": "neutral",
-            "text": "No refunds. Your portal is right there. Please use it."
+            "text": "No refunds. Your portal home is right there. Please use it."
           }
         ]
       },
@@ -186,17 +191,14 @@
           {
             "speaker": "Morty",
             "mood": "happy",
-            "text": "The crystal clicked into the gun! The screen says... \"SHRIMP RICK'S LAB\". Of course it does."
+            "text": "Grandpa's spare crystal. He lost it here, I won it back. He owes me so much."
           },
           {
             "speaker": "Gorbi",
             "mood": "neutral",
-            "text": "Do your portal somewhere else. Like, away from my counter."
+            "text": "Great. Your portal home is right there. Use it."
           }
-        ],
-        "do": {
-          "portal": true
-        }
+        ]
       }
     }
   },

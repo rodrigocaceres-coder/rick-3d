@@ -1,5 +1,5 @@
 {
-  "_note": "Citadel of Ricks, Rick ID Services and Lost and Found. The Coordinate Chip fell into the lost and found bin. Take a Number puzzle (STORY.md): Desk Rick wants the right form, Guard Rick's password is whatever he is mad at today, Cop Rick takes arcade prizes as 'evidence'. Clues come from the queue, Gossip Rick, the vending machine and Janitor Rick. A wrong answer sends Morty to the back of the line and his number is void. {number} is filled in with Morty's current number. do: back = back of the line, open = gate / field / cage, bribe = ring / soda (the soda is then gone from the boss fight).",
+  "_note": "Citadel of Ricks, Rick ID Services and Lost and Found. The Coordinate Chip fell into the lost and found bin. Take a Number puzzle (STORY.md): Desk Rick wants the right form, Guard Rick's password is whatever he is mad at today, Cop Rick takes shiny things as 'evidence' (the Shrimp Police badge from the lab). Clues come from the queue, Gossip Rick, the vending machine and Janitor Rick. A wrong answer sends Morty to the back of the line and his number is void. {number} is filled in with Morty's current number. do: back = back of the line, open = gate / field / cage, bribe = badge / ring / soda (ring and soda only exist after a bonus arcade run, so on the main path the badge is the answer).",
   "arrive": [
     { "speaker": "Morty", "mood": "neutral", "text": "The Citadel. A whole space station of Ricks. This is my actual nightmare." },
     { "speaker": "Morty", "mood": "neutral", "text": "Okay. The chip's here somewhere. The gun's pointing at... the lost and found. Of course it is." }
@@ -166,9 +166,17 @@
         "choices": [
           { "text": "Justice.", "goto": "wrongJustice" },
           { "text": "Half of Mom's sandwich.", "if": "hasSandwich", "goto": "wrongSandwich" },
+          { "text": "A Shrimp Police badge.", "if": "hasBadge", "set": { "passedCop": true, "hasBadge": false }, "goto": "passBadge" },
           { "text": "A shiny plastic arcade ring.", "if": "hasRing", "set": { "passedCop": true, "hasRing": false }, "goto": "passRing" },
           { "text": "An arcade soda. Still fizzing.", "if": "hasSoda", "set": { "passedCop": true, "hasSoda": false, "gaveSoda": true }, "goto": "passSoda" }
         ]
+      },
+      "passBadge": {
+        "lines": [
+          { "speaker": "Cop Rick", "mood": "happy", "text": "A badge. From a shrimp. That's interdimensional evidence. The best kind." },
+          { "speaker": "Cop Rick", "mood": "happy", "text": "Cage is open. I'm pinning this on. Nobody saw anything." }
+        ],
+        "do": { "open": "cage", "bribe": "badge" }
       },
       "passRing": {
         "lines": [
