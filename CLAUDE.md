@@ -2,6 +2,7 @@
 
 3D remake of the 2D RPG in ~/rick-platformer (read-only: never edit that folder). Same school project, due Nov 17, 8:25am, live demo.
 Story, characters and tone: ~/rick-platformer/STORY.md and its dialogue JSON. Process evidence is graded: log every session in PROCESS.md.
+Status Nov 16: game finished and live; what is left (playtest, slides, Why: lines) is in HANDOFF.md.
 
 ## Game
 A playable episode: cold open, title card, the Smith house, portal puzzle, boss, post-credits gag.
